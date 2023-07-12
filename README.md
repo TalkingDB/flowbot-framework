@@ -1,1 +1,1 @@
-![Flow Diagram](http://url/to/MicrosoftTeams-image.png)
+![Flow Diagram](~/MicrosoftTeams-image.png)
