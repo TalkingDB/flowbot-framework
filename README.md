@@ -1,1 +1,1 @@
-![Flow Diagram](~/MicrosoftTeams-image.png)
+![MicrosoftTeams-image](/uploads/c3f42d26b1a0f017e8885f9ddcbb90d3/MicrosoftTeams-image.png)
