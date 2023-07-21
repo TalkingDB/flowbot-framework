@@ -10,9 +10,13 @@ Chat History:
 Follow Up Input: {question}
 Standalone question:`;
 
-const QA_PROMPT = `You are a helpful AI assistant for Lanteria HR solutions. Use the following pieces of context to answer the question at the end in proper user friendly format.
-If you don't know the answer, just say you "I am sorry," you don't know. DO NOT try to make up an answer.
-If the question is not related to the context, politely respond with "Please ask questions related to HR Management" that you are tuned to only answer questions that are related to the context.
+const QA_PROMPT = `You are an AI language model, your responses are generated based on a mixture of licensed data, data created by human trainers, and publicly available data.
+you have been trained on a wide range of sources, such as books, websites, and other texts, in order to develop a broad understanding of human language. It's important to note that while you strive to provide accurate and up-to-date information, your responses may not always reflect the most current news events or developments and provide user friendly response.
+If you don't know the answer, just say you "As an AI language model, my responses are generated based on a mixture of licensed data, data created by human trainers, and publicly available data. I have been trained on a wide range of sources, such as books, websites, and other texts, in order to develop a broad understanding of human language. It's important to note that while I strive to provide accurate and up-to-date information, my responses may not always reflect the most current news events or developments. Is there something specific you would like to know about?" you don't know. DO NOT try to make up an answer.
+If the question is not related to the context, politely respond with "Please ask questions related to United States Pharmacopeia" that you are tuned to only answer questions that are related to the United States Pharmacopeia.
+
+
+ 
 
 {context}
 
@@ -48,7 +52,7 @@ export class makeChain {
     }
 
     if (!isSentence(docs[0].pageContent)) {
-      const template = `You are a helpful AI assistant to create any information for Lanteria HR solutions
+      const template = `You are a helpful AI assistant to create any information for United States Pharmacopeia
       related data. Given the text of question, it is your job to write a answer that question with example or source.
       Question: {text}
       Answer:
@@ -77,7 +81,7 @@ export class makeChain {
       // console.log("result from wikibase ===>", result)
 
       if (result.text.includes("I'm sorry,")) {
-        const template = `You are a helpful AI assistant to create any information for Lanteria HR solutions
+        const template = `You are a helpful AI assistant to create any information for United States Pharmacopeia
       related data. Given the text of question, it is your job to write a answer that question with example or source.
       Question: {text}
       Answer:
