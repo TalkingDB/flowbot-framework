@@ -11,10 +11,10 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 */
 const filePath = 'docs';
 
-export const run = async () => {
+export const run = async (file: string | Blob) => {
   try {
 
-    const loader = new TextLoader(""); // provide document here
+    const loader = new TextLoader(file); // provide document here
 
 
     const rawDocs = await loader.load();
@@ -42,13 +42,15 @@ export const run = async () => {
       namespace: PINECONE_NAME_SPACE,
       textKey: 'text',
     });
+
+    return true
   } catch (error) {
     console.log('error', error);
     throw new Error('Failed to ingest your data');
   }
 };
 
-(async () => {
-  await run();
-  console.log('ingestion complete');
-})();
+// (async () => {
+//   await run();
+//   console.log('ingestion complete');
+// })();
