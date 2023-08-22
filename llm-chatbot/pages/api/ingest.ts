@@ -27,10 +27,8 @@ export default async function handler(
         // Create a Blob from the JSON string
         // const blob = new Blob([jsonString], { type: 'application/json' });
         console.log(article)
-        let response = await run(article)
-        if (response) {
-            res.status(200).json({ msg: "article embedded in vectorDB" });
-
+        for (const item of article) {
+            let response = await run(item)
         }
         res.status(200).json({ msg: "article embedded in vectorDB" });
         
