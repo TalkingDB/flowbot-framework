@@ -11,7 +11,7 @@ import {Page} from '@/types/chat'
 */
 const filePath = 'docs';
 
-export const run = async (page: Page) => {
+export const run = async (file: string | Blob, pinecone_name_space: string) => {
   try {
 
     let pageNumber = page["page_number"];
@@ -36,7 +36,7 @@ export const run = async (page: Page) => {
   //  embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
-      namespace: PINECONE_NAME_SPACE,
+      namespace: pinecone_name_space || PINECONE_NAME_SPACE,
       textKey: 'text',
     });
     return true
