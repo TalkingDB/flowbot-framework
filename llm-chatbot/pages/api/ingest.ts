@@ -6,6 +6,7 @@ export default async function handler(
     res: NextApiResponse,
 ) {
     const article  = req.body;
+    const pinecone_name_space = req.query.pinecone_name_space;
 
     console.log("ingest api got hit ==>", article)
 
@@ -25,7 +26,7 @@ export default async function handler(
 
         // Create a Blob from the JSON string
         const blob = new Blob([jsonString], { type: 'application/json' });
-        let response = await run(blob)
+        let response = await run(blob, pinecone_name_space)
         if (response) {
             res.status(200).json({ msg: "article embedded in vectorDB" });
 
