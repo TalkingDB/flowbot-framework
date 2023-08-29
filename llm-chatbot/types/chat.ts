@@ -7,3 +7,10 @@ export type Message = {
   isStreaming?: boolean;
   sourceDocs?: Document[];
 };
+
+export type contextItem = {
+  content: Array<string>;
+  content_source: string;
+};
+
+export type contextItemArray = contextItem[];
