@@ -28,9 +28,11 @@ Question: {question}
 export class makeChain {
   vectorstore: PineconeStore;
   model: OpenAI;
+  chat_id: string;
 
-  constructor(vectorstore: PineconeStore) {
+  constructor(vectorstore: PineconeStore, chat_id: string) {
     this.vectorstore = vectorstore;
+    this.chat_id = chat_id
     this.model = new OpenAI({
       temperature: 0.7, // increase temepreature to get more creative answers
       modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
@@ -38,11 +40,12 @@ export class makeChain {
   }
 
   run = async (inputQuestion: string) => {
-    const textSimilarityApi = "http://34.93.99.128/staging/shipbot/similarity";
+    const textSimilarityApi = `http://34.93.99.128/staging/shipbot/similarity`;
     let retriever = this.vectorstore.asRetriever(25)
     let queryParams = {
-      'k': "3",
-      'question': inputQuestion
+      'k': "2",
+      'question': inputQuestion,
+      'chat-id':this.chat_id
     };
     let requestData = {}
     let docs:Array<Document> = await retriever.getRelevantDocuments(inputQuestion);
