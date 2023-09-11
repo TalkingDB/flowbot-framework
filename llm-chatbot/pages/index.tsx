@@ -299,6 +299,22 @@ export default function Home() {
     }
   }
 
+  function uploadFileData() {
+    if (selecteduploadFile) {
+
+      setPdfList([...pdfList, selecteduploadFile.name])
+      setSelecteduploadFile(null)
+    }
+  }
+
+  function removefilefromfileList(index: number) {
+    let data = [...pdfList]
+    data.splice(index, 1)
+    setPdfList(data)
+  }
+
+
+
   return (
     <>
       <Layout>
@@ -324,7 +340,7 @@ export default function Home() {
                       </button>
                       : null
                     }
-                    <button style={{ color: `${selecteduploadFile ? "black" : "grey"} ` }}>
+                    <button style={{ color: `${selecteduploadFile ? "black" : "grey"} ` }} onClick={uploadFileData}>
 
                       <svg className="w-8 h-8 pt-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                         <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
@@ -376,29 +392,36 @@ export default function Home() {
               }}>
 
                 <h1 className={styles.title}>Uploaded Doc</h1>
-                <p>Clear All</p>
+                <p onClick={() => setPdfList([])} className='cursor-pointer'>Clear All</p>
               </div>
               <div style={{
                 display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center", height: "100%",
                 minHeight: "250px"
               }}>
-                {/* <Image
-                  src="/pdf_upload.png"
-                  alt="AI"
-                  width="55"
-                  height="55"
-                  priority
-                  className='mt-2'
-                />
-                <div className='p-8'>Please upload a Doc to train the AI automatically</div>
-                 */}
-                <div style={{ width: "100%" }}>
-                  {
-                    pdfList?.map((item) =>
-                      <FileList filename={item} />
-                    )
-                  }
-                </div>
+                {
+                  pdfList.length > 0 ?
+
+                    <div style={{ width: "100%" }}>
+                      {
+                        pdfList.map((item, index) =>
+                          <FileList filename={item} removefilefromfileList={removefilefromfileList} index={index} />
+                        )
+                      }
+                    </div>
+                    :
+                    <>
+                      <Image
+                        src="/pdf_upload.png"
+                        alt="AI"
+                        width="55"
+                        height="55"
+                        priority
+                        className='mt-2'
+                      />
+                      <div className='p-8'>Please upload a Doc to train the AI automatically</div>
+                    </>
+                }
+
               </div>
 
             </div>
@@ -450,10 +473,6 @@ export default function Home() {
                       <div key={`chatMessage-${index}`} className={className}>
                         {icon}
 
-                        {(message.type === 'apiMessage') ?
-                          <div style={{ "marginRight": "20px" }}><p>{message.src == "gpt4" && message.type === 'apiMessage' ? "GPT4" : "TalkingDB"}</p></div>
-                          : null
-                        }
                         <div className={styles.markdownanswer}>
                           <ReactMarkdown linkTarget="_blank">
                             {message.message}
