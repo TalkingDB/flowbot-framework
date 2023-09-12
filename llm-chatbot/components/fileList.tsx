@@ -16,7 +16,6 @@ export default function FileList({ filename, index, trained
                     'API-KEY': process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY || '',
                 },
             });
-            console.log("Progress ==>", Number(response.data.data.replace(/%/g, "")));
             setProgress(Math.ceil(Number(response.data.data.replace(/%/g, ""))))
 
         } catch (error) {
@@ -31,7 +30,6 @@ export default function FileList({ filename, index, trained
                     'API-KEY': process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY || "",
                 },
             });
-            console.log("Progress ==>", response.data);
 
         } catch (error) {
             console.log(error);
