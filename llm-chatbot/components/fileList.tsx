@@ -51,7 +51,9 @@ export default function FileList({ filename, index, trained
         }
 
         if (!trained && progress === 100) {
-            trainAI()
+            setTimeout(() => {
+                trainAI()
+            }, 5000);
         }
     }, [progress]);
     return (
