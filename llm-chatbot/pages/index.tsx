@@ -23,7 +23,9 @@ export default function Home() {
   const [selecteduploadFile, setSelecteduploadFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [apiData, setApiData] = useState<any>(null);
-  const [pdfList, setPdfList] = useState<string[]>([]);
+  // const [pdfList, setPdfList] = useState<string[]>([]);
+  const [pdfList, setPdfList] = useState<{ name: string; is_trained: boolean }[]>([]);
+
   const [uploading, setUploading] = useState(false);
   // Add this state at the beginning of your component
   const [trainingInProgress, setTrainingInProgress] = useState(false);
@@ -31,10 +33,8 @@ export default function Home() {
   const router = useRouter();
   const { query: { 'chat-id': chatId } } = router
 
-  const backendConnectorHost = "table-llm-bot.smarter.codes"
-  const backendConnectorKey = "KJaksn9812nOdnAsSCd-1in31"
-  // const backendConnectorHost = "test"
-  // const backendConnectorKey = "test-1in31"
+  const backendConnectorHost = process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST
+  const backendConnectorKey = process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
 
   useEffect(() => {
     // Only run this code if chatId is defined (i.e., only on the client side)
@@ -49,7 +49,7 @@ export default function Home() {
     try {
       const response = await axios.get(`https://${backendConnectorHost}/pdf/list?chatbot_id=${chatId}`, {
         headers: {
-          'API-KEY': backendConnectorKey,
+          'API-KEY': backendConnectorKey || '',
         },
       });
       setApiData(response.data);
@@ -178,13 +178,12 @@ export default function Home() {
     try {
       const response = await axios.get(`https://${backendConnectorHost}/pdf/list?chatbot_id=${chatId}`, {
         headers: {
-          'API-KEY': backendConnectorKey,
-          //'Connection': 'keep-alive',
-          //'sec-ch-ua-mobile': '?0',
+          'API-KEY': backendConnectorKey || '',
         },
       });
       const pdfData = response.data.data;
       setPdfList(pdfData);
+      setSelecteduploadFile(null)
     } catch (error) {
       console.log(error);
     }
@@ -220,7 +219,7 @@ export default function Home() {
 
     try {
       const response = await axios.request(config);
-      console.log(JSON.stringify(response.data));
+      // console.log("upload file response ==>", response.data);
       await fetchPdfList();
       console.log("await fetchPdfList();");
     } catch (error) {
@@ -236,12 +235,10 @@ export default function Home() {
     try {
       const response = await axios.get(`https://${backendConnectorHost}/chatbot/untrain?chatbot_id=${chatId}`, {
         headers: {
-          'API-KEY': backendConnectorKey,
-          //'Connection': 'keep-alive',
-          //'sec-ch-ua-mobile': '?0',
+          'API-KEY': backendConnectorKey || '',
         },
       });
-      console.log(JSON.stringify(response.data));
+      // console.log("untrain response ==>", response.data);
       // Call the fetchPdfList function here
       await fetchPdfList();
     } catch (error) {
@@ -256,7 +253,7 @@ export default function Home() {
       setTrainingInProgress(true);
       const response = await axios.get(`https://${backendConnectorHost}/chatbot/train?chatbot_id=${chatId}`, {
         headers: {
-          'API-KEY': backendConnectorKey,
+          'API-KEY': backendConnectorKey || '',
           //'Connection': 'keep-alive',
           //'sec-ch-ua-mobile': '?0',
         },
@@ -272,11 +269,13 @@ export default function Home() {
   }
 
 
+
+
   const fileInputRefDoc = useRef(null);
   const handleFileChange = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      console.log("selected file ==>", selectedFile.name)
+      // console.log("selected file ==>", selectedFile.name)
       setSelecteduploadFile(selectedFile)
     }
   };
@@ -302,15 +301,20 @@ export default function Home() {
   function uploadFileData() {
     if (selecteduploadFile) {
 
-      setPdfList([...pdfList, selecteduploadFile.name])
+      // setPdfList([...pdfList, { "name": selecteduploadFile.name, "trained": false }])
+      uploadFileToApi(selecteduploadFile)
       setSelecteduploadFile(null)
     }
   }
 
-  function removefilefromfileList(index: number) {
-    let data = [...pdfList]
-    data.splice(index, 1)
-    setPdfList(data)
+  // function removefilefromfileList(index: number) {
+  //   let data = [...pdfList]
+  //   data.splice(index, 1)
+  //   setPdfList(data)
+  // }
+
+  function clearAllPdfList() {
+    handleUntrain()
   }
 
 
@@ -392,7 +396,7 @@ export default function Home() {
               }}>
 
                 <h1 className={styles.title}>Uploaded Doc</h1>
-                <p onClick={() => setPdfList([])} className='cursor-pointer'>Clear All</p>
+                <p onClick={() => clearAllPdfList()} className='cursor-pointer'>Clear All</p>
               </div>
               <div style={{
                 display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center", height: "100%",
@@ -404,7 +408,7 @@ export default function Home() {
                     <div style={{ width: "100%" }}>
                       {
                         pdfList.map((item, index) =>
-                          <FileList filename={item} removefilefromfileList={removefilefromfileList} index={index} />
+                          <FileList filename={item.name} index={index} trained={item.is_trained} />
                         )
                       }
                     </div>
@@ -429,8 +433,12 @@ export default function Home() {
 
           <main className={styles.main}>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "1rem", alignItems: "center" }}>
-              <h1 className={styles.title}>LLM CHATBOT</h1>
-              <button className={styles.buttonWrapper}>Publish & Share</button>
+              <h1 className={styles.title}>DOCUMENT CHATBOT</h1>
+              <div className='flex'>
+
+                <button className={`${styles.buttonWrapper} bg-gray-200`}>Publish & Share</button>
+                <span className={styles.comingSoonLabel} style={{ transform: "translate(30%, -60%)" }}>Coming soon</span>
+              </div>
             </div>
             <div className={styles.cloud}>
               <div ref={messageListRef} className={styles.messagelist}>
