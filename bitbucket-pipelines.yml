@@ -25,6 +25,5 @@ pipelines:
           name: Main
           deployment: Staging
           image: google/cloud-sdk:alpine
-          trigger: manual
           script:
             - bash ./run.sh stage
