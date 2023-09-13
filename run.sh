@@ -54,6 +54,7 @@ stage() {
     -e "s|\$PINECONE_INDEX_NAME|${PINECONE_INDEX_NAME}|" \
     -e "s|\$NEXT_PUBLIC_BACKEND_CONNECTOR_HOST|${NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}|" \
     -e "s|\$NEXT_PUBLIC_BACKEND_CONNECTOR_KEY|${NEXT_PUBLIC_BACKEND_CONNECTOR_KEY}|" \
+    -e "s|\$NEXT_PUBLIC_HI_MESSAGE_RESPONSE|${NEXT_PUBLIC_HI_MESSAGE_RESPONSE}|" \
     docker-compose-server.yml > docker-compose-deploy.tmp.yml
     
     gcloud compute ssh --zone $GCP_ZONE --project $GCP_PROJECT ubuntu@$GCE_VM -- mkdir -p server/llm-chatbot/$BITBUCKET_REPO_SLUG
@@ -87,6 +88,7 @@ deploy() {
     -e "s|\$PINECONE_INDEX_NAME|${PINECONE_INDEX_NAME}|" \
     -e "s|\$NEXT_PUBLIC_BACKEND_CONNECTOR_HOST|${NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}|" \
     -e "s|\$NEXT_PUBLIC_BACKEND_CONNECTOR_KEY|${NEXT_PUBLIC_BACKEND_CONNECTOR_KEY}|" \
+    -e "s|\$NEXT_PUBLIC_HI_MESSAGE_RESPONSE|${NEXT_PUBLIC_HI_MESSAGE_RESPONSE}|" \
     docker-compose-server.yml > docker-compose-deploy.tmp.yml
     
     gcloud compute ssh --zone $GCP_ZONE --project $GCP_PROJECT ubuntu@$GCE_VM -- mkdir -p server/llm-chatbot/$BITBUCKET_REPO_SLUG
