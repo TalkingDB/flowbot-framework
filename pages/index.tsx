@@ -46,16 +46,16 @@ export default function Home() {
     }
   }, [chatId]);
 
-  // useEffect(() => {
-  //   // Get the URL search parameters
-  //   const urlParams = new URLSearchParams(window.location.search);
+  useEffect(() => {
+    // Get the URL search parameters
+    const urlParams = new URLSearchParams(window.location.search);
 
-  //   // Check if the 'chat-id' query parameter is present
-  //   if (!urlParams.has('chat-id')) {
-  //     // Query parameter is not present, redirect to a new URL
-  //     window.location.href = `https://${backendConnectorHost}/chatbot/instance`;
-  //   }
-  // }, []);
+    // Check if the 'chat-id' query parameter is present
+    if (!urlParams.has('chat-id')) {
+      // Query parameter is not present, redirect to a new URL
+      window.location.href = `https://${backendConnectorHost}/chatbot/instance`;
+    }
+  }, []);
 
 
   async function fetchData() {
