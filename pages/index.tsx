@@ -15,7 +15,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import FileList from '@/components/fileList';
-import { ColorRing } from 'react-loader-spinner'
+import { Oval } from 'react-loader-spinner'
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
@@ -31,6 +31,7 @@ export default function Home() {
   // Add this state at the beginning of your component
   const [trainingInProgress, setTrainingInProgress] = useState(false);
   const [untrainingInProgress, setUnTrainingInProgress] = useState(false);
+  const [showLoader, setShowLoader] = useState<boolean>(false)
   const router = useRouter();
   const { query: { 'chat-id': chatId } } = router
 
@@ -45,16 +46,16 @@ export default function Home() {
     }
   }, [chatId]);
 
-  useEffect(() => {
-    // Get the URL search parameters
-    const urlParams = new URLSearchParams(window.location.search);
+  // useEffect(() => {
+  //   // Get the URL search parameters
+  //   const urlParams = new URLSearchParams(window.location.search);
 
-    // Check if the 'chat-id' query parameter is present
-    if (!urlParams.has('chat-id')) {
-      // Query parameter is not present, redirect to a new URL
-      window.location.href = `https://${backendConnectorHost}/chatbot/instance`;
-    }
-  }, []);
+  //   // Check if the 'chat-id' query parameter is present
+  //   if (!urlParams.has('chat-id')) {
+  //     // Query parameter is not present, redirect to a new URL
+  //     window.location.href = `https://${backendConnectorHost}/chatbot/instance`;
+  //   }
+  // }, []);
 
 
   async function fetchData() {
@@ -233,8 +234,10 @@ export default function Home() {
     try {
       const response = await axios.request(config);
       // console.log("upload file response ==>", response.data);
-      await fetchPdfList();
-      console.log("await fetchPdfList();");
+      setTimeout(async () => {
+        await fetchPdfList();
+        setShowLoader(false)
+      }, 2000)
     } catch (error) {
       console.log(error);
     } finally {
@@ -254,6 +257,7 @@ export default function Home() {
       // console.log("untrain response ==>", response.data);
       // Call the fetchPdfList function here
       await fetchPdfList();
+      setShowLoader(false)
     } catch (error) {
       console.log(error);
     } finally {
@@ -289,6 +293,7 @@ export default function Home() {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       // console.log("selected file ==>", selectedFile.name)
+      setShowLoader(true);
       setSelecteduploadFile(selectedFile)
       uploadFileToApi(selectedFile)
       setSelecteduploadFile(null)
@@ -321,6 +326,7 @@ export default function Home() {
   // }
 
   function clearAllPdfList() {
+    setShowLoader(true);
     handleUntrain()
   }
 
@@ -341,7 +347,7 @@ export default function Home() {
               <div className="mt-4 mb-4 flex flex-col">
                 <div className='flex mb-6'>
 
-                  <label className="w-64 flex justify-between items-center px-2 py-2 text-blue rounded-lg  tracking-wide  border border-blue  ">
+                  <label className="w-64 flex justify-between items-center px-2 py-2 text-blue rounded-lg  tracking-wide  border border-blue  cursor-pointer">
                     <input type='file' accept='.pdf' className="hidden" onChange={handleFileChange} ref={fileInputRef} />
                     <span className="mt-2 text-base leading-normal">Upload a Doc</span>
                     <svg className="w-8 h-8 pt-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -394,7 +400,7 @@ export default function Home() {
                   minHeight: "250px"
                 }}>
                   {
-                    pdfList.length > 0 ?
+                    pdfList.length > 0 && !showLoader ?
 
                       <div style={{ width: "100%" }}>
                         {
@@ -404,17 +410,34 @@ export default function Home() {
                         }
                       </div>
                       :
-                      <>
-                        <Image
-                          src="/pdf_upload.png"
-                          alt="AI"
-                          width="55"
-                          height="55"
-                          priority
-                          className='mt-2'
-                        />
-                        <div className='p-8'>Please upload a Doc to train the AI automatically</div>
-                      </>
+                      showLoader ?
+                        <div style={{ display: "flex", width: "100%", height: "100%", justifyContent: "center", position: "absolute", top: "50%" }}>
+                          <Oval
+                            height={40}
+                            width={40}
+                            color="#338bff"
+                            wrapperStyle={{}}
+                            wrapperClass=""
+                            visible={true}
+                            ariaLabel='oval-loading'
+                            secondaryColor="#338bff"
+                            strokeWidth={4}
+                            strokeWidthSecondary={4}
+
+                          />
+                        </div>
+                        :
+                        <>
+                          <Image
+                            src="/pdf_upload.png"
+                            alt="AI"
+                            width="55"
+                            height="55"
+                            priority
+                            className='mt-2'
+                          />
+                          <div className='p-8'>Please upload a Doc to train the AI automatically</div>
+                        </>
                   }
 
                 </div>
@@ -543,14 +566,20 @@ export default function Home() {
         :
         <div style={{ display: "flex", width: "100%", height: "100%", justifyContent: "center", position: "absolute", top: "50%" }}>
 
-          <ColorRing
-            visible={true}
-            height="80"
-            width="80"
-            ariaLabel="blocks-loading"
+
+
+          <Oval
+            height={80}
+            width={80}
+            color="#338bff"
             wrapperStyle={{}}
-            wrapperClass="blocks-wrapper"
-            colors={['#338bff', '#338bff', '#338bff', '#338bff', '#338bff']}
+            wrapperClass=""
+            visible={true}
+            ariaLabel='oval-loading'
+            secondaryColor="#338bff"
+            strokeWidth={4}
+            strokeWidthSecondary={4}
+
           />
         </div>
       }
