@@ -7,7 +7,7 @@ export class makeChain {
     this.chat_id = chat_id
   }
   run = async (inputQuestion: string) => {
-    const documentSearchAPI = "http://api-server:80/generate/answer";
+    const documentSearchAPI = "http://stage-document-backend.smarter.codes:8084/generate/answer";
     let queryParams = {
       'question': inputQuestion,
       'chat_id':this.chat_id
