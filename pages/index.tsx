@@ -143,6 +143,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           question,
+          enablegptfallback: toggleStatus ? 1 : 0,
           history,
         }),
       });
