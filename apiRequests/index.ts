@@ -67,3 +67,28 @@ export const whatsAppFileProgress = async (filename: string) => {
 
     }
 }
+
+
+export const getDefaultPromptTemplate = async (chatId: CHAT_ID) => {
+    try {
+        return await axiosConvInstance.post(`/prompt_template/default?chat_id=${chatId}`);
+    } catch (error) {
+
+    }
+}
+
+export const resetPromptTemplate = async (chatId: CHAT_ID) => {
+    try {
+        return await axiosConvInstance.post(`/prompt_template/reset?chat_id=${chatId}`);
+    } catch (error) {
+
+    }
+}
+
+export const submitPromptTemplate = async (chatId: CHAT_ID, data: any) => {
+    try {
+        return await axiosConvInstance.post(`/prompt_template?chat_id=${chatId}`, data);
+    } catch (error) {
+
+    }
+}

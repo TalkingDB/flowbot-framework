@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/accordion';
 import FileList from '@/components/fileList';
 import { Oval } from 'react-loader-spinner'
-import { deleteConvList, deletePDFList, getConvList, getPDFList, uploadConv, uploadPDF } from '@/apiRequests';
+import { deleteConvList, deletePDFList, getConvList, getDefaultPromptTemplate, getPDFList, resetPromptTemplate, submitPromptTemplate, uploadConv, uploadPDF } from '@/apiRequests';
 import WhatsAppList from '@/components/whatsAppList';
 import { PromptModal } from '@/components/customPromptModal';
 
@@ -40,6 +40,7 @@ export default function Home() {
   const [showLoader, setShowLoader] = useState<boolean>(false)
   const [toggleStatus, setToggleStatus] = useState<boolean>(false)
   const [promptModal, setPromptModal] = useState<boolean>(false);
+  const [promptTemplate, setPromptTemplate] = useState<string | any>('');
   const router = useRouter();
   const { query: { 'chat-id': chatId } } = router
 
@@ -78,6 +79,7 @@ export default function Home() {
   useEffect(() => {
     // Call fetchPdfList function here
     if (chatId) {
+
       fetchPdfList();
     }
   }, [chatId]);
@@ -194,6 +196,10 @@ export default function Home() {
 
   async function fetchPdfList() {
     try {
+      const temp = await getDefaultPromptTemplate(chatId)
+      if (temp) {
+        setPromptTemplate(temp.data)
+      }
       const pdfData = await getPDFList(chatId)
       setPdfList(pdfData);
       setSelecteduploadFile(null)
@@ -322,8 +328,15 @@ export default function Home() {
     }
   }
 
+  async function resetdefaultPromptTemplate() {
+    await resetPromptTemplate(chatId)
+    const temp = await getDefaultPromptTemplate(chatId)
+    if (temp) {
+      setPromptTemplate(temp.data)
+    }
+  }
+
   useEffect(() => {
-    console.log("fileChange ==>", selectedFileType, selecteduploadFile, selectedConvUploadFile)
     if (selectedFileType === "PDF" && selecteduploadFile) {
       setConvList([])
       uploadPDFFile()
@@ -332,6 +345,14 @@ export default function Home() {
       uploadConvToApi()
     }
   }, [selectedFileType, selecteduploadFile, selectedConvUploadFile])
+
+  const onPromptChange = (value: string) => {
+    setPromptTemplate(value)
+  }
+
+  const updatePrompt = async () => {
+    await submitPromptTemplate(chatId, promptTemplate)
+  }
 
   return (
     <>
@@ -478,7 +499,7 @@ export default function Home() {
                     {/* <span className="ml-3 mr-3 text-sm font-medium text-gray-900 dark:text-black-800">Enable GPT Fallback</span> */}
                   </label>
                   <button className={`${styles.buttonWrapper} bg-white mr-4`} onClick={() => setPromptModal(true)}>Custom Prompt</button>
-                  {promptModal && <PromptModal onClose={() => setPromptModal(false)} />}
+                  {promptModal && <PromptModal onChangeHandler={onPromptChange} onClose={(val: string | undefined) => { val === "submit" ? updatePrompt() : null; setPromptModal(false) }} resetTemplate={resetdefaultPromptTemplate} data={promptTemplate} onSubmit={() => updatePrompt()} />}
 
                   <div className='flex'>
 
