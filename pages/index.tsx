@@ -44,33 +44,33 @@ export default function Home() {
   const backendConnectorHost = process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST
   const backendConnectorKey = process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
 
-  // useEffect(() => {
-  //   // Get the URL search parameters
-  //   const urlParams = new URLSearchParams(window.location.search);
+  useEffect(() => {
+    // Get the URL search parameters
+    const urlParams = new URLSearchParams(window.location.search);
 
-  //   // Check if the 'chat-id' query parameter is present
-  //   if (!urlParams.has('chat-id')) {
-  //     // Query parameter is not present, redirect to a new URL
-  //     function generateRandomStringWithNumbers(length: number) {
-  //       const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  //       const numbers = '0123456789';
-  //       let result = 'chat-';
+    // Check if the 'chat-id' query parameter is present
+    if (!urlParams.has('chat-id')) {
+      // Query parameter is not present, redirect to a new URL
+      function generateRandomStringWithNumbers(length: number) {
+        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
+        let result = 'chat-';
 
-  //       for (let i = 0; i < length - 5; i++) {
-  //         const randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
-  //         result += randomChar;
-  //       }
+        for (let i = 0; i < length - 5; i++) {
+          const randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
+          result += randomChar;
+        }
 
-  //       for (let i = 0; i < 3; i++) {
-  //         const randomDigit = numbers.charAt(Math.floor(Math.random() * numbers.length));
-  //         result += randomDigit;
-  //       }
+        for (let i = 0; i < 3; i++) {
+          const randomDigit = numbers.charAt(Math.floor(Math.random() * numbers.length));
+          result += randomDigit;
+        }
 
-  //       return result;
-  //     }
-  //     window.location.href = `https://chats-reader-ai.document-chatbot.hybrid.chat/?chat-id=${generateRandomStringWithNumbers(8)}`
-  //   }
-  // }, []);
+        return result;
+      }
+      window.location.href = `https://dev.document-chatbot.hybrid.chat/?chat-id=${generateRandomStringWithNumbers(8)}`
+    }
+  }, []);
 
 
   useEffect(() => {
