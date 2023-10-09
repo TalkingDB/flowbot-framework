@@ -351,7 +351,7 @@ export default function Home() {
   }
 
   const updatePrompt = async () => {
-    await submitPromptTemplate(chatId, promptTemplate)
+    await submitPromptTemplate(chatId, { "template_instructions": promptTemplate })
   }
 
   return (
