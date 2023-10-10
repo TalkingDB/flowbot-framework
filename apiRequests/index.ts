@@ -71,7 +71,7 @@ export const whatsAppFileProgress = async (filename: string) => {
 
 export const getDefaultPromptTemplate = async (chatId: CHAT_ID) => {
     try {
-        return await axiosConvInstance.post(`/prompt_template/default?chat_id=${chatId}`);
+        return await axiosConvInstance.get(`/prompt_template?chat_id=${chatId}`);
     } catch (error) {
 
     }
