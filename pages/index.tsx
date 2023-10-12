@@ -105,9 +105,22 @@ export default function Home() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
+  const autoResizeTextarea = () => {
+    const textarea = textAreaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset the height to auto to determine the new height
+      textarea.style.height = textarea.scrollHeight + 'px'; // Set the new height
+    }
+  };
+
+
   useEffect(() => {
     textAreaRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    autoResizeTextarea()
+  }, [query])
 
   //handle form submission
   async function handleSubmit(e: any) {
