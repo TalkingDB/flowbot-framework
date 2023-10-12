@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import Layout from '@/components/layout';
-import styles from '@/styles/Home.module.css';
+
 import { Message } from '@/types/chat';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
@@ -45,6 +45,7 @@ export default function Home() {
   const router = useRouter();
   const { query: { 'chat-id': chatId } } = router
   const [JSModule, setJSModule] = useState<any>(null);
+  const [styles, setStyle] = useState<any>(null);
 
   useEffect(() => {
     // Get the URL search parameters
@@ -81,7 +82,11 @@ export default function Home() {
       fetchPdfList();
       import(`@/custom/JSFile/${chatId}`).then(module => {
         setJSModule(module)
-      })
+      });
+      import(`@/custom/CSSFile/${chatId}/Home.module.css`).then(module => {
+        setStyle(module)
+      });
+
     }
   }, [chatId]);
 
@@ -408,7 +413,7 @@ export default function Home() {
 
   return (
     <>
-      {chatId ?
+      {chatId && styles ?
         <Layout>
           <div className="flex m-5">
             <div style={{ padding: "1rem", display: "flex", flexDirection: "column", maxWidth: "355px" }}>

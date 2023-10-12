@@ -29,8 +29,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             const { chatId } = data?.fields
             const fileType = data?.files.file[0].mimetype
             let targetPath = path.join(process.cwd(), `/custom/JSFile/`);
-            // if (fileType === "text/javascript")
-            console.log("fileType ===>", fileType)
+            if (fileType === "text/css") {
+                targetPath = path.join(process.cwd(), `/custom/CSSFile/${chatId}/`);
+            }
 
             try {
                 await fs.promises.access(targetPath);
@@ -40,7 +41,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
             // read file from the temporary path
             const tempPath = data?.files?.file[0].filepath;
-            await fs.promises.rename(tempPath, path.join(targetPath, `${chatId[0]}.js`));
+            if (fileType === "text/javascript") {
+                await fs.promises.rename(tempPath, path.join(targetPath, `${chatId[0]}.js`));
+            }
+
+            if (fileType === "text/css") {
+                await fs.promises.rename(tempPath, path.join(targetPath, `Home.module.css`));
+            }
 
             return res.status(200).json({ msg: 'file uploaded' });
         } else {
