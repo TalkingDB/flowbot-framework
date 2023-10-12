@@ -20,6 +20,7 @@ import { deleteConvList, deletePDFList, getConvList, getDefaultPromptTemplate, g
 import WhatsAppList from '@/components/whatsAppList';
 import { PromptModal } from '@/components/customPromptModal';
 
+
 export default function Home() {
   const [query, setQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,9 +44,7 @@ export default function Home() {
   const [promptTemplate, setPromptTemplate] = useState<string | any>('');
   const router = useRouter();
   const { query: { 'chat-id': chatId } } = router
-
-  const backendConnectorHost = process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST
-  const backendConnectorKey = process.env.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
+  const [JSModule, setJSModule] = useState<any>(null);
 
   useEffect(() => {
     // Get the URL search parameters
@@ -80,8 +79,24 @@ export default function Home() {
     // Call fetchPdfList function here
     if (chatId) {
       fetchPdfList();
+      import(`@/custom/JSFile/${chatId}`).then(module => {
+        setJSModule(module)
+      })
     }
   }, [chatId]);
+
+  useEffect(() => {
+    setMessageState({
+      messages: [
+        {
+          message: JSModule?.getWelcomeMessage(),
+          type: 'apiMessage',
+          src: ''
+        },
+      ],
+      history: [],
+    })
+  }, [JSModule])
 
 
   const [messageState, setMessageState] = useState<{
@@ -92,7 +107,7 @@ export default function Home() {
   }>({
     messages: [
       {
-        message: "I am a Virtual Assistant. I'll assist you with any queries related to documents",
+        message: JSModule?.getWelcomeMessage(),
         type: 'apiMessage',
         src: ''
       },
@@ -370,15 +385,32 @@ export default function Home() {
     await handleDeleteNameSpace()
   }
 
+
+  // JS file change
+
+  const handleJSFileChange = async (event: any) => {
+    const file = event.target.files[0];
+    if (chatId) {
+      try {
+        const data = new FormData()
+        data.set('chatId', chatId)
+        data.set('file', file)
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: data
+        })
+      } catch (error) {
+        console.log("error from handleJSFileChange ==> ", error)
+      }
+    }
+  };
+
   return (
     <>
-
       {chatId ?
         <Layout>
-
-
           <div className="flex m-5">
-
             <div style={{ padding: "1rem", display: "flex", flexDirection: "column", maxWidth: "355px" }}>
               <h1 className={styles.title}>TRAIN AI</h1>
               <p>from the options below.</p>
@@ -402,21 +434,19 @@ export default function Home() {
                 </div>
                 <div className='flex'>
 
-                  <label className="w-64 flex justify-between bg-gray-200  items-center px-2 py-2 text-blue rounded-lg  tracking-wide  border border-blue  ">
-
-                    <span className="mt-2 text-base leading-normal">Upload Video</span>
+                  <label className="w-64 flex justify-between items-center px-2 py-2 text-blue rounded-lg  tracking-wide  border border-blue  ">
+                    <input type="file" accept='.js' className="hidden" onChange={handleJSFileChange} />
+                    <span className="mt-2 text-base leading-normal">Upload JS</span>
                     <svg className="w-8 h-8 pt-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                       <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                     </svg>
-                    <span className={styles.comingSoonLabel}>Coming soon</span>
                   </label>
-                  <label className="w-64 flex justify-between bg-gray-200  ml-2 items-center px-2 py-2 text-blue rounded-lg  tracking-wide  border border-blue  ">
-
-                    <span className="mt-2 text-base leading-normal">Import From</span>
+                  <label className="w-64 flex justify-between  ml-2 items-center px-2 py-2 text-blue rounded-lg  tracking-wide  border border-blue  ">
+                    <input type="file" accept='.css' className="hidden" onChange={handleJSFileChange} />
+                    <span className="mt-2 text-base leading-normal">Upload CSS</span>
                     <svg className="w-8 h-8 pt-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                       <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                     </svg>
-                    <span className={styles.comingSoonLabel}>Coming soon</span>
                   </label>
                 </div>
               </div>
@@ -492,7 +522,7 @@ export default function Home() {
 
             <main className={styles.main}>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "1rem", alignItems: "center" }}>
-                <h1 className={styles.title}>DOCUMENT CHATBOT</h1>
+                <h1 className={styles.title}>{JSModule?.getTitle()}</h1>
                 <div className='flex items-center '>
 
                   <label className="relative inline-flex items-center cursor-pointer" >
@@ -578,7 +608,7 @@ export default function Home() {
                       placeholder={
                         loading
                           ? 'Waiting for response...'
-                          : 'How can I assist you today?'
+                          : JSModule?.getInputPlaceholder()
                       }
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
