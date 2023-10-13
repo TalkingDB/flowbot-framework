@@ -46,6 +46,23 @@ export default function Home() {
   const { query: { 'chat-id': chatId } } = router
   const [JSModule, setJSModule] = useState<any>(null);
   const [styles, setStyle] = useState<any>(null);
+  const [newChatRoom, setNewChatRoom] = useState<string>('test');
+
+
+  function generateRandomChatRoom(length: number) {
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    let result = 'publish-';
+    for (let i = 0; i < length - 5; i++) {
+      const randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
+      result += randomChar;
+    }
+    for (let i = 0; i < 3; i++) {
+      const randomDigit = numbers.charAt(Math.floor(Math.random() * numbers.length));
+      result += randomDigit;
+    }
+    return result;
+  }
 
   useEffect(() => {
     // Get the URL search parameters
@@ -56,6 +73,9 @@ export default function Home() {
       // Query parameter is not present, redirect to a new URL
       window.location.href = `https://dev.document-chatbot.hybrid.chat/?chat-id=default`
     }
+
+    const chatroom = generateRandomChatRoom(8)
+    setNewChatRoom(chatroom)
   }, []);
 
 
@@ -65,9 +85,17 @@ export default function Home() {
       fetchPdfList();
       import(`@/custom/JSFile/${chatId}`).then(module => {
         setJSModule(module)
+      }).catch((error) => {
+        import(`@/custom/JSFile/default`).then(module => {
+          setJSModule(module)
+        });
       });
       import(`@/custom/CSSFile/${chatId}/Home.module.css`).then(module => {
         setStyle(module)
+      }).catch((error) => {
+        import(`@/styles/Home.module.css`).then(module => {
+          setStyle(module)
+        });
       });
 
     }
@@ -381,7 +409,7 @@ export default function Home() {
     if (chatId) {
       try {
         const data = new FormData()
-        data.set('chatId', chatId)
+        data.set('chatId', newChatRoom)
         data.set('file', file)
 
         const res = await fetch('/api/upload', {
@@ -523,9 +551,8 @@ export default function Home() {
                   {promptModal && <PromptModal onChangeHandler={onPromptChange} onClose={(val: string | undefined) => { val === "submit" ? updatePrompt() : null; setPromptModal(false) }} resetTemplate={resetdefaultPromptTemplate} data={promptTemplate} onSubmit={() => updatePrompt()} />}
 
                   <div className='flex'>
-
-                    <button className={`${styles.buttonWrapper} bg-gray-200`}>Publish & Share</button>
-                    <span className={styles.comingSoonLabel} style={{ transform: "translate(30%, -60%)" }}>Coming soon</span>
+                    <button className={`${styles.buttonWrapper}`} onClick={() => window.alert(`Copy the Url for chatbot - https://dev.document-chatbot.hybrid.chat/?chat-id=${newChatRoom}`)}>Publish & Share</button>
+                    {/* <span className={styles.comingSoonLabel} style={{ transform: "translate(30%, -60%)" }}>Coming soon</span> */}
                   </div>
                 </div>
               </div>
