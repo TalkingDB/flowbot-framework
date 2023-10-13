@@ -31,11 +31,18 @@ export default async function handler(
   try {
     //create chain
     const chain = new makeChain(pinecone_name_space);
+    import(`@/custom/JSFile/${pinecone_name_space}`).then(async (module) => {
 
-    const response = await chain.run(sanitizedQuestion)
-    if (response) {
-      res.status(200).json(response);
-    }
+      const response = await module.start(chain, sanitizedQuestion)
+      if (response) {
+        res.status(200).json(response);
+      }
+    });
+
+    // const response = await chain.run(sanitizedQuestion)
+    // if (response) {
+    //   res.status(200).json(response);
+    // }
 
   } catch (error: any) {
     console.log('error', error);
