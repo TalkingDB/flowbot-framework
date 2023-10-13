@@ -69,7 +69,7 @@ export default function Home() {
     // Get the URL search parameters
     const urlParams = new URLSearchParams(window.location.search);
     const chatId = urlParams.get("chat-id");
-    console.log("ChatId  Params ==>", urlParams)
+    // console.log("ChatId  Params ==>", urlParams)
 
     // Check if the chatId contains "publish"
     if (chatId && chatId.includes("publish")) {
@@ -83,13 +83,27 @@ export default function Home() {
       window.location.href = `https://dev.document-chatbot.hybrid.chat/?chat-id=default`
     }
 
+    const createNewChatRoom = () => {
+      const chatroom = generateRandomChatRoom(8)
+      if (newChatRoom === "test") {
+        // console.log("new ChatRoom ==>", chatroom)
+        setNewChatRoom(chatroom)
+      }
+    }
+
     createNewChatRoom()
+
+    // Override the window.alert method to trigger the afterAlert function
+    window.alert = function (message) {
+      // Display the custom alert message
+      const result = window.confirm(message);
+      // Check if the user clicked OK on the custom alert
+      if (result) {
+        setNewChatRoom("test")
+      }
+    };
   }, []);
 
-  const createNewChatRoom = () => {
-    const chatroom = generateRandomChatRoom(8)
-    setNewChatRoom(chatroom)
-  }
 
 
 
@@ -568,7 +582,6 @@ export default function Home() {
                     <div className='flex'>
                       <button className={`${styles.buttonWrapper}`} onClick={() => {
                         window.alert(`Copy the Url for chatbot - https://dev.document-chatbot.hybrid.chat/?chat-id=${newChatRoom}`);
-                        createNewChatRoom()
                       }
                       }>Publish & Share</button>
                       {/* <span className={styles.comingSoonLabel} style={{ transform: "translate(30%, -60%)" }}>Coming soon</span> */}
