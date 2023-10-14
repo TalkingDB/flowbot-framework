@@ -92,3 +92,11 @@ export const submitPromptTemplate = async (chatId: CHAT_ID, data: any) => {
 
     }
 }
+
+export const getNewInstance = async () => {
+    try {
+        return await axiosConvInstance.get(`/chatbot/instance`, { maxRedirects: 0 });
+    } catch (error) {
+
+    }
+}
