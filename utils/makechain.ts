@@ -7,15 +7,14 @@ export class makeChain {
   constructor(chat_id: string) {
     this.chat_id = chat_id
   }
-  run = async (inputQuestion: string) => {
-    const documentSearchAPI = "https://dev.document-search.smarter.codes/generate/answer";
+  run = async (inputQuestion: string, backendUrl: string = "https://dev.document-search.smarter.codes/generate/answer") => {
     let queryParams = {
       'user_input': inputQuestion,
       'chat_id': this.chat_id
     };
     const options = {
       method: 'POST',
-      url: documentSearchAPI,
+      url: backendUrl,
       params: queryParams,
       headers: {
         'content-type': 'application/json',

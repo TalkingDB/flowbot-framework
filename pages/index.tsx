@@ -1,23 +1,14 @@
 import { useRef, useState, useEffect } from 'react';
 import Layout from '@/components/layout';
-
 import { Message } from '@/types/chat';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import LoadingDots from '@/components/ui/LoadingDots';
 import { Document } from 'langchain/document';
-import axios from 'axios';
 import { useRouter } from 'next/router';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import FileList from '@/components/fileList';
 import { Oval } from 'react-loader-spinner'
-import { deleteConvList, deletePDFList, getConvList, getDefaultPromptTemplate, getNewInstance, getPDFList, resetPromptTemplate, submitPromptTemplate, uploadConv, uploadPDF } from '@/apiRequests';
-import WhatsAppList from '@/components/whatsAppList';
+import { deleteConvList, deletePDFList, getConvList, getDefaultPromptTemplate, getPDFList, resetPromptTemplate, submitPromptTemplate, uploadConv, uploadPDF } from '@/apiRequests';
 import { PromptModal } from '@/components/customPromptModal';
 
 
@@ -48,6 +39,7 @@ export default function Home() {
   const [styles, setStyle] = useState<any>(null);
   const [newChatRoom, setNewChatRoom] = useState<string>('test');
   const [isPublishUrl, setIsPublishUrl] = useState<boolean>(false);
+  const [currentUrl, setCurrentUrl] = useState<string>("");
 
 
   function generateRandomChatRoom(length: number) {
@@ -69,7 +61,12 @@ export default function Home() {
     // Get the URL search parameters
     const urlParams = new URLSearchParams(window.location.search);
     const chatId = urlParams.get("chat-id");
-    // console.log("ChatId  Params ==>", urlParams)
+    const url = new URL(window.location.href);
+
+    // Remove the "chat-id" parameter if it exists
+    url.searchParams.delete('chat-id');
+    const updatedURL = url.toString();
+    setCurrentUrl(updatedURL)
 
     // Check if the chatId contains "publish"
     if (chatId && chatId.includes("publish")) {
@@ -80,7 +77,7 @@ export default function Home() {
     // Check if the 'chat-id' query parameter is present
     if (!urlParams.has('chat-id')) {
       // Query parameter is not present, redirect to a new URL
-      window.location.href = `https://${window.location.host}/?chat-id=default`
+      window.location.href = `${updatedURL}?chat-id=default`
     }
 
     const createNewChatRoom = () => {
@@ -581,7 +578,7 @@ export default function Home() {
                   {!isPublishUrl &&
                     <div className='flex'>
                       <button className={`${styles.buttonWrapper}`} onClick={() => {
-                        window.alert(`Copy the Url for chatbot - https://dev.document-chatbot.hybrid.chat/?chat-id=${newChatRoom}`);
+                        window.alert(`Copy the Url for chatbot - ${currentUrl}?chat-id=${newChatRoom}`);
                       }
                       }>Publish & Share</button>
                       {/* <span className={styles.comingSoonLabel} style={{ transform: "translate(30%, -60%)" }}>Coming soon</span> */}
