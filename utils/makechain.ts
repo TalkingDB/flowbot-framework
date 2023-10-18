@@ -9,7 +9,7 @@ export class makeChain {
   constructor(chat_id: string) {
     this.chat_id = chat_id
   }
-  run = async (inputQuestion: string, backendUrl: string = textSimilarityBackendConnectorHost) => {
+  run = async (inputQuestion: string, backendUrl: string = `${textSimilarityBackendConnectorHost}/generate/answer`) => {
     let queryParams = {
       'user_input': inputQuestion,
       'chat_id': this.chat_id
