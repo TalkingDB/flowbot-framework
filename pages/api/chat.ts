@@ -35,8 +35,15 @@ export default async function handler(
 
       const response = await module.start(chain, sanitizedQuestion)
       if (response) {
-        res.status(200).json(response);
+        return res.status(200).json(response);
       }
+    }).catch((error) => {
+      import(`@/custom/JSFile/default`).then(async (module) => {
+        const response = await module.start(chain, sanitizedQuestion)
+        if (response) {
+          return res.status(200).json(response);
+        }
+      });
     });
 
     // const response = await chain.run(sanitizedQuestion)
