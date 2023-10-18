@@ -27,6 +27,44 @@ export default function Home() {
   const [isPublishUrl, setIsPublishUrl] = useState<boolean>(false);
   const [currentUrl, setCurrentUrl] = useState<string>("");
 
+  const [messageState, setMessageState] = useState<{
+    messages: Message[];
+    pending?: string;
+    history: [string, string][];
+    pendingSourceDocs?: Document[];
+  }>({
+    messages: [
+      {
+        message: JSModule?.getWelcomeMessage(),
+        type: 'apiMessage',
+        src: ''
+      },
+    ],
+    history: [],
+  });
+
+  const { messages, history } = messageState;
+
+  const messageListRef = useRef<HTMLDivElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoResizeTextarea = () => {
+    const textarea = textAreaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset the height to auto to determine the new height
+      textarea.style.height = textarea.scrollHeight + 'px'; // Set the new height
+    }
+  };
+
+
+  useEffect(() => {
+    textAreaRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    autoResizeTextarea()
+  }, [query])
+
 
   function generateRandomChatRoom(length: number) {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -120,44 +158,6 @@ export default function Home() {
   }, [JSModule])
 
 
-  const [messageState, setMessageState] = useState<{
-    messages: Message[];
-    pending?: string;
-    history: [string, string][];
-    pendingSourceDocs?: Document[];
-  }>({
-    messages: [
-      {
-        message: JSModule?.getWelcomeMessage(),
-        type: 'apiMessage',
-        src: ''
-      },
-    ],
-    history: [],
-  });
-
-  const { messages, history } = messageState;
-
-  const messageListRef = useRef<HTMLDivElement>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  const autoResizeTextarea = () => {
-    const textarea = textAreaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto'; // Reset the height to auto to determine the new height
-      textarea.style.height = textarea.scrollHeight + 'px'; // Set the new height
-    }
-  };
-
-
-  useEffect(() => {
-    textAreaRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    autoResizeTextarea()
-  }, [query])
-
   //handle form submission
   async function handleSubmit(e: any) {
     e.preventDefault();
@@ -218,7 +218,6 @@ export default function Home() {
           history: [...state.history, [question, data.text]],
         }));
       }
-      console.log('messageState', messageState);
 
       setLoading(false);
 
@@ -263,6 +262,19 @@ export default function Home() {
       setPromptTemplate(temp.data)
     }
   }
+
+  useEffect(() => {
+    if (chatId) {
+      const getDefaultPrompt = async () => {
+        const temp = await getDefaultPromptTemplate(chatId)
+        if (temp) {
+          setPromptTemplate(temp.data)
+        }
+      }
+      getDefaultPrompt()
+    }
+
+  }, [chatId])
 
 
   return (
