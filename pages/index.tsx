@@ -112,16 +112,6 @@ export default function Home() {
     }
 
     createNewChatRoom()
-
-    // Override the window.alert method to trigger the afterAlert function
-    window.alert = function (message) {
-      // Display the custom alert message
-      const result = window.confirm(message);
-      // Check if the user clicked OK on the custom alert
-      if (result) {
-        setNewChatRoom("test")
-      }
-    };
   }, []);
 
   useEffect(() => {
