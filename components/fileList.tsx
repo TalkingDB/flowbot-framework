@@ -3,8 +3,8 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import { pdfFileProgress, whatsAppFileProgress } from '@/apiRequests';
 
-export default function FileList({ selectedFileType, filename, index, trained, setTrainingInProgress
-}: { selectedFileType: string, filename: string | undefined, index: number, trained: boolean, setTrainingInProgress: (value: boolean) => void }) {
+export default function FileList({ selectedFileType, filename, index, trained, is_shallow_trained, setTrainingInProgress
+}: { selectedFileType: string, filename: string | undefined, index: number, trained: boolean, is_shallow_trained: boolean, setTrainingInProgress: (value: boolean) => void }) {
     const router = useRouter();
     const { query: { 'chat-id': chatId } } = router
 
@@ -79,12 +79,36 @@ export default function FileList({ selectedFileType, filename, index, trained, s
         <ul className="bg-white rounded-lg shadow divide-y divide-gray-200 max-w-sm mt-2">
             <li className="px-6 py-4">
                 <div className="flex w-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 50 50">
-                        <path d="M 7 2 L 7 48 L 43 48 L 43 14.59375 L 42.71875 14.28125 L 30.71875 2.28125 L 30.40625 2 Z M 9 4 L 29 4 L 29 16 L 41 16 L 41 46 L 9 46 Z M 31 5.4375 L 39.5625 14 L 31 14 Z M 15 22 L 15 24 L 35 24 L 35 22 Z M 15 28 L 15 30 L 31 30 L 31 28 Z M 15 34 L 15 36 L 35 36 L 35 34 Z"></path>
-                    </svg>
-                    <div className='flex flex-col  ml-2 w-full'>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 50 50">
+                            <path d="M 7 2 L 7 48 L 43 48 L 43 14.59375 L 42.71875 14.28125 L 30.71875 2.28125 L 30.40625 2 Z M 9 4 L 29 4 L 29 16 L 41 16 L 41 46 L 9 46 Z M 31 5.4375 L 39.5625 14 L 31 14 Z M 15 22 L 15 24 L 35 24 L 35 22 Z M 15 28 L 15 30 L 31 30 L 31 28 Z M 15 34 L 15 36 L 35 36 L 35 34 Z"></path>
+                        </svg>
+                    </div>
+                    <div className='flex flex-col  ml-2 ' style={{ width: "230px" }}>
 
                         <span className=" font-semibold text-lg w-56 truncate">{filename}</span>
+                        <div className='flex  ml-2 w-full mt-2 mb-2'>
+                            <ol className="flex items-center w-full text-xs font-medium text-center text-gray-500 dark:text-gray-400 xs:text-base">
+                                <li className={`flex md:w-full items-center ${is_shallow_trained ? "text-blue-600 dark:text-blue-500" : ""} sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 dark:after:border-gray-700`}>
+                                    <span className="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500">
+                                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                                        </svg>
+                                        Shallow Trained
+                                    </span>
+                                </li>
+                                <li className={`${trained ? "text-blue-600 dark:text-blue-500 " : ""}flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 dark:after:border-gray-70`}>
+                                    <span className="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500">
+                                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                                        </svg>
+                                        Deep Trained
+                                    </span>
+                                </li>
+                            </ol>
+
+                        </div>
+
                         {
                             progress !== 100 ?
                                 <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
@@ -93,7 +117,8 @@ export default function FileList({ selectedFileType, filename, index, trained, s
                                 null
 
                         }
-                        <p className="text-gray-700">{progress === 100 ? "AI Trained" : "Training AI ..."}</p>
+
+                        {/* <p className="text-gray-700">{progress === 100 ? "AI Trained" : "Training AI ..."}</p> */}
                     </div>
                 </div>
             </li >
