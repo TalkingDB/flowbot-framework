@@ -1,15 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
+import dbConnect from '@/config/mongodb';
+import { upsertSubscription } from '@/models/subscriptionModel';
+import { upsertUser } from '@/models/userModel';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history, enablegptfallback } = req.body;
+  const { question, history, enablegptfallback, session } = req.body;
   const { pinecone_name_space } = req.query;
-  console.log('question', question);
+  console.log('question', question, session);
   const hiKeywords = ['hi', 'hello', 'hey', 'hi!'];
   const hiResposeMessage = process.env.NEXT_PUBLIC_HI_MESSAGE_RESPONSE
+
+  await dbConnect()
 
   //only accept post requests
   if (req.method !== 'POST') {
@@ -31,6 +36,9 @@ export default async function handler(
   try {
     //create chain
     const chain = new makeChain(pinecone_name_space);
+    if (pinecone_name_space) {
+      await upsertUser(pinecone_name_space, session)
+    }
     import(`@/custom/JSFile/${pinecone_name_space}`).then(async (module) => {
 
       const response = await module.start(chain, sanitizedQuestion)
@@ -45,11 +53,6 @@ export default async function handler(
         }
       });
     });
-
-    // const response = await chain.run(sanitizedQuestion)
-    // if (response) {
-    //   res.status(200).json(response);
-    // }
 
   } catch (error: any) {
     console.log('error', error);

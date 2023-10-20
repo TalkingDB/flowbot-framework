@@ -26,6 +26,7 @@ export default function Home() {
   const [newChatRoom, setNewChatRoom] = useState<string>('test');
   const [isPublishUrl, setIsPublishUrl] = useState<boolean>(false);
   const [currentUrl, setCurrentUrl] = useState<string>("");
+  const [currentSession, setCurrentSession] = useState<string>("")
 
   const [messageState, setMessageState] = useState<{
     messages: Message[];
@@ -108,6 +109,7 @@ export default function Home() {
       const chatroom = generateRandomChatRoom(8)
       if (newChatRoom === "test") {
         setNewChatRoom(chatroom)
+        setCurrentSession(generateRandomChatRoom(4))
       }
     }
 
@@ -186,10 +188,10 @@ export default function Home() {
           question,
           enablegptfallback: toggleStatus ? 1 : 0,
           history,
+          session: currentSession
         }),
       });
       const data = await response.json();
-      console.log('data', data);
 
       if (data.error) {
         setError(data.error);
