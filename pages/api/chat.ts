@@ -36,9 +36,7 @@ export default async function handler(
   try {
     //create chain
     const chain = new makeChain(pinecone_name_space);
-    if (pinecone_name_space) {
-      await upsertUser(pinecone_name_space, session)
-    }
+    const user = await upsertUser(pinecone_name_space, session)
     import(`@/custom/JSFile/${pinecone_name_space}`).then(async (module) => {
 
       const response = await module.start(chain, sanitizedQuestion)
