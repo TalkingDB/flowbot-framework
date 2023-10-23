@@ -38,7 +38,7 @@ export default async function handler(
     //create chain
     const chain = new makeChain(pinecone_name_space);
 
-    const user = await upsertUser(pinecone_name_space, session)
+    // const user = await upsertUser(pinecone_name_space, session)
 
     import(`@/custom/JSFile/${pinecone_name_space}`).then(async (module) => {
       if (module.conversational) {
