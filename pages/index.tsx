@@ -67,10 +67,10 @@ export default function Home() {
   }, [query])
 
 
-  function generateRandomChatRoom(length: number) {
+  function generateRandomChatRoom(initial: string, length: number) {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numbers = '0123456789';
-    let result = 'publish-';
+    let result = initial;
     for (let i = 0; i < length - 5; i++) {
       const randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
       result += randomChar;
@@ -94,7 +94,7 @@ export default function Home() {
     setCurrentUrl(updatedURL)
 
     // Check if the chatId contains "publish"
-    if (chatId && chatId.includes("publish")) {
+    if (chatId && !chatId.includes("admin")) {
       setIsPublishUrl(true)
     } else {
       setIsPublishUrl(false)
@@ -102,14 +102,17 @@ export default function Home() {
     // Check if the 'chat-id' query parameter is present
     if (!urlParams.has('chat-id')) {
       // Query parameter is not present, redirect to a new URL
-      window.location.href = `${updatedURL}?chat-id=default`
+      window.location.href = `${updatedURL}?chat-id=document-admin`
     }
 
     const createNewChatRoom = () => {
-      const chatroom = generateRandomChatRoom(8)
+      let chatroom = generateRandomChatRoom("document-", 8)
+      if (chatId && chatId.includes("cover")) {
+        chatroom = generateRandomChatRoom("cover-", 8)
+      }
       if (newChatRoom === "test") {
         setNewChatRoom(chatroom)
-        setCurrentSession(generateRandomChatRoom(4))
+        setCurrentSession(generateRandomChatRoom("session_", 9))
       }
     }
 
