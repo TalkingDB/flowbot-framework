@@ -53,21 +53,18 @@ export default function FileList({ selectedFileType, filename, index, trained, s
 
     useEffect(() => {
         if (selectedFileType === "PDF") {
-
-            if (progress)
-
-                if (!trained && progress !== 100) {
-                    let interval: any;
-                    if (progress < 100) {
-                        interval = setInterval(() => {
-                            pdfProgress()
-                        }, 1200); // 1200 milliseconds (2 minutes divided by 100 steps)
-                    }
-
-                    return () => {
-                        clearInterval(interval);
-                    };
+            if (!trained && progress !== 100) {
+                let interval: any;
+                if (progress < 100) {
+                    interval = setInterval(() => {
+                        pdfProgress()
+                    }, 1200); // 1200 milliseconds (2 minutes divided by 100 steps)
                 }
+
+                return () => {
+                    clearInterval(interval);
+                };
+            }
 
             if (!trained && progress === 100) {
                 setTimeout(() => {
