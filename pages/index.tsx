@@ -2,6 +2,7 @@ import Button from '@/components/ui/Buttons/Button';
 import '../custom/CSSFile/default/Index.module.css';
 import RadioGroup from '@/components/ui/Radio/RadioGroup';
 import { useState } from 'react';
+import Accordion from '@/components/ui/Accordion/Accordion';
 
 export default function Home() {
   const options = [
@@ -25,6 +26,7 @@ export default function Home() {
         selectedValue={selectedValue}
         onChange={handleRadioChange}
       />
+            <Accordion title="Section 1" content="Content for Section 1" />
     </>
   );
 }
