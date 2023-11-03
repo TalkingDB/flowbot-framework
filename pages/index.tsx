@@ -3,6 +3,8 @@ import '../configuration/default/CSS/Index.module.css';
 import RadioGroup from '@/components/ui/Radio/RadioGroup';
 import { useState } from 'react';
 import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
+import Layout from '@/components/layout';
+import Signup from './Signup/Signup';
 
 export default function Home() {
   // const options = [
@@ -21,21 +23,8 @@ export default function Home() {
   // };
 
   return (
-    <>
-      {/* <Button>+ Professional Registeration</Button>
-      <Button variant="secondary">+ Professional Registeration</Button>
-      <Button variant="ghost">+ Professional Registeration</Button>
-      <RadioGroup
-        options={options}
-        selectedValue={selectedValue}
-        onChange={handleRadioChange}
-      />
-      <CardRadioGroup
-        options={cardOptions}
-        selectedValue={selectedValue}
-        onChange={handleRadioChange}
-      /> */}
-      hi
-    </>
+    <Layout>
+      <Signup/>
+    </Layout>
   );
 }
