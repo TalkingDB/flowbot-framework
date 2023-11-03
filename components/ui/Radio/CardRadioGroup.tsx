@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/configuration/default/CSS/Index.module.css';
+import styles from '@/configuration/CSS/Index.module.css';
 
 const CardRadioGroup = ({
   options,
@@ -17,10 +17,10 @@ const CardRadioGroup = ({
           key={option.value}
           className={`${styles.cardradioLabel} ${selectedValue === option.value ? styles.selected : ''}`}
         >
-            <div className={styles.cardradioiconcontainer}>
+          <div className={styles.cardradioiconcontainer}>
 
-          {option.label}
-            </div>
+            {option.label}
+          </div>
           <input
             type="radio"
             value={option.value}

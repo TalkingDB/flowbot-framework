@@ -1,5 +1,5 @@
 import Button from '@/components/ui/Buttons/Button';
-import '../configuration/default/CSS/Index.module.css';
+import '../configuration/CSS/Index.module.css';
 import RadioGroup from '@/components/ui/Radio/RadioGroup';
 import { useState } from 'react';
 import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <Signup/>
+      <Signup />
     </Layout>
   );
 }

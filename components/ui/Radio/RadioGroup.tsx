@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/configuration/default/CSS/Index.module.css';
+import styles from '@/configuration/CSS/Index.module.css';
 
 const RadioGroup = ({
   options,

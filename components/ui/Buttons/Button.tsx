@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/configuration/default/CSS/Index.module.css';
+import styles from '@/configuration/CSS/Index.module.css';
 
 
 const Button = ({
@@ -10,7 +10,7 @@ const Button = ({
   children: React.ReactNode;
 }) => {
   let buttonClasses = '';
-  
+
   if (variant === 'primary') {
     buttonClasses = styles.primaryButton; // Define your primary button class
   } else if (variant === 'secondary') {
