@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '@/configuration/default/CSS/Index.module.css';
 
-const RadioGroup = ({
+const CardRadioGroup = ({
   options,
   selectedValue,
   onChange,
@@ -11,19 +11,22 @@ const RadioGroup = ({
   onChange: (value: string) => void;
 }) => {
   return (
-    <div className={styles.radioGroup}> {/* Apply a class from the imported CSS module */}
+    <div className={styles.cardradioGroup}> {/* Apply a class from the imported CSS module */}
       {options.map((option) => (
         <label
           key={option.value}
-          className={`${styles.radioLabel} ${selectedValue === option.value ? styles.selected : ''}`}
+          className={`${styles.cardradioLabel} ${selectedValue === option.value ? styles.selected : ''}`}
         >
+            <div className={styles.cardradioiconcontainer}>
+
           {option.label}
+            </div>
           <input
             type="radio"
             value={option.value}
             checked={selectedValue === option.value}
             onChange={() => onChange(option.value)}
-            className={styles.radioInput}
+            className={styles.cardradioInput}
           />
         </label>
       ))}
@@ -31,4 +34,4 @@ const RadioGroup = ({
   );
 };
 
-export default RadioGroup;
+export default CardRadioGroup;

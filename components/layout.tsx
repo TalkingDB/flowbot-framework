@@ -4,9 +4,9 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="mx-auto flex flex-col space-y-4">
+    <div>
       <div>
-        <main className="flex w-full flex-1 flex-col overflow-hidden">
+        <main>
           {children}
         </main>
       </div>

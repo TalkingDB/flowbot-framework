@@ -1,5 +1,6 @@
 import React from 'react';
-import styles from '@/custom/CSSFile/default/Index.module.css';
+import styles from '@/configuration/default/CSS/Index.module.css';
+
 
 const Button = ({
   variant = 'primary', // Default variant is 'primary'

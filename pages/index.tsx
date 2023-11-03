@@ -1,24 +1,28 @@
 import Button from '@/components/ui/Buttons/Button';
-import '../custom/CSSFile/default/Index.module.css';
+import '../configuration/default/CSS/Index.module.css';
 import RadioGroup from '@/components/ui/Radio/RadioGroup';
 import { useState } from 'react';
-import Accordion from '@/components/ui/Accordion/Accordion';
+import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
 
 export default function Home() {
-  const options = [
-    { label: 'YES', value: 'YES' },
-    { label: 'NO', value: 'NO' },
-  ];
+  // const options = [
+  //   { label: 'YES', value: 'YES' },
+  //   { label: 'NO', value: 'NO' },
+  // ];
 
-  const [selectedValue, setSelectedValue] = useState('YES');
+  // const cardOptions = [
+  //   { label: 'General Contractor', value: 'YES' },
+  // ];
 
-  const handleRadioChange = (value: string) => {
-    setSelectedValue(value);
-  };
+  // const [selectedValue, setSelectedValue] = useState('YES');
+
+  // const handleRadioChange = (value: string) => {
+  //   setSelectedValue(value);
+  // };
 
   return (
     <>
-      <Button>+ Professional Registeration</Button>
+      {/* <Button>+ Professional Registeration</Button>
       <Button variant="secondary">+ Professional Registeration</Button>
       <Button variant="ghost">+ Professional Registeration</Button>
       <RadioGroup
@@ -26,7 +30,12 @@ export default function Home() {
         selectedValue={selectedValue}
         onChange={handleRadioChange}
       />
-            <Accordion title="Section 1" content="Content for Section 1" />
+      <CardRadioGroup
+        options={cardOptions}
+        selectedValue={selectedValue}
+        onChange={handleRadioChange}
+      /> */}
+      hi
     </>
   );
 }

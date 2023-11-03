@@ -52,7 +52,7 @@
   line-height: 20px; /* 133.333% */
 }
 
-/* Index.module.css */
+/* Radio */
 
 .radioGroup {
   display: flex;
@@ -160,3 +160,44 @@ background: var(--grey-20-bg, #F1F4F9);
   line-height: normal;
   letter-spacing: 0.55px;
   text-transform: uppercase;}
+
+  /* card radio */
+
+  .cardradioGroup {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .cardradioLabel {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s; 
+    border-radius: 10px;
+    display: flex;
+    width: 246px;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 8px;
+    /* Add smooth transitions for visual effects */
+  }
+  
+  .cardradioLabel.selected {
+    border-radius: 10px;
+    border: 1px solid var(--orange-100, #FF6900);
+    background: var(--orange-20, linear-gradient(0deg, #FDF0E7 0%, #FDF0E7 100%), #FFF);
+  }
+  
+  .cardradioInput {
+    margin-right: 5px;
+    cursor: pointer;
+    /* Add any additional input styles here */
+  }
+
+  .cardradioiconcontainer{
+    display: flex;
+    flex-direction: column;
+  }
+  
