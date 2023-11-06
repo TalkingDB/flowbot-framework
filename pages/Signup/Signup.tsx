@@ -14,6 +14,22 @@ import Libby from '@/assets/svgs/Libby';
 import You from '@/assets/svgs/You';
 import Pencil from '@/assets/svgs/Pencil';
 import PasswordInput from '@/components/ui/Input/PasswordInput';
+import Address from '@/components/ui/Address/Address';
+
+const cityOptions = [
+  { value: 'new-york', label: 'New York' },
+  { value: 'los-angeles', label: 'Los Angeles' },
+  { value: 'chicago', label: 'Chicago' },
+  // Add more city options as needed
+];
+
+const stateOptions = [
+  { value: 'new-york', label: 'New York' },
+  { value: 'california', label: 'California' },
+  { value: 'illinois', label: 'Illinois' },
+  // Add more state options as needed
+];
+
 
 const Signup = () => {
   const [step, setStep] = useState(1);
@@ -210,7 +226,7 @@ const Signup = () => {
                         <div key={`chatMessage-${index}`} className={className}>
                           <div className={homestyles?.container}>
                           {icon}
-                          <div style={{ display: "flex", flexDirection: "column" }}>
+                          <div style={{ display: "flex", flexDirection: "column" ,width:"100%"}}>
                             {message?.type=="apiMessage"?<span>Libby</span>
                             :<span>
                               You
@@ -231,6 +247,15 @@ const Signup = () => {
                               {
                                 currentJSModule?.inputType === "password" && (index === activeIndex) ?
                                   <PasswordInput
+                                  /> : null
+                              }
+                              {
+                                currentJSModule?.inputType === "address"  ?
+                                  <Address
+                                  cities={cityOptions}
+                                  states={stateOptions}
+                                  zip={""}
+                                  street={""}
                                   /> : null
                               }
                               </div>

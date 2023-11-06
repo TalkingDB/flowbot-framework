@@ -39,10 +39,41 @@ export const ChatBotStep = [
     },
     {
         "id": 5,
+        "question": "Please check your phone for the SMS verification code. Once you receive it, please type it into the chat box. If you fail to receive it, please type in please resend into the chatbox.",
+        "inputType": "text",
+        "options":[]
+    },
+    {
+        "id": 6,
         "question": "Please enter your preferred password. It must contain letters, numbers and symbols. It is required to have at least one letter, one number and one symbol.",
         "inputType": "password",
         "options":[]
-    }
+    },
+    {
+        "id": 7,
+        "question": "Please re-enter your password",
+        "inputType": "password",
+        "options":[]
+    },
+    {
+        "id": 8,
+        "question": "Okay, now please enter your company name",
+        "inputType": "",
+        "options":[]
+    },
+    {
+        "id": 9,
+        "question": "The next step is for you to enter the primary contact name for the business",
+        "inputType": "",
+        "options":[]
+    },
+    {
+        "id": 10,
+        "question": "Thank you, now can you please enter your primary address",
+        "inputType": "address",
+        "options":[]
+    },
+
 ];
 export const finalMessage = "Thanks for the provided information"
 export const conversational = true

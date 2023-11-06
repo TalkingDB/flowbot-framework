@@ -247,4 +247,43 @@ background: var(--grey-20-bg, #F1F4F9);
   padding-left: 4px;
 }
 
-  
+  /* selectinput.module.css */
+.select_container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.select_input {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+  background: white;
+  height: 54px;
+}
+
+.select_icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 30px;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.Address{
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+}
+.Address_topcontainer{
+  display: flex;
+  gap: 12px;
+}
