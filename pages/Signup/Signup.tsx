@@ -341,10 +341,24 @@ const Signup = () => {
                     let className;
                     if (message.type === 'apiMessage') {
                       icon = (
-                        <div className={homestyles?.libby}>
-                          <Libby />
-                        </div>
-                      );
+                        <div style={{ paddingRight: "20px" }}>
+                          <Image
+                            key={index}
+                            src="/bot-image.png"
+                            alt="AI"
+                            width="40"
+                            height="40"
+                            className={styles.boticon}
+                            priority
+                          />
+                        </div>)
+                      if (JSModule?.testProject) {
+                        icon = (
+                          <div className={homestyles?.libby}>
+                            <Libby />
+                          </div>
+                        );
+                      }
                       className = homestyles?.apimessage;
                     } else {
                       icon = (
