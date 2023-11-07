@@ -17,6 +17,7 @@
         box-sizing: border-box;
         padding-top: 64px;
         font-family: 'Aspekta';
+        position: relative;
       }
       h3 {
         color: var(--white, #fff);
@@ -117,6 +118,30 @@ border: 1px solid var(--orange-100, #FF6900);
   z-index: -2;
 }
 
+.sidebar-login{
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
+    color: var(--white, #FFF);
+
+/* 14px/regular */
+font-family: Aspekta;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+width: 100%;
+}
+
+.sidebar-login .text{
+    text-align: center;
+}
+.sidebar-login .login{
+
+    cursor: pointer;
+    color: var(--orange-100, #FF6900);
+ }
+
     </style>
   </head>
 
@@ -144,6 +169,11 @@ border: 1px solid var(--orange-100, #FF6900);
         <div class="step-circle">4</div>
         <div class="step-text">Summary</div>
       </div>
+    </div>
+    <div class="sidebar-login">
+        <span class="text">
+            Have an account? <span class="login">Log In</span>
+        </span>
     </div>
     <script src="src/index.js"></script>
   </body>
