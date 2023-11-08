@@ -22,6 +22,7 @@ import { PromptModal } from '@/components/customPromptModal';
 import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
 import Generate from '@/assets/svgs/icons/Generate';
 import CheckboxGroup from '@/components/ui/Checkbox/CheckboxGroup';
+import SelectInputField from '@/components/ui/SelectInputField/SelectInputField';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -432,6 +433,18 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'cardRadio' ? (
                                       <CardRadioGroup
+                                      onChange={() => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit();
+                                          }
+                                        }}
+                                        options={message?.step?.options}
+                                        // selectedValue={'value'}
+                                      />
+                                    ) : null}
+                                   {message?.step?.inputType ===
+                                      'select' ? (
+                                      <SelectInputField
                                       onChange={() => {
                                           if (index === messages.length - 1) {
                                             handleSubmit();
