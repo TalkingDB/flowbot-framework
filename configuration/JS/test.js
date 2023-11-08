@@ -81,7 +81,108 @@ export const ChatBotStep = [
         "inputType": "address",
         "options": []
     },
+    {
+        "id": 11,
+        "question": "What best describes your primary occupation from the list below your occupation from the list below?",
+        "header":{
+            "step":"2",
+            "text":"Services Offered"
+        },
+        "inputType": "cardRadio",
+        "options": [
+            { label: 'Appliance Professional', value: 'Appliance Professional' },
+            { label: 'Carpenter', value: 'Carpenter' },
+            { label: 'Concrete/Masonry Pro', value: 'Concrete/Masonry Pro' },
+            { label: 'Deck Builder', value: 'Deck Builder' },
+            { label: 'Electrician', value: 'Electrician' },
+            { label: 'General Contractor', value: 'General Contractor' },
+            { label: 'Handyman', value: 'Handyman' },
+            { label: 'House Cleaner', value: 'House Cleaner' },
+            { label: 'Lawn and Landscape Pro', value: 'Lawn and Landscape Pro' },
+            { label: 'Painter', value: 'Painter' },
+            { label: 'Plumber', value: 'Plumber' }
+          ]
+          
+    },
+    {
+        "id": 12,
+        "question": "Alright, now tell me what state you provide these services in?",
+        "inputType": "select",
+        "options": [
+            { label: 'Florida', value: 'Florida' },
+            { label: 'New York', value: 'New York' },
+          ]
+          
+    },
+    {
+        "id": 13,
+        "question": "Please select the license that applies to your business.",
+        "inputType": "radioButton",
+        "options": [
+            { label: 'Certified General Contractor', value: 'Certified General Contractor' },
+            { label: 'Certified Residental Contractor', value: 'Certified Residental Contractor' },
+            { label: 'Certified Building Contractor', value: 'Certified Building Contractor' },
 
+        ],
+        "default": "Certified Building Contractor"
+          
+    },
+    {
+        "id": 14,
+        "question": "The next step is for you to provide your Certified General Contractor license number from the state of Florida",
+        "inputType": "text",
+        "options": [],
+          
+    },
+    {
+        "id": 15,
+        "question": "Please hold on for a minute or two while we validate your license...",
+        "inputType": "bottext",
+        "options": [],
+    },
+    {
+        "id": 16,
+        "question": "Here is the listing that we found. Please review and validate..",
+        "inputType": "constructiondetails",
+        "options": [],
+    },
+    {
+        "id": 17,
+        "question": "Is this your listing?",
+        "inputType": "radioButton",
+        "options": [
+            { label: 'Yes', value: 'Yes' },
+            { label: 'No', value: 'No' }
+        ],
+        "default": "Yes"
+    },
+    {
+        "id": 18,
+        "question": "Now tell me which city will be your primary city?",
+        "inputType": "text",
+        "options": []
+    },
+    {
+        "id": 19,
+        "question": "So, tell us how far you will go to perform your services in miles",
+        "inputType": "text",
+        "options": []
+    },
+    {
+        "id": 20,
+        "question": "What services do you want to provide from the list below. Please select or deselect the services that apply or do not apply.",
+        "inputType": "checkboxButton",
+        "options": [
+            { label: 'Bard/Shed Repair', value: 'Bard/Shed Repair' },
+            { label: 'Brick, Stone, Block Wall Inst.', value: 'Brick, Stone, Block Wall Inst.' },
+            { label: 'Crown Molding Instalation', value: 'Crown Molding Instalation' },
+            { label: 'Decorative Wall Panel Inst.', value: 'Decorative Wall Panel Inst.' },
+            { label: 'Driveway Repair', value: 'Driveway Repair' },
+            { label: 'Exterior Awning Inst.', value: 'Exterior Awning Inst.' }
+          ]
+    },
+
+    
 ];
 export const finalMessage = "Thanks for the provided information"
 export const conversational = true

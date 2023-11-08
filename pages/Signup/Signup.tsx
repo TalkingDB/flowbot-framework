@@ -461,7 +461,12 @@ const Signup = () => {
                                       <CheckboxGroup
                                         selectedValues={selectedValues}
                                         options={message?.step?.options}
-                                        onChange={handleCheckboxChange}
+                                        onChange={(e)=>{
+                                            if (index === messages.length - 1) {
+                                              handleSubmit();
+                                            }
+                                          handleCheckboxChange(e)
+                                        }}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
