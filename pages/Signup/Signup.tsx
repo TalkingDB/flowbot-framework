@@ -302,7 +302,7 @@ const Signup = () => {
 
 
   return (
-    <div className={styles['signup']}>
+    <div className={styles['signup']} style={{ justifyContent: isPublishUrl && !JSModule?.testProject ? "center" : "" }}>
       <div className={styles['sidebar']} style={{ width: isPublishUrl ? "initial" : "" }}>
         {!JSModule?.testProject && !isPublishUrl &&
           <ChatbotInfo chatBotId={newChatRoom} />
@@ -313,7 +313,7 @@ const Signup = () => {
           </div>
         }
       </div>
-      <div className={styles['main-content']}>
+      <div className={styles['main-content']} style={{ width: isPublishUrl && !JSModule?.testProject ? "initial" : "100%" }}>
         <div className={styles['main-header']}>
           <span>{JSModule?.getTitle}</span>
           {JSModule?.testProject ? <Button variant="link">
