@@ -211,18 +211,20 @@ const Signup = () => {
     checklastmessage(value)
     const question = query.trim();
     if (query) {
-      setMessageState((state) => ({
-        ...state,
-        messages: [
-          ...state.messages,
-          {
-            type: 'userMessage',
-            message: question,
-            src: "test",
-            id: Math.random()
-          },
-        ],
-      }));
+      if (messages[messages.length - 1]?.step?.inputType !== "password") {
+        setMessageState((state) => ({
+          ...state,
+          messages: [
+            ...state.messages,
+            {
+              type: 'userMessage',
+              message: question,
+              src: "test",
+              id: Math.random()
+            },
+          ],
+        }));
+      }
     }
     setLoading(true);
     setQuery('');
