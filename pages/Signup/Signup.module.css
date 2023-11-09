@@ -3,7 +3,8 @@
   height: 100%;
 }
 .sidebar {
-  width: 550px;
+  width: 578px;
+  padding: 0px 20px;
 }
 .main-content {
   display: flex;
