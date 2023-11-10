@@ -244,7 +244,6 @@ const Signup = () => {
         }),
       });
       const data = await response.json();
-
       if (data.error) {
         setMessageState((state) => ({
           ...state,
@@ -253,6 +252,8 @@ const Signup = () => {
             {
               type: 'userMessage',
               message: question,
+              error: true,
+              errorMessage: data.errorMessage,
               src: "test",
               id: Math.random()
             },
@@ -292,9 +293,6 @@ const Signup = () => {
       }
 
       setLoading(false);
-
-      //scroll to bottom
-      messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
     } catch (error) {
       setLoading(false);
       console.log('error', error);
@@ -461,7 +459,12 @@ const Signup = () => {
                                 <span
                                   className={homestyles?.markdownanswerspan}
                                 >
-                                  {message.message}
+                                  <div style={{ display: "flex" }}>
+                                    {message.message}
+                                    {message?.error && <div style={{ color: "red", paddingLeft: "4px", fontWeight: "bold" }}>
+                                      ({message?.errorMessage})
+                                    </div>}
+                                  </div>
                                 </span>
                                 {JSModule?.conversational && (
                                   <div className={homestyles?.extraContainer}>
