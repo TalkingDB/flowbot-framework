@@ -505,6 +505,11 @@ const Signup = () => {
                                       <Address
                                         states={stateOptions}
                                         cities={cityOptions}
+                                        onSave={()=>{
+                                          if (index === messages.length - 1) {
+                                            handleSubmit();
+                                          }
+                                        }}
                                         zip={''}
                                         street={''}
                                       />
