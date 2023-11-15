@@ -26,6 +26,8 @@ import SelectInputField from '@/components/ui/SelectInputField/SelectInputField'
 import NextFunction from '@/components/NextFunction';
 import ShowDetails from '@/components/ui/ShowDetails/ShowDetails';
 import FileUploadComponent from '@/components/ui/FileUpload/FileUploadComponent';
+import GoogleLoginComponent from '@/components/ui/Radio/GoogleLoginComponent';
+import Summary from '@/components/ui/Summary/Summary';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -220,14 +222,19 @@ const Signup = () => {
   //   }
   // }
 
-
+console.log(query,"qe",loading)
   //handle form submission
   async function handleSubmit(value?: string) {
+    console.log(loading,"Asdasd")
+    console.log(value)
     checklastmessage(value)
+    console.log(checklastmessage(value))
     let question = query.trim();
     if (!query) {
       question = value?.trim() || ""
     }
+    console.log(query)
+    console.log(question)
     setLoading(true);
     setQuery('');
 
@@ -355,7 +362,7 @@ const Signup = () => {
           <ChatbotInfo chatBotId={newChatRoom} />
         }
         {JSModule?.testProject &&
-          <div style={{ backgroundImage: `url('./background.jpeg')`, backgroundSize: "contain", backgroundRepeat: "no-repeat", width: "416px", height: "704px", padding: "20px", boxSizing: "border-box", paddingTop: "64px", fontFamily: 'Aspekta', position: "relative" }}>
+          <div style={{ backgroundImage: `url('./background.svg')`, backgroundSize: "contain", backgroundRepeat: "no-repeat", width: "518px", height: "848px", padding: "20px", boxSizing: "border-box", paddingTop: "102px", fontFamily: 'Aspekta', position: "relative" }}>
             <div dangerouslySetInnerHTML={{ __html: htmlFile }} />
           </div>
         }
@@ -481,6 +488,19 @@ const Signup = () => {
                                         }}
                                       />
                                     ) : null}
+                                    {message.type === 'apiMessage' &&
+                                      message?.step?.inputType ===
+                                      'googleLogin' ? (
+                                      <GoogleLoginComponent
+                                      handleSubmit={handleSubmit}
+                                        options={message?.step?.options}
+                                        // onChange={(value) => {
+                                        //   if (index === messages.length - 1) {
+                                        //     handleSubmit(value);
+                                        //   }
+                                        // }}
+                                      />
+                                    ) : null}
                                     {message?.step?.inputType === 'password' ? (
                                       <PasswordInput
                                         disabled={message?.step?.disabled || true}
@@ -491,6 +511,11 @@ const Signup = () => {
                                       <Address
                                         states={stateOptions}
                                         cities={cityOptions}
+                                        onSave={()=>{
+                                          if (index === messages.length - 1) {
+                                            handleSubmit();
+                                          }
+                                        }}
                                         zip={''}
                                         street={''}
                                       />
@@ -544,6 +569,12 @@ const Signup = () => {
                                       'fileUploader' ? (
                                       <FileUploadComponent
                                         handleSubmit={handleSubmit}
+                                      />
+                                    ) : null}
+                                     {message?.step?.inputType ===
+                                      'summary' ? (
+                                      <Summary
+                                        // handleSubmit={handleSubmit}
                                       />
                                     ) : null}
                                   </div>
