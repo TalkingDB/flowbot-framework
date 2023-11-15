@@ -5,7 +5,6 @@ import { useState } from 'react';
 import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
 import Layout from '@/components/layout';
 import Signup from './Signup/Signup';
-import Posting from './Posting/Posting';
 
 export default function Home() {
   // const options = [
@@ -25,7 +24,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <Posting />
+      <Signup />
     </Layout>
   );
 }

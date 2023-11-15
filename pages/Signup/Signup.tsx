@@ -26,6 +26,7 @@ import SelectInputField from '@/components/ui/SelectInputField/SelectInputField'
 import NextFunction from '@/components/NextFunction';
 import ShowDetails from '@/components/ui/ShowDetails/ShowDetails';
 import FileUploadComponent from '@/components/ui/FileUpload/FileUploadComponent';
+import LoginPasswordAsk from '@/components/ui/LoginPasswordAsk/LoginPasswordAsk';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -485,6 +486,10 @@ const Signup = () => {
                                       <PasswordInput
                                         disabled={message?.step?.disabled || true}
                                         value={message?.step?.answer}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType === 'loginPasswordAsk' ? (
+                                      <LoginPasswordAsk
                                       />
                                     ) : null}
                                     {message?.step?.inputType === 'address' ? (
