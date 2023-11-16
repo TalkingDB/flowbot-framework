@@ -28,6 +28,7 @@ import ShowDetails from '@/components/ui/ShowDetails/ShowDetails';
 import FileUploadComponent from '@/components/ui/FileUpload/FileUploadComponent';
 import GoogleLoginComponent from '@/components/ui/Radio/GoogleLoginComponent';
 import Summary from '@/components/ui/Summary/Summary';
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -63,6 +64,9 @@ const Signup = () => {
   const [selectedValues, setSelectedValues] = useState([]); // Initial empty array
   const [htmlFile, setHtmlFile] = useState('')
   // const [disableInput, setDisableInput] = useState(false)
+
+  const { data: session, status } = useSession();
+  console.log("data session ==>", session, status)
 
   const handleCheckboxChange = (values: any) => {
     setSelectedValues(values);
@@ -507,8 +511,9 @@ const Signup = () => {
                                       message?.step?.inputType ===
                                       'googleLogin' ? (
                                       <GoogleLoginComponent
-                                        handleSubmit={handleSubmit}
+                                        handleSubmit={(value) => handleSubmit(value)}
                                         options={message?.step?.options}
+                                        value={message?.step?.answer}
                                       // onChange={(value) => {
                                       //   if (index === messages.length - 1) {
                                       //     handleSubmit(value);
