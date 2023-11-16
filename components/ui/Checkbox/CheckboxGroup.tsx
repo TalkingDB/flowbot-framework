@@ -13,6 +13,7 @@ const CheckboxGroup = ({
 }) => {
 
   const [selectedValues, setSelectedValue] = useState<string[]>([])
+  const [showButton, setShowButton] = useState(true)
   const handleCheckboxChange = (value: string) => {
     if (selectedValues.includes(value)) {
       // If the value is already selected, remove it
@@ -42,9 +43,9 @@ const CheckboxGroup = ({
           </label>
         ))}
       </div>
-      <div>
-        <Button onClick={() => onChange(selectedValues.join('@'))}>Confirm</Button>
-      </div >
+      {showButton && <div>
+        <Button onClick={() => { onChange(selectedValues.join('@')); setShowButton(false) }}>Confirm</Button>
+      </div >}
     </>
   );
 };

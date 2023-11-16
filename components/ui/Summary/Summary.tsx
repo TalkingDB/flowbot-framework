@@ -39,6 +39,7 @@ interface OutputItem {
 
 const Summary = (props: IProps) => {
   const [dummyData, setDummyData] = useState<IItem[]>([]);
+  const [showButton, setShowButton] = useState<Boolean>(true)
 
   useEffect(() => {
     if (props.data) {
@@ -100,7 +101,7 @@ const Summary = (props: IProps) => {
           </div>
         ))}
       </div>
-      <Button onClick={() => props.onChange()}>Confirm</Button>
+      {showButton && <Button onClick={() => { props.onChange(); setShowButton(false) }}>Confirm</Button>}
     </div>
   );
 };
