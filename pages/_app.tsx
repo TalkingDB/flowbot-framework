@@ -1,16 +1,16 @@
+import { SessionProvider } from 'next-auth/react';
 import '@/styles/base.css';
 import type { AppProps } from 'next/app';
-// import { Inter } from 'next/font/google';
 import "../configuration/CSS/Fonts.css"
-
+import Providers from '@/components/Providers';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <>
-      <main style={{fontFamily:'Aspekta !important'}}>
+    <Providers>
+      <main style={{ fontFamily: 'Aspekta, sans-serif' }}>
         <Component {...pageProps} />
       </main>
-    </>
+    </Providers>
   );
 }
 
