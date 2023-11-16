@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from '@/configuration/CSS/Index.module.css';
-import GoogleSSO from '../GoogleSSO';
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const GoogleLoginComponent = ({
   handleSubmit,
@@ -12,10 +12,42 @@ const GoogleLoginComponent = ({
   handleSubmit: (val?:string)=>void;
 }) => {
 
-  const [selectedValue, setSelectedValue] = useState(0)
+  const [selectedValue, setSelectedValue] = useState(0);
+
+  const { data: session, status } = useSession();
+
+  const popupCenter = (url:string, title:string) => {
+    const dualScreenLeft = window.screenLeft ?? window.screenX;
+    const dualScreenTop = window.screenTop ?? window.screenY;
+
+    const width =
+      window.innerWidth ?? document.documentElement.clientWidth ?? screen.width;
+
+    const height =
+      window.innerHeight ??
+      document.documentElement.clientHeight ??
+      screen.height;
+
+    const systemZoom = width / window.screen.availWidth;
+
+    const left = (width - 500) / 2 / systemZoom + dualScreenLeft;
+    const top = (height - 550) / 2 / systemZoom + dualScreenTop;
+
+    const newWindow = window.open(
+      url,
+      title,
+      `width=${500 / systemZoom},height=${550 / systemZoom
+      },top=${top},left=${left}`
+    );
+
+    newWindow?.focus();
+  };
+
 
   const changeSelectedValue = (index: number) => {
     if(index == 1){
+      // popupCenter("/google-signin", "Sample Sign In")
+      signIn()
       setSelectedValue(index)
     }else{
       setSelectedValue(index)
@@ -23,6 +55,8 @@ const GoogleLoginComponent = ({
       // onChange("no")
     }
   }
+
+  console.log(status)
 
   console.log(selectedValue)
   return (
@@ -43,10 +77,10 @@ const GoogleLoginComponent = ({
             className={styles.radioInput}
           />
         </label>
-        {selectedValue == 1 && 
+        {/* {selectedValue == 1 && 
         <GoogleSSO handleSubmit={handleSubmit}/>
-        }
-        <label
+        } */}
+        {<label
           key={"no"}
           className={`${styles.radioLabel} ${selectedValue === 2 ? styles.selected : ''}`}
         >
@@ -60,7 +94,7 @@ const GoogleLoginComponent = ({
             }}
             className={styles.radioInput}
           />
-        </label>
+        </label>}
       {/* ))} */}
     </div>
   );
