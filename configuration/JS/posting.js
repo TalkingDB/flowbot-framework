@@ -84,6 +84,71 @@ export const ChatBotStep = [
       return { nextStep: 4, toast: '', error: false };
     },
   },
+  {
+    id: 4,
+    question:
+      'I am excited to help you with the Packaged Project option. Please select which project that you need help with.',
+    inputType: 'radioButton',
+    options: [
+      {
+        label: 'Garbage Disposal and Installation',
+        value: 'Garbage Disposal and Installation',
+      },
+      {
+        label: 'Dishwasher and Installation',
+        value: 'Dishwasher and Installation',
+      },
+      {
+        label: 'Fan and Installation',
+        value: 'Fan and Installation',
+      },
+      {
+        label: 'Oven and Installation',
+        value: 'Oven and Installation',
+      },
+    ],
+    callBack: (event, reponse) => {
+      return { nextStep: 5, toast: '', error: false };
+    },
+  },
+  {
+    id: 5,
+    question:
+      'Have you already purchased your new dishwasher?',
+    inputType: 'radioButton',
+    options: [
+      {
+        label: 'Yes',
+        value: 'Yes',
+      },
+      {
+        label: 'No',
+        value: 'No',
+      }
+    ],
+    callBack: (event, reponse) => {
+      return { nextStep: 6, toast: '', error: false };
+    },
+  },
+  {
+    id: 6,
+    question:
+      'Great, I am excited to get your dishwasher delivered and installed. The first thing to do is to select the dishwasher that you want installed. Please click the list of options below and select the dishwasher that meets your needs. Once you select it, the packaged price will update.',
+    inputType: 'tableComponent',
+    options: [
+        { id: 1, brand: 'General Electric', description: '24 in. Built-In Tall Tub Top Control Stainless Steel Dishwasher w/Sanitize, Dry Boost, 52 dBA', price: '$428.00',model:"GDT550PYRFS" },
+        { id: 2, brand: 'Samsung', description: '24 in. Top Control Tall Tub Dishwasher in Stainless Steel with Stainless Steel Interior Door, 55 dBA', price: '$578.00',model:"DW80R2031US" },
+        { id: 3, brand: 'Frigidaire', description: '24 In. in. Front Control Built-In Tall Tub Dishwasher in Stainless Steel with 3-Cycles, 55 dBA', price: '$398.00',model:"FFCD2413US" },
+        { id: 4, brand: 'Samsung', description: '2Fingerprint Resistant 53 dBA Dishwasher with Adjustable Rack in Stainless Steel', price: '$428.00',model:"DW80CG4021SR" },
+        { id: 5, brand: 'Whirlpool', description: '24 in. Fingerprint Resistant Stainless Steel Top Control Built-In Tall Tub Dishwasher with Third Level Rack, 47 dBA', price: '$548.00',model:"WDTA50SAKZ" },
+        { id: 6, brand: 'Samsung', description: '24 in. Fingerprint Resistant Stainless Steel Top Control Smart Built-In Tall Tub Dishwasher with AutoRelease, 42dBA', price: '$698.00',model:"DW80B7070US" },
+      ]
+      ,
+    callBack: (event, reponse) => {
+      return { nextStep: 7, toast: '', error: false };
+    },
+  },
+
 ];
 export const leftPanelHtml = `<!DOCTYPE html>
 <html>

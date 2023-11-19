@@ -33,8 +33,7 @@ text-transform: uppercase;
   }
   
   .selectedRow {
-    background-color: #bde4ff; /* Change the background color for selected rows */
-  }
+    background: var(--orange-20, linear-gradient(0deg, #FDF0E7 0%, #FDF0E7 100%), #FFF);   }
   
   .brandcell{
     display: flex;

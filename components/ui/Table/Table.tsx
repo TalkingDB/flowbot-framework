@@ -5,15 +5,16 @@ interface Product {
   id: number;
   brand: string;
   description: string;
-  price: number;
+  price: string;
   model: string;
 }
 
 interface TableProps {
-  products: Product[];
+    products: Product[];
+    onChange: (value: string) => void;
 }
 
-const Table: React.FC<TableProps> = ({ products }) => {
+const Table: React.FC<TableProps> = ({ products,onChange }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortedColumn, setSortedColumn] = useState<string>('brand');
@@ -52,7 +53,10 @@ const Table: React.FC<TableProps> = ({ products }) => {
                 type="radio"
                 value={product.id}
                 checked={selectedRow === product.id}
-                onChange={() => setSelectedRow(product.id)}
+                onChange={() => {
+                    setSelectedRow(product.id)
+                    onChange(String(product.id))
+                }}
               />
             </td>
             <td>

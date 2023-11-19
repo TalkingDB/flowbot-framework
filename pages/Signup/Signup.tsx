@@ -640,6 +640,11 @@ const Signup = () => {
                                       'tableComponent' ? (
                                       <Table
                                         products={message.step.options}
+                                        onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
                                       />
                                     ) : null}
                                   </div>
