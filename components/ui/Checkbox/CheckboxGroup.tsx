@@ -44,7 +44,7 @@ const CheckboxGroup = ({
         ))}
       </div>
       {showButton && <div>
-        <Button onClick={() => { onChange(selectedValues.join('@')); setShowButton(false) }}>Confirm</Button>
+        <Button onClick={() => { onChange(selectedValues.toString()); setShowButton(false) }}>Confirm</Button>
       </div >}
     </>
   );
