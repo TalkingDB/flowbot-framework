@@ -31,6 +31,8 @@ import ColumnCards from '@/components/ui/Radio/ColumnCards';
 import GoogleLoginComponent from '@/components/ui/Radio/GoogleLoginComponent';
 import Summary from '@/components/ui/Summary/Summary';
 import { useSession, signIn, signOut } from "next-auth/react";
+import MultiSelectInput from '@/components/ui/MutiSelectInput/MultiSelectInput';
+import AutoCompleteInput from '@/components/ui/AutoCompleteInput/AutoCompleteInput';
 import Table from '@/components/ui/Table/Table';
 import CostCards from '@/components/ui/CostCards/CostCards';
 import InstallationInfo from '@/components/ui/InstallationInfo/InstallationInfo';
@@ -533,12 +535,12 @@ const Signup = () => {
                                     ) : null}
                                     {message?.step?.inputType === 'loginPasswordAsk' ? (
                                       <LoginPasswordAsk
-                                      onSave={() => {
-                                        if (index === messages.length - 1) {
-                                          handleSubmit();
-                                        }
-                                      }}
-                                      options={message?.step?.options}
+                                        onSave={() => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit();
+                                          }
+                                        }}
+                                        options={message?.step?.options}
                                       />
                                     ) : null}
                                     {message?.step?.inputType === 'address' ? (
@@ -566,7 +568,7 @@ const Signup = () => {
                                         options={message?.step?.options}
                                       />
                                     ) : null}
-                                                                        {message?.step?.inputType ===
+                                    {message?.step?.inputType ===
                                       'columnCards' ? (
                                       <ColumnCards
                                         onChange={() => {
@@ -581,6 +583,30 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'select' ? (
                                       <SelectInputField
+                                        value={message?.step?.default}
+                                        onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                        options={message?.step?.options}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'multiselect' ? (
+                                      <MultiSelectInput
+                                        value={message?.step?.default}
+                                        onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                        options={message?.step?.options}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'autoComplete' ? (
+                                      <AutoCompleteInput
                                         value={message?.step?.default}
                                         onChange={(value) => {
                                           if (index === messages.length - 1) {
