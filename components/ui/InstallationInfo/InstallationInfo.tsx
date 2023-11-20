@@ -7,11 +7,11 @@ interface InstallationInfoProps {
 
 const InstallationInfo: React.FC<InstallationInfoProps> = ({ onChange }) => {
 
-    useEffect(()=>{
-        setTimeout(() => {
-            onChange("")
-        }, 3000);
-    },[]);
+    // useEffect(()=>{
+    //     setTimeout(() => {
+    //         onChange("")
+    //     }, 3000);
+    // },[]);
 
   return (
     <div>

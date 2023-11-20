@@ -7,11 +7,11 @@ interface CostCardsProps {
 }
 
 const CostCards: React.FC<CostCardsProps> = ({ options,onChange }) => {
-    useEffect(()=>{
-        setTimeout(()=>{
-            onChange("")
-        },1000)
-    },[])
+    // useEffect(()=>{
+    //     setTimeout(()=>{
+    //         onChange("")
+    //     },1000)
+    // },[])
 
 
   return (

@@ -35,7 +35,7 @@ export const ChatBotStep = [
         value: 'no',
       },
     ],
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 2, toast: '', error: false };
     },
   },
@@ -45,7 +45,7 @@ export const ChatBotStep = [
       'Please enter your login and password below and then type submit in the text box',
     inputType: 'loginPasswordAsk',
     options: [],
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 3, toast: '', error: false };
     },
   },
@@ -80,7 +80,7 @@ export const ChatBotStep = [
             value:4
         }
     ],
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 4, toast: '', error: false };
     },
   },
@@ -107,7 +107,7 @@ export const ChatBotStep = [
         value: 'Oven and Installation',
       },
     ],
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 5, toast: '', error: false };
     },
   },
@@ -126,7 +126,7 @@ export const ChatBotStep = [
         value: 'No',
       }
     ],
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 6, toast: '', error: false };
     },
   },
@@ -144,7 +144,7 @@ export const ChatBotStep = [
         { id: 6, brand: 'Samsung', description: '24 in. Fingerprint Resistant Stainless Steel Top Control Smart Built-In Tall Tub Dishwasher with AutoRelease, 42dBA', price: '$698.00',model:"DW80B7070US" },
       ]
       ,
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 7, toast: '', error: false };
     },
   },
@@ -160,7 +160,7 @@ export const ChatBotStep = [
         { id: 4, text: "Total:",price:"$639.18" },
       ]
       ,
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 8, toast: '', error: false };
     },
   },
@@ -170,7 +170,7 @@ export const ChatBotStep = [
       '',
     inputType: 'InstallationInfo',
     options: [],
-    callBack: (event, reponse) => {
+    callBack: (event, response) => {
       return { nextStep: 9, toast: '', error: false };
     },
   },
@@ -179,6 +179,7 @@ export const ChatBotStep = [
     question:
       'Will you be using a credit card or ACH?',
     inputType: 'radioButton',
+    default:null,
     header: {
         step: '3',
         text: 'Payment',
@@ -187,10 +188,136 @@ export const ChatBotStep = [
         {label:"Credit Card",value:"Credit Card"},
         {label:"ACH",value:"ACH"},
     ],
-    callBack: (event, reponse) => {
-      return { nextStep: 10, toast: '', error: false };
+    callBack: (event, response) => {
+      if(response !== "ACH"){
+        return { nextStep: 10, toast: '', error: false };
+      }else{
+        return { nextStep: 16, toast: '', error: false };
+      }
     },
   },
+  {
+    id: 10,
+    question:
+      'Enter card number:',
+    inputType: 'text',
+    options: [],
+    callBack: (event, response) => {
+      return { nextStep: 11, toast: '', error: false };
+    },
+  },
+  {
+    id: 11,
+    question:
+      'Alright, now enter the expiration date for the credit card',
+    inputType: 'text',
+    options: [],
+    callBack: (event, response) => {
+      return { nextStep: 12, toast: '', error: false };
+    },
+  },
+  {
+    id: 12,
+    question:
+      'Perfect! Now enter the three digit CVV from the back of the card',
+    inputType: 'text',
+    options: [],
+    callBack: (event, response) => {
+      return { nextStep: 13, toast: '', error: false };
+    },
+  },
+  {
+    id: 13,
+    question:
+      'Finally, please enter the zip code associated with this credit card',
+    inputType: 'text',
+    options: [],
+    callBack: (event, response) => {
+      return { nextStep: 14, toast: '', error: false };
+    },
+  },
+  {
+    id: 14,
+    question:
+      '',
+    inputType: 'text',
+    options: [],
+    callBack: (event, response) => {
+      return { nextStep: 15, toast: '', error: false };
+    },
+  },
+  {
+    "id": 15,
+    "header": {
+        "step": "4",
+        "text": "Summary"
+    },
+    "question": "Here is a summary of the information that you provided, please review",
+    "inputType": "summary",
+    "options": [],
+    "callBack": (event, response) => {
+        return { "nextStep": 20, "toast": "", "error": false, "hideAnswer": true }
+    }
+},  {
+  id: 16,
+  question:
+    'What is the name on the account?',
+  inputType: 'text',
+  options: [],
+  callBack: (event, response) => {
+    return { nextStep: 17, toast: '', error: false };
+  },
+},
+{
+  id: 17,
+  question:
+    'What is the name on the account?',
+  inputType: 'text',
+  options: [],
+  callBack: (event, response) => {
+    return { nextStep: 18, toast: '', error: false };
+  },
+},
+{
+  id: 18,
+  question:
+    'What is your routing number?',
+  inputType: 'text',
+  options: [],
+  callBack: (event, response) => {
+    return { nextStep: 19, toast: '', error: false };
+  },
+},
+{
+  id: 19,
+  question:
+    'What is your account number?',
+  inputType: 'text',
+  options: [],
+  callBack: (event, response) => {
+    return { nextStep: 15, toast: '', error: false };
+  },
+},
+{
+  id: 20,
+  question:
+    'If you are good with the information above, please type submit.',
+  inputType: 'text',
+  options: [],
+  callBack: (event, response) => {
+    return { nextStep: 21, toast: '', error: false };
+  },
+},
+{
+  id: 21,
+  question:
+    'Thank you so much for posting your project! We are assigning your project manager now and we look forward to getting this project done! You will be receiving updates via text or you can visit your dashboard to get updates. Feel free to reach out to us via chat if you have any additional questions. Thank you for using Begin A Project and remember us when you have any other project or service that you need around the house or at your business.',
+  inputType: 'text',
+  options: [],
+  callBack: (event, response) => {
+    return { nextStep: 21, toast: '', error: false };
+  },
+},
 
 ];
 export const leftPanelHtml = `<!DOCTYPE html>
@@ -382,39 +509,30 @@ width: 100%;
 export const showUserEnteredPasssword = false;
 export const finalMessage = 'Thanks for the provided information';
 export const conversational = true;
-
 export const start = async (handler, question) => {
   if (conversational) {
-    let currentStep = await handler.user.getlastStep();
-    let answ = ChatBotStep[currentStep];
-    if (answ === undefined) return { text: finalMessage, src: 'talkingDb' };
-    if (answ.callBack) {
-      const { nextStep, toast, error, hideAnswer } = answ.callBack(
-        handler,
-        question,
-      );
-      handler.user.setlastStep(nextStep);
-      await handler.user.save();
-      answ = ChatBotStep[nextStep];
-      return {
-        text: answ.question,
-        src: 'talkingDb',
-        currentStep: answ,
-        error: error,
-        errorMessage: toast || '',
-        hideAnswer: hideAnswer || false,
-      };
-    }
-    return {
-      text: answ.question,
-      src: 'talkingDb',
-      currentStep: answ,
-      error: error,
-      errorMessage: toast || '',
-      hideAnswer: hideAnswer || false,
-    };
+      let currentStep = await handler.user.getlastStep()
+      let answ = ChatBotStep[currentStep]
+      if (answ === undefined) return { "text": finalMessage, "src": "talkingDb" };
+      if (answ.callBack) {
+          const { nextStep, toast, error, hideAnswer } = answ.callBack(handler, question)
+          handler.user.setlastStep(nextStep)
+          await handler.user.save()
+          answ = ChatBotStep[nextStep]
+          if (answ.inputType === "summary") {
+              answ["data"] = handler.user.getUserData()
+          }
+          if (answ.inputType === "await") {
+              answ["await"] = 4000
+          }
+          if (answ.inputType === "costCards" || answ.inputType === "InstallationInfo") {
+            answ["await"] = 1000
+        }
+          return { "text": answ.question, "src": "talkingDb", currentStep: answ, "error": error, "errorMessage": toast || "", hideAnswer: hideAnswer || false };
+      }
+      return { "text": answ.question, "src": "talkingDb", currentStep: answ, "error": error, "errorMessage": toast || "", hideAnswer: hideAnswer || false };
   } else {
-    const response = await handler.chain.run(question);
-    return response;
+      const response = await handler.chain.run(question)
+      return response
   }
-};
+} 
