@@ -70,6 +70,7 @@ const Signup = () => {
   const [promptTemplate, setPromptTemplate] = useState<string | any>('');
   const [selectedValues, setSelectedValues] = useState([]); // Initial empty array
   const [htmlFile, setHtmlFile] = useState('')
+  const [editableIndex, setEditableIndex] = useState<number | null>(null)
   // const [disableInput, setDisableInput] = useState(false)
 
   const { data: session, status } = useSession();
@@ -199,6 +200,14 @@ const Signup = () => {
         history: [],
       })
       handleSubmit()
+    }
+    if (JSModule && JSModule?.conversational && JSModule?.ChatBotStep[activeIndex]?.fullWidth) {
+      setRegistrationMessage(JSModule?.ChatBotStep[activeIndex])
+      setIsSignupPage(true)
+      setMessageState({
+        messages: [],
+        history: [],
+      })
     }
   }, [activeIndex])
 
@@ -493,7 +502,10 @@ const Signup = () => {
                                   className={homestyles?.markdownanswerspan}
                                 >
                                   <div style={{ display: "flex" }}>
-                                    {message.message}
+                                    <div style={message?.type !== "apiMessage" && editableIndex === index ? { "border": "2px solid black", "padding": "2.5px" } : null} contentEditable={message?.type !== "apiMessage" && editableIndex === index ? true : false} >
+                                      {message.message}
+
+                                    </div>
                                     {message?.error && <div style={{ color: "red", paddingLeft: "4px", fontWeight: "bold" }}>
                                       ({message?.errorMessage})
                                     </div>}
@@ -634,11 +646,13 @@ const Signup = () => {
                                     ) : null}
                                     {message?.step?.inputType ===
                                       'constructiondetails' ? (
-                                      <ShowDetails onSave={() => {
-                                        if (index === messages.length - 1) {
-                                          handleSubmit();
-                                        }
-                                      }} />
+                                      <ShowDetails
+                                        options={message?.step?.options}
+                                        onSave={() => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit();
+                                          }
+                                        }} />
                                     ) : null}
                                     {message?.step?.inputType ===
                                       'fileUploader' ? (
@@ -702,13 +716,17 @@ const Signup = () => {
                             </div>
                           </div>
                           <div className={homestyles?.editbtn}>
-                            {message?.type !== 'apiMessage' ? (
-                              <Button variant="link">
+                            {message?.type !== 'apiMessage' && editableIndex !== index && !message?.error ? (
+                              <Button variant="link" onClick={() => { setEditableIndex(index) }}>
                                 <Pencil /> Edit
                               </Button>
-                            ) : (
-                              <></>
-                            )}
+                            ) : message?.type !== 'apiMessage' && editableIndex === index && !message?.error ? (
+                              <Button variant="link" onClick={() => { setEditableIndex(null); console.log("message from save ==> ", message) }}>
+                                Save
+                              </Button>
+                            )
+                              : <></>
+                            }
                           </div>
                         </div>
                       </>
