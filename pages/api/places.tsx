@@ -11,7 +11,7 @@ export default async function handler(
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
-            url: `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${input}&key=AIzaSyCGwYSglScNK3aiFgnjnqPhPSGRBcc3GhQ`,
+            url: `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${input}&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`,
             headers: {}
         };
 
