@@ -16,6 +16,7 @@ const LoginPasswordAsk = ({
   const [pass, setPass] = useState("")
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showButton, setShowButton] = useState(true)
 
 
   function validateEmail(value: string) {
@@ -62,7 +63,10 @@ const LoginPasswordAsk = ({
       <div className={styles.forgot}>
         <Button variant='link'>Forgot Password?</Button>
       </div>
-      <Button onClick={() => onSave(JSON.stringify({ "email": email, "password": pass }))} disabled={!email || !pass || emailError || passwordError ? true : false} variant={!email || !pass || emailError || passwordError ? 'ghost' : 'primary'}>Login</Button>
+
+      {showButton && <div>
+        <Button onClick={() => { onSave(JSON.stringify({ "email": email, "password": pass })); setShowButton(false) }} disabled={!email || !pass || emailError || passwordError ? true : false} variant={!email || !pass || emailError || passwordError ? 'ghost' : 'primary'}>Login</Button>
+      </div>}
     </div>
   )
 }

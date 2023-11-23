@@ -10,11 +10,11 @@ interface Product {
 }
 
 interface TableProps {
-    products: Product[];
-    onChange: (value: string) => void;
+  products: Product[];
+  onChange: (value: string) => void;
 }
 
-const Table: React.FC<TableProps> = ({ products,onChange }) => {
+const Table: React.FC<TableProps> = ({ products, onChange }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortedColumn, setSortedColumn] = useState<string>('brand');
@@ -39,7 +39,7 @@ const Table: React.FC<TableProps> = ({ products,onChange }) => {
     <table className={styles.table}>
       <thead>
         <tr>
-          <th style={{width:"20px"}} onClick={() => handleSort('')}></th>
+          <th style={{ width: "20px" }} onClick={() => handleSort('')}></th>
           <th onClick={() => handleSort('brand')}>Brand / Model Number</th>
           <th onClick={() => handleSort('description')}>Description</th>
           <th onClick={() => handleSort('price')}>Price</th>
@@ -54,18 +54,18 @@ const Table: React.FC<TableProps> = ({ products,onChange }) => {
                 value={product.id}
                 checked={selectedRow === product.id}
                 onChange={() => {
-                    setSelectedRow(product.id)
-                    onChange(String(product.id))
+                  setSelectedRow(product.id)
+                  onChange(`${product.brand}/${product.model}`)
                 }}
               />
             </td>
             <td>
-            <div className={styles.brandcell}>
+              <div className={styles.brandcell}>
                 <span className={styles.brand}>
-              {product.brand}
+                  {product.brand}
                 </span>
                 <span className={styles.model}>
-                    {product.model}
+                  {product.model}
                 </span>
 
               </div>

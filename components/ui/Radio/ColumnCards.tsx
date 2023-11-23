@@ -5,8 +5,8 @@ const ColumnCards = ({
   options,
   onChange,
 }: {
-  options: { label: string; value: string,header?:string;}[];
-  onChange: () => void;
+  options: { label: string; value: string, header?: string; }[];
+  onChange: (value: string) => void;
 }) => {
 
   const [selectedValue, setSelectedValue] = useState(0)
@@ -16,7 +16,7 @@ const ColumnCards = ({
   }
   return (
     <div className={styles.colCardsGroup}> {/* Apply a class from the imported CSS module */}
-      {options.map((option,index) => (
+      {options.map((option, index) => (
         <label
           key={option.value}
           className={`${styles.colCardsLabel} ${selectedValue === index ? styles.selected : ''}`}
@@ -26,16 +26,16 @@ const ColumnCards = ({
             value={option.value}
             checked={selectedValue === index}
             onChange={() => {
-              onChange();
+              onChange(option.header);
               changeSelectedValue(index)
-            }}            className={styles.colCardsInput}
+            }} className={styles.colCardsInput}
           />
           <div className={styles.colCardsiconcontainer}>
             <h3 className={styles.colCardsHeader}>
-            {option?.header}
+              {option?.header}
             </h3>
             <span>
-            {option.label}
+              {option.label}
             </span>
           </div>
         </label>

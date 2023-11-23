@@ -586,9 +586,9 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'columnCards' ? (
                                       <ColumnCards
-                                        onChange={() => {
+                                        onChange={(value) => {
                                           if (index === messages.length - 1) {
-                                            handleSubmit();
+                                            handleSubmit(value);
                                           }
                                         }}
                                         options={message?.step?.options}
@@ -671,7 +671,6 @@ const Signup = () => {
                                       message?.step?.inputType === 'summary'
                                         ? (
                                           <>
-                                            {console.log("tersfygui")}
                                             <Summary data={message?.step?.data} onChange={() => {
                                               if (index === messages.length - 1) {
                                                 handleSubmit();
