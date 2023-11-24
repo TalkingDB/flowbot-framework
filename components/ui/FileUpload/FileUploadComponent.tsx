@@ -10,13 +10,31 @@ interface FileUploadComponentProps {
 const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit }) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    const file = e.target.files[0];
+
+    if (file) {
+      getBase64(file, (result: any) => {
+        result = result.substring(result.indexOf(',') + 1)
+        handleSubmit(result)
+      });
+    }
     if (files) {
       setSelectedFiles(files);
-      handleSubmit(files[0].name); // Call the handleSubmit function when files are selected
     }
   };
+
+  function getBase64(file: File, cb: any) {
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      cb(reader.result)
+    };
+    reader.onerror = function (error) {
+      console.log('Error: ', error);
+    };
+  }
 
   const formatBytes = (bytes: number) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
