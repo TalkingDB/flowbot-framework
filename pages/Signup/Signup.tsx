@@ -37,6 +37,8 @@ import Table from '@/components/ui/Table/Table';
 import CostCards from '@/components/ui/CostCards/CostCards';
 import InstallationInfo from '@/components/ui/InstallationInfo/InstallationInfo';
 import Invoice from '@/components/ui/Invoice/Invoice';
+import TextInput from '@/components/ui/Input/TextInput';
+import SearchInput from '@/components/ui/Search/Search';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -656,6 +658,18 @@ const Signup = () => {
                                       <Invoice
                                         options={message?.step?.options}
                                         values={message?.step?.options}
+                                        onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'search' ? (
+                                      <SearchInput
+                                        width={"100%"}
+                                        containerwidth={"90%"}
                                         onChange={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
