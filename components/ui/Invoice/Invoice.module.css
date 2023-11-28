@@ -1,0 +1,75 @@
+.invoiceContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.descriptionContainer {
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 12px;
+    color: var(--grey-100, #727A8B);
+}
+
+.viewDetails {
+    color: var(--orange-100, #FF6900);
+    cursor: pointer;
+}
+
+.checkboxGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.checkboxLabel {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    border-radius: 10px;
+    display: flex;
+    width: 246px;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 8px;
+    /* Add smooth transitions for visual effects */
+}
+
+.checkboxLabel.selected {
+    border-radius: 10px;
+    border: 1px solid var(--orange-100, #FF6900);
+    background: var(--orange-20, linear-gradient(0deg, #FDF0E7 0%, #FDF0E7 100%), #FFF);
+}
+
+.checkboxInput {
+    margin-right: 5px;
+    cursor: pointer;
+    /* Add any additional input styles here */
+}
+
+.total {
+    color: #112041 !important;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+.price {
+    color: var(--orange-100, #FF6900) !important;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.price {
+    color: #112041 !important;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+
+.active {
+    color: var(--orange-100, #FF6900) !important;
+    font-size: 24px;
+    font-weight: 600;
+}

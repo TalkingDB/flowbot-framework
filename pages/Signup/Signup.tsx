@@ -654,8 +654,8 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'invoice' ? (
                                       <Invoice
-                                        values={""}
                                         options={message?.step?.options}
+                                        values={message?.step?.options}
                                         onChange={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
