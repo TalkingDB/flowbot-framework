@@ -26,13 +26,6 @@ spec:
           envFrom:
             - secretRef:
                 name: $APP-env
-          volumeMounts:
-            - name: configuration-volume
-              mountPath: /app/configuration
-      volumes:
-        - name: configuration-volume
-          hostPath:
-            path: ./configuration
 ---
 apiVersion: v1
 kind: Service
