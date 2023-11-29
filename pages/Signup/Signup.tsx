@@ -289,7 +289,7 @@ const Signup = () => {
             ...state.messages,
             {
               type: 'userMessage',
-              message: question,
+              message: data.currentStep.answer || question,
               error: true,
               errorMessage: data.errorMessage,
               src: "test",
@@ -297,6 +297,23 @@ const Signup = () => {
             },
           ],
         }));
+        if (data.currentStep.showQuestion) {
+          setMessageState((state) => ({
+            ...state,
+            messages: [
+              ...state.messages,
+              {
+                type: 'apiMessage',
+                message: data.text,
+                src: data.src,
+                step: data.currentStep || {},
+                sourceDocs: data.sourceDocuments,
+                id: Math.random()
+              },
+            ],
+            history: [...state.history, [question, data.text]],
+          }));
+        }
       } else {
         if (!data.hideAnswer) {
           setMessageState((state) => ({
