@@ -74,7 +74,7 @@ const Signup = () => {
   const [selectedValues, setSelectedValues] = useState([]); // Initial empty array
   const [htmlFile, setHtmlFile] = useState('')
   const [editableIndex, setEditableIndex] = useState<number | null>(null)
-  // const [disableInput, setDisableInput] = useState(false)
+  const [disableInput, setDisableInput] = useState(false)
 
 
   const handleCheckboxChange = (values: any) => {
@@ -239,31 +239,25 @@ const Signup = () => {
     }
   }
 
-  // const disableUserInput = () => {
-  //   if (messages.length > 0 && messages[messages.length - 1]?.step) {
-  //     let message = messages[messages.length - 1]
-  //     console.log("check diasble or not", message?.step)
-  //     if (message?.step?.inputType && message?.step?.inputType === "text" || message?.step?.inputType === "password") {
-  //       console.log("dis", message?.step?.inputType)
-  //       setDisableInput(false)
-  //     } else {
-  //       setDisableInput(true)
-  //       console.log("else condition ==>", message?.step?.inputType)
-  //     }
-  //   }
-  // }
+  const disableUserInput = () => {
+    if (messages.length > 0 && messages[messages.length - 1]?.step) {
+      let message = messages[messages.length - 1]
+      if (message?.step?.inputType && message?.step?.inputType === "text" || message?.step?.inputType === "password" || message?.step?.inputType === "number") {
+        setDisableInput(false)
+      } else {
+        setDisableInput(true)
+      }
+    }
+  }
 
   //handle form submission
   async function handleSubmit(value?: string, update?: boolean) {
-
-    console.log(value, query, "Asdasd")
     let question = query.trim();
     if (!query) {
       question = value?.trim() || ""
     }
     // console.log("Value handleSubmit question ==>", question)
     if (update !== false) {
-      console.log("question found inside ==>", question)
       checklastmessage(question)
     }
     setLoading(true);
@@ -353,7 +347,7 @@ const Signup = () => {
 
   useEffect(() => {
     messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
-    // disableUserInput()
+    disableUserInput()
   }, [messages]);
 
 
@@ -771,9 +765,12 @@ const Signup = () => {
               </div >
               <div className={homestyles?.center}>
                 <div className={homestyles?.cloudform}>
-                  <form onSubmit={() => handleSubmit()}>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit()
+                  }}>
                     <textarea
-                      disabled={loading}
+                      disabled={disableInput || loading}
                       onKeyDown={handleEnter}
                       ref={textAreaRef}
                       autoFocus={false}
@@ -792,7 +789,7 @@ const Signup = () => {
                     />
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={!query || loading}
                       className={homestyles?.generatebutton}
                     >
                       {loading ? (
