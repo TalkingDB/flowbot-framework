@@ -59,6 +59,15 @@ UserSchema.method("getUserData", function () {
     return this.userData
 });
 
+UserSchema.method("getData", function (value: string) {
+    return this.userData.find((item: {
+        key: string;
+        category_id?: string;
+        category_description?: string;
+        answer?: string;
+    }) => item.key == value)
+});
+
 export let UserModel = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export const upsertUser = async (chatbotId: string, sessionId: string) => {
