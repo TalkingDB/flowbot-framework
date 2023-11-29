@@ -76,8 +76,6 @@ const Signup = () => {
   const [editableIndex, setEditableIndex] = useState<number | null>(null)
   // const [disableInput, setDisableInput] = useState(false)
 
-  const { data: session, status } = useSession();
-  console.log("data session ==>", session, status)
 
   const handleCheckboxChange = (values: any) => {
     setSelectedValues(values);
@@ -541,6 +539,7 @@ const Signup = () => {
                                       message?.step?.inputType ===
                                       'googleLogin' ? (
                                       <GoogleLoginComponent
+                                        disabled={index !== messages.length - 1 ? true : false}
                                         handleSubmit={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value)
