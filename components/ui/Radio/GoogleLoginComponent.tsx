@@ -6,16 +6,19 @@ const GoogleLoginComponent = ({
   handleSubmit,
   value,
   options,
+  disabled,
   // onChange,
 }: {
   options: { label: string; value: string }[];
   value: string;
+  disabled: boolean;
   // onChange: (value: string) => void;
   handleSubmit: (val?: string) => void;
 }) => {
 
   const [selectedValue, setSelectedValue] = useState(value);
   const [openPopup, setOpenPopup] = useState(false);
+  const [firstRender, setFirstRender] = useState(true);
 
   const { data: session, status } = useSession();
 
@@ -48,26 +51,27 @@ const GoogleLoginComponent = ({
 
   const changeSelectedValue = (item: string) => {
     if (item === "Yes") {
-      if (status === "authenticated") {
-        handleSubmit(session.user.email || "")
+      if (status === "authenticated" && !firstRender) {
+        // console.log("already authenticated and not first render")
+        // handleSubmit(session.user.email || "")
       } else {
         setOpenPopup(true)
+        setFirstRender(false)
         popupCenter("/google-signin", "Sample Sign In")
-        // signIn("google")
       }
       setSelectedValue(item)
     } else {
       setSelectedValue(item)
       handleSubmit("No")
-      // onChange("no")
     }
   }
 
   useEffect(() => {
+
     if (status === "authenticated" && openPopup) {
       handleSubmit(session.user.email || "")
     }
-  }, [status])
+  }, [status, openPopup])
 
   console.log(status)
 
@@ -83,6 +87,7 @@ const GoogleLoginComponent = ({
         <input
           type="radio"
           value={"yes"}
+          disabled={disabled}
           checked={selectedValue === "Yes"}
           onChange={() => {
             changeSelectedValue("Yes")
@@ -100,6 +105,7 @@ const GoogleLoginComponent = ({
         {"No"}
         <input
           type="radio"
+          disabled={disabled}
           value={"no"}
           checked={selectedValue === "No"}
           onChange={() => {
