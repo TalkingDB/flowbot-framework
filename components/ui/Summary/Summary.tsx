@@ -7,6 +7,7 @@ interface IDataItem {
   label: string;
   value: string;
   inputType: string;
+  summary: boolean;
 }
 
 interface IItem {
@@ -22,6 +23,7 @@ interface IProps {
       key: string;
       answer: string;
       inputType: string;
+      summary: boolean;
     }[];
   };
   onChange: () => void;
@@ -33,6 +35,7 @@ interface InputItem {
   category_description?: string;
   answer: string;
   inputType: string;
+  summary: boolean;
 }
 
 interface OutputItem {
@@ -53,25 +56,27 @@ const Summary = (props: IProps) => {
         let currentStep: OutputItem | undefined;
 
         inputArray.forEach((item) => {
-          if (item.category_id) {
-            const existingCategory = output.find((outputItem) => outputItem.header === item.category_description);
+          if (item.summary) {
+            if (item.category_id) {
+              const existingCategory = output.find((outputItem) => outputItem.header === item.category_description);
 
-            if (existingCategory) {
-              existingCategory.data.push({ label: item.key, value: item.answer, inputType: item.inputType });
+              if (existingCategory) {
+                existingCategory.data.push({ label: item.key, value: item.answer, inputType: item.inputType });
+              } else {
+                const newCategory: OutputItem = {
+                  header: item.category_description || 'Uncategorized',
+                  step: item.category_id,
+                  data: [{ label: item.key, value: item.answer, inputType: item.inputType }],
+                };
+                output.push(newCategory);
+              }
+
+              currentStep = output.find((outputItem) => outputItem.header === item.category_description);
             } else {
-              const newCategory: OutputItem = {
-                header: item.category_description || 'Uncategorized',
-                step: item.category_id,
-                data: [{ label: item.key, value: item.answer, inputType: item.inputType }],
-              };
-              output.push(newCategory);
-            }
-
-            currentStep = output.find((outputItem) => outputItem.header === item.category_description);
-          } else {
-            // If category_id is not present, push the item to the current step's data
-            if (currentStep) {
-              currentStep.data.push({ label: item.key, value: item.answer, inputType: item.inputType });
+              // If category_id is not present, push the item to the current step's data
+              if (currentStep) {
+                currentStep.data.push({ label: item.key, value: item.answer, inputType: item.inputType });
+              }
             }
           }
         });
@@ -110,7 +115,7 @@ const Summary = (props: IProps) => {
                         }
                       </div>)
                       :
-                      dataItem.inputType === "select" ?
+                      dataItem.inputType === "select" || dataItem.inputType === "cardRadio" ?
                         <span className={styles.span}>{JSON.parse(dataItem.value).label}</span>
                         :
                         dataItem.inputType === "fileUploader" ?
