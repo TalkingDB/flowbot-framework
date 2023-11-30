@@ -7,7 +7,7 @@ import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
 import { GoogleAuth } from 'google-auth-library';
-
+export const config = { api: { bodyParser: { sizeLimit: '100mb' } } }
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
