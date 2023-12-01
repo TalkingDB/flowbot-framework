@@ -10,6 +10,13 @@ export interface IUser extends Document {
     updatedAt: Date;
 }
 
+interface stepData {
+    key: string;
+    category_id?: string;
+    category_description?: string;
+    answer?: string;
+}
+
 const UserSchema: Schema = new Schema({
     subscriptionType: {
         type: String,
@@ -51,8 +58,13 @@ UserSchema.method('setlastStep', function (value: number) {
     this.lastStep = value;
 });
 
-UserSchema.method("setUserData", function (data: {}) {
-    this.userData.push(data)
+UserSchema.method("setUserData", function (data: stepData) {
+    const index = this.userData.findIndex((item: stepData) => item.key === data.key);
+    if (index !== -1) {
+        this.userData[index] = data;
+    } else {
+        this.userData.push(data);
+    }
 });
 
 UserSchema.method("getUserData", function () {
@@ -60,12 +72,7 @@ UserSchema.method("getUserData", function () {
 });
 
 UserSchema.method("getData", function (value: string) {
-    return this.userData.find((item: {
-        key: string;
-        category_id?: string;
-        category_description?: string;
-        answer?: string;
-    }) => item.key == value)
+    return this.userData.find((item: stepData) => item.key == value)
 });
 
 export let UserModel = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
