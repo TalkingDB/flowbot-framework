@@ -238,6 +238,21 @@ background: var(--grey-20-bg, #F1F4F9);
     gap: 12px;
     flex-wrap: wrap;
   }
+
+  .cardradioGroup input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-clip: content-box;
+    border: 2px solid #dfe2e9;
+    padding: 3px;
+  }
+   
+  .cardradioGroup input[type="radio"]:checked {
+    border: 2px solid var(--orange-100, #FF6900);
+    background-color: var(--orange-100, #FF6900);
+  }
   
   .cardradioLabel {
     margin-bottom: 10px;
@@ -249,6 +264,7 @@ background: var(--grey-20-bg, #F1F4F9);
     border-radius: 10px;
     display: flex;
     width: 246px;
+    flex-direction: column;
     justify-content: space-between;
     padding: 16px;
     gap: 8px;
@@ -269,7 +285,8 @@ background: var(--grey-20-bg, #F1F4F9);
 
   .cardradioiconcontainer{
     display: flex;
-    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .cardradioiconcontainer span{

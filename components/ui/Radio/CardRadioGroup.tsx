@@ -67,24 +67,24 @@ const CardRadioGroup = ({
       {options.map((option, index) => (
         <label
           key={option.value}
-          className={`${styles.radioLabel} ${selectedValue === option.value ? styles.selected : ''}`}
+          className={`${styles.cardradioLabel} ${selectedValue === option.value ? styles.selected : ''}`}
         >
           <div className={styles.cardradioiconcontainer}>
             {option?.label && getIconByLabel(option.label)}
+            <input
+              type="radio"
+              value={option.value}
+              disabled={disabled}
+              checked={selectedValue === option.value}
+              onChange={() => {
+                changeSelectedValue(JSON.stringify(option))
+              }}
+              className={styles.cardradioInput}
+            />
+          </div>
             <span>
               {option.label}
             </span>
-          </div>
-          <input
-            type="radio"
-            value={option.value}
-            disabled={disabled}
-            checked={selectedValue === option.value}
-            onChange={() => {
-              changeSelectedValue(JSON.stringify(option))
-            }}
-            className={styles.cardradioInput}
-          />
         </label>
       ))}
     </div>
