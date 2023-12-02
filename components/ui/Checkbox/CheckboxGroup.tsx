@@ -32,7 +32,9 @@ const CheckboxGroup = ({
 
             className={`${styles.checkboxLabel} ${selectedValues.includes(option.value) ? styles.selected : ''}`}
           >
-            {option.label}
+            <span style={{width: "200px"}}>
+              {option.label}
+            </span>
             <input
               type="checkbox"
               value={option.value}
