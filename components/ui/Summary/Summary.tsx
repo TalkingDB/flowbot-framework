@@ -109,8 +109,8 @@ const Summary = (props: IProps) => {
                     dataItem.inputType === "multiselect" || dataItem.inputType === "checkboxButton" ?
                       (<div style={{ display: 'flex', columnGap: "8px", paddingTop: "4px" }}>
                         {
-                          dataItem.value.split(",").map((item) =>
-                            <span className={styles.span} style={{ padding: "4px 8px", backgroundColor: "#F1F4F9", borderRadius: "6px", color: "#727A8B" }}>{item}</span>
+                          JSON.parse(dataItem.value).map((item : {label: string, value: string}) =>
+                            <span className={styles.span} style={{ padding: "4px 8px", backgroundColor: "#F1F4F9", borderRadius: "6px", color: "#727A8B" }}>{item.label}</span>
                           )
                         }
                       </div>)

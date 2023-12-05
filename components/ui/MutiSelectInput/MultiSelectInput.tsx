@@ -29,7 +29,7 @@ const MultiSelectInput: React.FC<SelectInputProps> = ({ options, onChange, value
                 />
             </div>
             <div style={{ marginLeft: "20px" }}>
-                {showButton && <Button onClick={() => { onChange(selectedValue?.map((item) => item?.value).toString()); setShowButton(false) }}>Confirm</Button>}
+                {showButton && <Button onClick={() => { onChange(JSON.stringify(selectedValue)); setShowButton(false) }}>Confirm</Button>}
             </div>
         </div>
     );
