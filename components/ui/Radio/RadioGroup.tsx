@@ -26,7 +26,9 @@ const RadioGroup = ({
           key={option.value}
           className={`${styles.radioLabel} ${selectedValue === option.value ? styles.selected : ''}`}
         >
-          {option.label}
+          <span style={{width: "180px"}}>
+            {option.label}
+          </span>
           <input
             type="radio"
             value={option.value}

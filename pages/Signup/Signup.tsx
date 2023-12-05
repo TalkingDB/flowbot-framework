@@ -172,7 +172,7 @@ const Signup = () => {
   useEffect(() => {
     if (JSModule && JSModule?.conversational && JSModule?.ChatBotStep[activeIndex]?.fullWidth) {
       setRegistrationMessage(JSModule?.ChatBotStep[activeIndex])
-      setIsSignupPage(true)
+      setIsSignupPage(true);
     } else {
       setMessageState({
         messages: [
@@ -329,6 +329,10 @@ const Signup = () => {
             ],
           }));
         }
+        if (data.currentStep.update) {
+          JSModule?.leftPanelStateUpdate(+data.currentStep.header.step)
+        }
+
         setMessageState((state) => ({
           ...state,
           messages: [
