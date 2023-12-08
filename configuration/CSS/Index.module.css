@@ -463,6 +463,7 @@ background: var(--grey-20-bg, #F1F4F9);
 .colCardsiconcontainer{
   display: flex;
   flex-direction: column;
+  width: fit-content;
 }
 
 .colCardsiconcontainer span{
