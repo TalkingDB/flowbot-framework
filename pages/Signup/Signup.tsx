@@ -359,6 +359,28 @@ const Signup = () => {
     }
   }
 
+
+  // File Handler Submission
+  const uploadFilehandler = async (files: File[]) => {
+    const file = files[0];
+    const formData = new FormData();
+    formData.append('chatId', newChatRoom);
+    formData.append('sessionId', currentSession);
+    formData.append('file', file);
+
+        fetch('/api/file-upload', {
+          method: 'POST',
+          body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log('File uploaded successfully:', data);
+      })
+      .catch(error => {
+          console.error('Error uploading file:', error);
+      });
+  }
+
   //prevent empty submissions
   const handleEnter = (e: any) => {
     if (e.key === 'Enter' && query) {
@@ -714,9 +736,10 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'fileUploader' ? (
                                       <FileUploadComponent
-                                        handleSubmit={(value) => {
+                                        handleSubmit={(value, files) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
+                                            uploadFilehandler(files)
                                           }
                                         }}
                                       />

@@ -4,7 +4,7 @@ import styles from '@/configuration/CSS/Index.module.css';
 
 
 interface FileUploadComponentProps {
-  handleSubmit: (value: string) => void;
+  handleSubmit: (value: string, files: File[]) => void;
 }
 
 const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit }) => {
@@ -18,7 +18,7 @@ const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit 
       getBase64(file, (result: any) => {
         result = result.substring(result.indexOf(',') + 1)
         const uploadedFile = JSON.stringify({ 'fileName': files[0].name, "imageData": result, "fileType": files[0].type })
-        handleSubmit(uploadedFile)
+        handleSubmit(uploadedFile, files)
       });
     }
     if (files) {

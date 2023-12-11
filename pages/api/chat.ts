@@ -7,6 +7,10 @@ import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
 import { GoogleAuth } from 'google-auth-library';
+const fs = require('fs');
+const FormData = require('form-data');
+import path from 'path';
+
 export const config = { api: { bodyParser: { sizeLimit: '100mb' } } }
 export default async function handler(
     req: NextApiRequest,
@@ -35,13 +39,13 @@ export default async function handler(
         const user = await upsertUser(pinecone_name_space, session)
 
         import(`@/configuration/JS/${pinecone_name_space}`).then(async (module) => {
-            const response = await module.start({ chain, axiosInstance: axios, user, BigQuery, DocumentProcessorServiceClient, GoogleAuth }, sanitizedQuestion)
+            const response = await module.start({ chain, axiosInstance: axios, user, BigQuery, DocumentProcessorServiceClient, GoogleAuth, fs, path, FormData }, sanitizedQuestion)
             if (response) {
                 return res.status(200).json(response);
             }
         }).catch((error) => {
             import(`@/configuration/JS/default`).then(async (module) => {
-                const response = await module.start({ chain, axiosInstance: axios, user, BigQuery, DocumentProcessorServiceClient, GoogleAuth }, sanitizedQuestion)
+                const response = await module.start({ chain, axiosInstance: axios, user, BigQuery, DocumentProcessorServiceClient, GoogleAuth, fs, path, FormData }, sanitizedQuestion)
                 if (response) {
                     return res.status(200).json(response);
                 }
