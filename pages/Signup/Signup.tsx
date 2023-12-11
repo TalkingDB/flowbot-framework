@@ -40,6 +40,7 @@ import InstallationInfo from '@/components/ui/InstallationInfo/InstallationInfo'
 import Invoice from '@/components/ui/Invoice/Invoice';
 import TextInput from '@/components/ui/Input/TextInput';
 import SearchInput from '@/components/ui/Search/Search';
+import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -759,6 +760,16 @@ const Signup = () => {
                                       'InstallationInfo' ? (
                                       <InstallationInfo
                                         onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'Stripe' ? (
+                                      <StripeComponent
+                                        onClose={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
                                           }
