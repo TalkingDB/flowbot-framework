@@ -30,8 +30,12 @@ border-right: 0.2px solid var(--grey-40-stroke, #E1E4EA);
   color: var(--black, #112041);
   text-align: center;
   font-family: Aspekta;
-  font-size: 32px;
+  font-size: 24px;
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+}
+
+.price.active {
+  color: var(--orange-100, #FF6900) !important;
 }

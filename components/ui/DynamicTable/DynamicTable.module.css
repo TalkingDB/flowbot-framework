@@ -11,7 +11,6 @@
 .table td {
     padding: 8px;
     padding: 16px 12px;
-    text-align: left;
 }
 
 .table th {
@@ -31,6 +30,7 @@
 
 .table td {
     color: var(--grey-100, #727A8B);
+    font-size: 15px;
 }
 
 .table th:hover {
@@ -82,6 +82,8 @@
 .price {
     color: var(--orange-100, #FF6900) !important;
     font-size: 18px;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .total {

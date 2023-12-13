@@ -19,12 +19,15 @@ const DynamicTable: React.FC<TableProps> = ({ data, onChange }) => {
             setSortOrder('asc');
         }
     };
-
     return (
         <table className={styles.table + " table-auto"}>
             <thead>
                 <tr>
-                    {data?.name?.map((item, index) => <th style={{ width: item.width }}>{item}</th>
+                    {data?.name?.map((item, index) => 
+                    <th 
+                    style={{ width: item.width}} 
+                    className={` ${index === data.name.length - 1  ? 'text-end' : (index !== data.name.length - 1 && index !== 0) ? "text-center" :'text-start'}`}
+                    >{item}</th>
                     )}
                 </tr>
             </thead>
@@ -32,7 +35,9 @@ const DynamicTable: React.FC<TableProps> = ({ data, onChange }) => {
                 {data?.data?.map((item, index) => (
                     <tr key={index} className={selectedRow === index ? styles.selectedRow : ''}>
                         {data?.name?.map((value, newindex) => [
-                            <td className={styles.selectCell} style={{ color: "#112041" }}>
+                            <td
+                            className={` ${newindex === data.name.length - 1  ? 'text-end' : (newindex !== data.name.length - 1 && newindex !== 0) ? "text-center" :'text-start'}`}  
+                            >
                                 <span>{item[newindex]}</span>
                             </td>
                         ])
@@ -40,7 +45,7 @@ const DynamicTable: React.FC<TableProps> = ({ data, onChange }) => {
                     </tr>
                 ))}
             </tbody>
-            <tfoot>
+            {/* <tfoot>
                 <tr>
                     {data?.name?.map((item, index) => {
                         if (data?.name?.length - 1 == index) {
@@ -48,7 +53,7 @@ const DynamicTable: React.FC<TableProps> = ({ data, onChange }) => {
                                 <td style={{ width: item.width }} className={styles.price}>$1998.345</td>
                             </>)
                         } else if (data?.name?.length - 2 == index) {
-                            return <td style={{ width: item.width }} className={styles.total}>Total</td>
+                            return <td style={{ width: item.width, textAlign: 'center' }} className={styles.total}>Total</td>
                         }
                         else {
                             return <td style={{ width: item.width }}></td>
@@ -57,7 +62,7 @@ const DynamicTable: React.FC<TableProps> = ({ data, onChange }) => {
                     )}
                 </tr>
 
-            </tfoot>
+            </tfoot> */}
         </table>
     );
 };

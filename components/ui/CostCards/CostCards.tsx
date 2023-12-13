@@ -5,10 +5,12 @@ import Button from '../Buttons/Button';
 interface CostCardsProps {
     options: any;
     onChange: (val: any) => void;
+    showSubmit?: boolean;
+    fontSize?: string
 }
 
-const CostCards: React.FC<CostCardsProps> = ({ options, onChange }) => {
-    const [showButton, setShowButton] = useState<Boolean>(true)
+const CostCards: React.FC<CostCardsProps> = ({ options, onChange, showSubmit=true, fontSize }) => {
+    const [showButton, setShowButton] = useState<Boolean>(showSubmit)
 
     return (
         <>
@@ -17,7 +19,10 @@ const CostCards: React.FC<CostCardsProps> = ({ options, onChange }) => {
                     return (
                         <div key={index} className={styles.Card}>
                             <span className={styles.text}>{item.text}</span>
-                            <h3 className={styles.price}>{item.price}</h3>
+                            <div 
+                                className={`${styles.price} ${item.text === "Total:" ? styles.active : ''}`}
+                                style={{fontSize: fontSize}}
+                            >{item.price}</div>
                         </div>
                     )
                 })}
