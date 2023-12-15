@@ -91,3 +91,31 @@
     font-weight: 800;
     font-size: 18px;
 }
+
+
+.editContainer {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    background-color: #FDF0E7;
+    padding: 4px 8px;
+    border: 1px solid #FDF0E7;
+    border-radius: 4px;
+}
+
+.editContainer > span {
+    cursor: pointer;  
+}
+
+.editContainer > span:hover {
+    color:  #ebd1be;
+}
+
+
+.addButton {
+    color: var(--orange-100, #FF6900);
+    font-family: Aspekta;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+}

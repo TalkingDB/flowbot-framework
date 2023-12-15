@@ -42,6 +42,7 @@ import TextInput from '@/components/ui/Input/TextInput';
 import SearchInput from '@/components/ui/Search/Search';
 import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
+import CostMilestone from '@/components/ui/CostMilestone/CostMilestone';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -363,23 +364,24 @@ const Signup = () => {
 
   // File Handler Submission
   const uploadFilehandler = async (files: File[]) => {
-    const file = files[0];
-    const formData = new FormData();
-    formData.append('chatId', newChatRoom);
-    formData.append('sessionId', currentSession);
-    formData.append('file', file);
-
-        fetch('/api/file-upload', {
-          method: 'POST',
-          body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log('File uploaded successfully:', data);
-      })
-      .catch(error => {
-          console.error('Error uploading file:', error);
-      });
+    for (let item of files) {
+      const formData = new FormData();
+      formData.append('chatId', newChatRoom);
+      formData.append('sessionId', currentSession);
+      formData.append('file', item);
+  
+          fetch('/api/file-upload', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('File uploaded successfully:', data);
+        })
+        .catch(error => {
+            console.error('Error uploading file:', error);
+        });
+    }
   }
 
   //prevent empty submissions
@@ -806,6 +808,17 @@ const Signup = () => {
                                         onClose={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'costMilestone' ? (
+                                      <CostMilestone
+                                        options={message.step.options}
+                                        onClose={() => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit("");
                                           }
                                         }}
                                       />

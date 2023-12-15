@@ -6,10 +6,11 @@ interface CostCardsProps {
     options: any;
     onChange: (val: any) => void;
     showSubmit?: boolean;
-    fontSize?: string
+    fontSize?: string;
+    hightlightIndex?: number;
 }
 
-const CostCards: React.FC<CostCardsProps> = ({ options, onChange, showSubmit=true, fontSize }) => {
+const CostCards: React.FC<CostCardsProps> = ({ options, onChange, showSubmit=true, fontSize, hightlightIndex }) => {
     const [showButton, setShowButton] = useState<Boolean>(showSubmit)
 
     return (
@@ -20,7 +21,7 @@ const CostCards: React.FC<CostCardsProps> = ({ options, onChange, showSubmit=tru
                         <div key={index} className={styles.Card}>
                             <span className={styles.text}>{item.text}</span>
                             <div 
-                                className={`${styles.price} ${item.text === "Total:" ? styles.active : ''}`}
+                                className={`${styles.price} ${index === hightlightIndex || item.text === "Total:" ? styles.active : ''}`}
                                 style={{fontSize: fontSize}}
                             >{item.price}</div>
                         </div>
