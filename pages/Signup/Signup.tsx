@@ -44,6 +44,8 @@ import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
 import CostMilestone from '@/components/ui/CostMilestone/CostMilestone';
 import ProjectCard from '@/components/ui/ProjectCard/ProjectCard';
+import RatingCard from '@/components/ui/RatingCard/RatingCard';
+import ReferralCard from '@/components/ui/ReferralCard/ReferralCard';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -828,6 +830,28 @@ const Signup = () => {
                                       'ProjectCard' ? (
                                       <ProjectCard
                                         options={message.step.options}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'RatingCard' ? (
+                                      <RatingCard
+                                        options={message.step.options}
+                                        onClose={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'ReferralCard' ? (
+                                      <ReferralCard
+                                        disabled={index !== messages.length - 1 ? true : false}
+                                        onClose={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
                                       />
                                     ) : null}
                                   </div>
