@@ -43,6 +43,7 @@ import SearchInput from '@/components/ui/Search/Search';
 import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
 import CostMilestone from '@/components/ui/CostMilestone/CostMilestone';
+import ProjectCard from '@/components/ui/ProjectCard/ProjectCard';
 
 const cityOptions = [
   { value: 'new-york', label: 'New York' },
@@ -821,6 +822,12 @@ const Signup = () => {
                                             handleSubmit("");
                                           }
                                         }}
+                                      />
+                                    ) : null}
+                                    {message?.step?.inputType ===
+                                      'ProjectCard' ? (
+                                      <ProjectCard
+                                        options={message.step.options}
                                       />
                                     ) : null}
                                   </div>
