@@ -67,8 +67,10 @@ const GoogleLoginComponent = ({
 
   useEffect(() => {
     localStorage.removeItem('token');
+    localStorage.removeItem('id_token');
     const getDataFromLocalStorage = async () => {
       const token = localStorage.getItem('token');
+      const id_token = localStorage.getItem('id_token');
       if (token) {
         const userinfoEndpoint = 'https://www.googleapis.com/oauth2/v3/userinfo';
         const userInfoResponse = await axios.get(userinfoEndpoint, {
@@ -79,7 +81,9 @@ const GoogleLoginComponent = ({
           
         const userEmail = userInfoResponse.data.email;
         if (userEmail) {
-          handleSubmit(JSON.stringify({"email": userEmail, "access_token": token}))
+          handleSubmit(JSON.stringify({"email": userEmail, "access_token": token, "id_token": id_token}))
+          localStorage.removeItem('token');
+          localStorage.removeItem('id_token');
         }
       }
     };

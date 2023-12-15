@@ -3,12 +3,13 @@ import { useRouter } from 'next/router';
 
 const SignInPage = () => {
     const router = useRouter();
-    const { code } = router.query;
+    const { code, token } = router.query;
 
     useEffect(() => {
         if (code) {
             try {
                 localStorage.setItem('token', code);
+                localStorage.setItem('id_token', token)
                 window.close()
               } catch (error) {
                 console.log('Error setting localStorage:', error);
