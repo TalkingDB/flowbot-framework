@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import {useStripe, useElements, PaymentElement} from '@stripe/react-stripe-js';
 import Button from '../Buttons/Button';
 
 const CheckoutForm = ({onClose}: {onClose:  (value: string)=>void;}) => {
   const stripe = useStripe();
   const elements = useElements();
+  const [showButton, setShowButton] = useState(true);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement> ) => {
     // We don't want to let default form submission happen here,
     // which would refresh the page.
     event.preventDefault();
+    setShowButton(false)
 
     if (!stripe || !elements) {
       // Stripe.js hasn't yet loaded.
@@ -39,9 +42,9 @@ const CheckoutForm = ({onClose}: {onClose:  (value: string)=>void;}) => {
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement />
-      <div className='mt-4'>
-      <Button disabled={!stripe}>Submit</Button>
-      </div>
+      {showButton && <div className='mt-4'>
+        <Button disabled={!stripe}>Submit</Button>
+      </div>}
     </form>
   )
 };
