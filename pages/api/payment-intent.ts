@@ -7,10 +7,11 @@ export default async function handler(
 ) {
 
     try {
+        const {amount, currency, description} = JSON.parse(req.body);
         const paymentIntent = await stripe.paymentIntents.create({
-            currency: "USD",
-            amount: 50,
-            description: 'Software development services',
+            currency: currency,
+            amount: amount,
+            description: description,
             // shipping: {
             //     name: 'Jenny Rosen',
             //     address: {

@@ -6,7 +6,7 @@ import CheckoutForm from './CheckoutForm';
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
 
-const StripeComponent = ({onClose}: {onClose: (value: string)=>void}) => {
+const StripeComponent = ({options, onClose}: {options: {amount: number, currency: string, description: string}, onClose: (value: string)=>void}) => {
   const [stripePromise, setStripePromise] = useState(null)
   const [clientSecret, setClientSecret] = useState("");
 
@@ -15,14 +15,16 @@ const StripeComponent = ({onClose}: {onClose: (value: string)=>void}) => {
   }, [])
 
   useEffect(() => {
-    fetch("/api/payment-intent", {
-      method: "POST",
-      body: JSON.stringify({}),
-    }).then(async (result) => {
-      const { clientSecret } = await result.json();
-      setClientSecret(clientSecret);
-    });
-  }, []);
+    if (options) {
+      fetch("/api/payment-intent", {
+        method: "POST",
+        body: JSON.stringify({amount: options.amount, currency: options.currency, description: options.description}),
+      }).then(async (result) => {
+        const { clientSecret } = await result.json();
+        setClientSecret(clientSecret);
+      });
+    }
+  }, [options]);
 
 
   return (

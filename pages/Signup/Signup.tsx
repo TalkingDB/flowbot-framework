@@ -798,6 +798,7 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'Stripe' ? (
                                       <StripeComponent
+                                        options={message.step.options}
                                         onClose={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
