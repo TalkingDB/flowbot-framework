@@ -14,7 +14,7 @@ export default function TimePickerComponent({onChange}: {onChange: (value: strin
           <DesktopTimePicker 
             defaultValue={dayjs('2022-04-17T15:30')} 
             onChange={(value) => onChange(dayjs(value).format('HH:mm'))}
-            
+            timeSteps={{minutes: 1}}
             />
     </LocalizationProvider>
   );

@@ -3,7 +3,7 @@ import DynamicTable from "../DynamicTable/DynamicTable";
 
 
 
-function CostMilestone ({onClose, options}: {onClose: () => void, option: any}) {
+function CostMilestone ({onClose, options}: {onClose: () => void, options: any}) {
     return (
         <div>
             <CostCards
@@ -28,8 +28,7 @@ function CostMilestone ({onClose, options}: {onClose: () => void, option: any}) 
                             <div className='mt-4'>
                                 <DynamicTable 
                                     data={data?.data} 
-                                    editable={true} 
-                                    editableTitle="Add Milestone"
+                                    options={data.options}
                                     onChange={(value) => null} />
                             </div>
                         </>

@@ -102,3 +102,23 @@
     font-size: 24px;
     font-weight: 600;
 }
+
+
+.searchContainer {
+    border-radius: 6px;
+    Padding: 14px 12px 14px 12px;
+    border: 1px solid #E1E4EA;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.searchContainer > input {
+    width: 100%;
+    height: auto;
+}
+
+.searchContainer > input:focus {
+    outline: none; /* Remove default focus outline */
+    border: none;  /* Your desired styles for the focused state */
+  }

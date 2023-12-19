@@ -39,12 +39,19 @@
     font-size: 15px;
 }
 
+.table td span input {
+    text-align: inherit;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
 .table th:hover {
     background-color: #f2f2f2;
 }
 
 .selectedRow {
-    background: var(--orange-20, linear-gradient(0deg, #FDF0E7 0%, #FDF0E7 100%), #FFF);
+    outline: auto;
 }
 
 .brandcell {
@@ -136,6 +143,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
+    height: 54px;
     background-color: var(--grey-5, #FDFDFF);
 }
 

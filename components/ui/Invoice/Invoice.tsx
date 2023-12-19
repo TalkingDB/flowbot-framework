@@ -15,8 +15,10 @@ const Invoice = ({
 }) => {
 
     const [selectedValues, setSelectedValue] = useState<[{label: string; value: string; data: any, table: []}] | []>([])
-    const [showButton, setShowButton] = useState(true)
-    const [show, setShow] = useState<null | number>(null)
+    const [showButton, setShowButton] = useState(true);
+    const [show, setShow] = useState<null | number>(null);
+
+
     const handleCheckboxChange = (value: { label: string; value: string, data: any, table: [] }) => {
         if (selectedValues.findIndex(item => item.value === value.value) >= 0) {
                 setSelectedValue(selectedValues.filter((val) => val.value !== value.value));
@@ -92,16 +94,9 @@ const Invoice = ({
                                     }
                                 </div>
                                 {
-                                    option?.table?.map((data, index) => {
-                                        return (
-                                            <>
-                                                <h6 className='pt-8' style={{ color: "var(--grey-100, #727A8B)" }}>{data?.name}</h6>
-                                                <div className='mt-4'>
-                                                    <DynamicTable data={data?.data} total={data.total} onChange={(value) => null} />
-                                                </div>
-                                            </>
-                                        )
-                                    })
+                                    option?.table?.map((data, index) => <DynamicTableContainer data={data}/>)
+                                        
+                                        
                                 }
                                 {/* <div>
                                     <p>Before and after picture</p>
@@ -132,11 +127,45 @@ const Invoice = ({
             {showButton && <div className='mt-4'>
                 <Button onClick={() => { onChange(JSON.stringify(selectedValues)); setShowButton(false) }}
                     disabled={selectedValues.length === 0}
+                    variant={selectedValues.length === 0 ? 'ghost' : 'primary'}
                 >Confirm</Button>
             </div >
             }
         </>
     );
 };
+
+const DynamicTableContainer = ({
+    data,
+}: {
+    data: []
+}) => {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    return (
+        <>
+            <h6 className='pt-8' style={{ color: "var(--grey-100, #727A8B)" }}>{data?.name}</h6>
+            {data?.options?.searchBar && <div className={styles.searchContainer}>
+                <input
+                placeholder={data.options.searchPlaceHolder}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    value={searchQuery}
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.75033 2.58862C4.83831 2.58862 1.66699 5.75994 1.66699 9.67196C1.66699 13.584 4.83831 16.7553 8.75033 16.7553C10.4061 16.7553 11.9292 16.1872 13.1352 15.2353L16.1788 18.2789C16.5042 18.6043 17.0319 18.6043 17.3573 18.2789C17.6827 17.9535 17.6827 17.4258 17.3573 17.1004L14.3137 14.0568C15.2656 12.8507 15.8337 11.3276 15.8337 9.67196C15.8337 5.75994 12.6623 2.58862 8.75033 2.58862ZM3.33366 9.67196C3.33366 6.68041 5.75878 4.25529 8.75033 4.25529C11.7419 4.25529 14.167 6.68041 14.167 9.67196C14.167 12.6635 11.7419 15.0886 8.75033 15.0886C5.75878 15.0886 3.33366 12.6635 3.33366 9.67196Z" fill="#AAB1BA"/>
+                </svg>
+            </div>
+            }
+            <div className='mt-4'>
+                <DynamicTable 
+                    data={data?.data} 
+                    total={data.total}
+                    options={data.options}
+                    onChange={(value) => null} />
+            </div>
+        </>
+    )
+}
+
 
 export default Invoice;
