@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import styles from '@/configuration/CSS/Index.module.css';
+import React, { useState, useContext } from 'react';
+import ThemeContext from '@/contexts/ThemeContext';
 
 const RadioGroup = ({
   options,
@@ -7,35 +7,45 @@ const RadioGroup = ({
   disabled,
   onChange,
 }: {
-  options: { label: string; value: string, data?: any }[];
+  options: { label: string; value: string; data?: any }[];
   value: string;
   disabled: boolean;
   onChange: (value: string) => void;
 }) => {
+  const { styles } = useContext(ThemeContext);
+  const [selectedValue, setSelectedValue] = useState<{
+    label: string;
+    value: string;
+    data?: any;
+  } | null>(null);
 
-  const [selectedValue, setSelectedValue] = useState<{ label: string; value: string, data?: any } | null>(null)
-
-  const changeSelectedValue = (value: { label: string; value: string, data?: any }) => {
-    setSelectedValue(value)
-    onChange(JSON.stringify(value))
-  }
+  const changeSelectedValue = (value: {
+    label: string;
+    value: string;
+    data?: any;
+  }) => {
+    setSelectedValue(value);
+    onChange(JSON.stringify(value));
+  };
   return (
-    <div className={styles.radioGroup}> {/* Apply a class from the imported CSS module */}
+    <div className={styles.radioGroup}>
+      {' '}
+      {/* Apply a class from the imported CSS module */}
       {options.map((option, index) => (
         <label
           key={option.value}
-          className={`${styles.radioLabel} ${selectedValue?.value === option.value ? styles.selected : ''}`}
+          className={`${styles.radioLabel} ${
+            selectedValue?.value === option.value ? styles.selected : ''
+          }`}
         >
-          <span style={{width: "180px"}}>
-            {option.label}
-          </span>
+          <span style={{ width: '180px' }}>{option.label}</span>
           <input
             type="radio"
             value={option.value}
             disabled={disabled}
             checked={selectedValue?.value === option.value}
             onChange={() => {
-              changeSelectedValue(option)
+              changeSelectedValue(option);
             }}
             className={styles.radioInput}
           />

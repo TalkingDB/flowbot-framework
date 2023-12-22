@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import styles from '../../../configuration/CSS/Index.module.css';
+import React, { useState, useContext } from 'react';
+import ThemeContext from '@/contexts/ThemeContext';
 
 interface Option {
   label: string;
@@ -12,16 +12,23 @@ interface SelectInputProps {
   value: string;
 }
 
-const SelectInputField: React.FC<SelectInputProps> = ({ options, onChange, value }) => {
+const SelectInputField: React.FC<SelectInputProps> = ({
+  options,
+  onChange,
+  value,
+}) => {
+  const { styles } = useContext(ThemeContext);
   const [selectedValue, setSelectedValue] = useState<string>(value); // Initialize with an empty string
 
   const changeSelectedValue = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = String(event.target.value) || ""
+    const value = String(event.target.value) || '';
     setSelectedValue(value); // Set the selected value to the value of the selected option
-    const selectedOptionIndex: number = options.findIndex((option) => option.value === value);
+    const selectedOptionIndex: number = options.findIndex(
+      (option) => option.value === value,
+    );
 
     if (selectedOptionIndex) {
-      onChange(JSON.stringify(options[selectedOptionIndex]))
+      onChange(JSON.stringify(options[selectedOptionIndex]));
     }
   };
 

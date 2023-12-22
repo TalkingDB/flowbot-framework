@@ -38,13 +38,13 @@ export default async function handler(
 
         const user = await upsertUser(pinecone_name_space, session)
 
-        import(`@/configuration/JS/${pinecone_name_space}`).then(async (module) => {
+        import(`@/configuration/${pinecone_name_space}/server`).then(async (module) => {
             const response = await module.start({ chain, axiosInstance: axios, user, BigQuery, DocumentProcessorServiceClient, GoogleAuth, fs, path, FormData }, sanitizedQuestion)
             if (response) {
                 return res.status(200).json(response);
             }
         }).catch((error) => {
-            import(`@/configuration/JS/default`).then(async (module) => {
+            import(`@/configuration/default/server`).then(async (module) => {
                 const response = await module.start({ chain, axiosInstance: axios, user, BigQuery, DocumentProcessorServiceClient, GoogleAuth, fs, path, FormData }, sanitizedQuestion)
                 if (response) {
                     return res.status(200).json(response);

@@ -10,8 +10,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [JSModule, setJSModule] = useState<any>(null);
-  const [styles, setStyles] = useState<any>(null);
+  const [JSModule, setJSModule] = useState<any>({});
+  const [CSSStyles, setStyles] = useState<any>({});
   const router = useRouter();
   const {
     query: { 'chat-id': chatId },
@@ -43,7 +43,7 @@ export default function Layout({ children }: LayoutProps) {
   }, [chatId]);
 
   return (
-    <ThemeContext.Provider value={{ styles }}>
+    <ThemeContext.Provider value={{ styles: CSSStyles }}>
       <div className={styles.container}>
         {JSModule?.Navbar && (
           <header className={styles.navbar}>

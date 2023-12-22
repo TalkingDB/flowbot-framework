@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import styles from '@/styles/Home.module.css';
+import React, { useState, useContext } from 'react';
 import Button from '../Buttons/Button';
+import ThemeContext from '@/contexts/ThemeContext';
 
-const ShowDetails = ({ options, onSave }: { options: any, onSave: () => void }) => {
-  const [showButton, setShowButton] = useState<Boolean>(true)
+const ShowDetails = ({
+  options,
+  onSave,
+}: {
+  options: any;
+  onSave: () => void;
+}) => {
+  const { styles } = useContext(ThemeContext);
+  const [showButton, setShowButton] = useState<Boolean>(true);
   return (
     <div className={styles.detailsContainer}>
       <h3>{options.name}</h3>
@@ -25,9 +32,18 @@ const ShowDetails = ({ options, onSave }: { options: any, onSave: () => void }) 
         <h6>Main Address</h6>
         <span>{options.address}</span>
       </div>
-      {showButton && <div>
-        <Button onClick={() => { onSave(); setShowButton(false) }}>Confirm</Button>
-      </div>}
+      {showButton && (
+        <div>
+          <Button
+            onClick={() => {
+              onSave();
+              setShowButton(false);
+            }}
+          >
+            Confirm
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from '../../../configuration/CSS/Index.module.css';
+import React, { useContext } from 'react';
+import ThemeContext from '@/contexts/ThemeContext';
 
 interface Option {
   label: string;
@@ -9,11 +9,17 @@ interface Option {
 interface SelectInputProps {
   options: Option[];
   value: string;
-  label:string;
+  label: string;
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-const SelectInput: React.FC<SelectInputProps> = ({ options, value, onChange,label }) => {
+const SelectInput: React.FC<SelectInputProps> = ({
+  options,
+  value,
+  onChange,
+  label,
+}) => {
+  const { styles } = useContext(ThemeContext);
   return (
     <div className={styles.select_container}>
       <span>{label}</span>

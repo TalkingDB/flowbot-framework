@@ -1,6 +1,5 @@
-import React from 'react';
-import styles from '@/configuration/CSS/Index.module.css';
-
+import React, { useContext } from 'react';
+import ThemeContext from '@/contexts/ThemeContext';
 
 const Button = ({
   variant = 'primary', // Default variant is 'primary',
@@ -14,6 +13,7 @@ const Button = ({
   children: React.ReactNode;
   onClick?: () => void; // Define the onClick prop with the appropriate type
 }) => {
+  const { styles } = useContext(ThemeContext);
   let buttonClasses = '';
 
   if (variant === 'primary') {
@@ -22,14 +22,17 @@ const Button = ({
     buttonClasses = styles.secondaryButton; // Define your secondary button class
   } else if (variant === 'ghost') {
     buttonClasses = styles.ghostButton; // Define your ghost button class
-  }
-  else if (variant === 'link') {
+  } else if (variant === 'link') {
     buttonClasses = styles.linkButton; // Define your ghost button class
   }
 
-
   return (
-    <button className={buttonClasses} {...props} onClick={onClick} disabled={disabled}>
+    <button
+      className={buttonClasses}
+      {...props}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {children}
     </button>
   );

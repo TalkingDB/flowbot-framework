@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import SelectInput from '../SelectInput/SelectInput'; // Import the SelectInput component
 import TextInput from '../Input/TextInput';
-import styles from "../../../configuration/CSS/Index.module.css"
 import Button from '../Buttons/Button';
+import ThemeContext from '@/contexts/ThemeContext';
 
 interface Option {
   label: string;
@@ -14,20 +14,38 @@ interface AddressProps {
   states: Option[]; // An array of state options
   zip: String;
   street: String;
-  onSave: ()=>void;
+  onSave: () => void;
 }
 
-const Address: React.FC<AddressProps> = ({ cities, states, zip, street,onSave }) => {
+const Address: React.FC<AddressProps> = ({
+  cities,
+  states,
+  zip,
+  street,
+  onSave,
+}) => {
+  const { styles } = useContext(ThemeContext);
+
   return (
     <div className={styles.Address}>
       <div className={styles.Address_topcontainer}>
-        <SelectInput options={states} value="" onChange={() => { }} label='State' />
-        <SelectInput options={cities} value="" onChange={() => { }} label='City' />
-        <TextInput label='Zip Code' />
+        <SelectInput
+          options={states}
+          value=""
+          onChange={() => {}}
+          label="State"
+        />
+        <SelectInput
+          options={cities}
+          value=""
+          onChange={() => {}}
+          label="City"
+        />
+        <TextInput label="Zip Code" />
       </div>
-      <TextInput label='Street Address' width="100%" containerwidth='100%' />
+      <TextInput label="Street Address" width="100%" containerwidth="100%" />
       <div>
-      <Button onClick={onSave}>Save</Button>
+        <Button onClick={onSave}>Save</Button>
       </div>
     </div>
   );

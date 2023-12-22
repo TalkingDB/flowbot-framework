@@ -1,13 +1,15 @@
 import FileUploderIcon from '@/assets/svgs/icons/FileUploderIcon';
-import React, { useState } from 'react';
-import styles from '@/configuration/CSS/Index.module.css';
-
+import React, { useState, useContext } from 'react';
+import ThemeContext from '@/contexts/ThemeContext';
 
 interface FileUploadComponentProps {
   handleSubmit: (value: string, files: File[]) => void;
 }
 
-const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit }) => {
+const FileUploadComponent: React.FC<FileUploadComponentProps> = ({
+  handleSubmit,
+}) => {
+  const { styles } = useContext(ThemeContext);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,9 +18,13 @@ const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit 
 
     if (file && files) {
       getBase64(file, (result: any) => {
-        result = result.substring(result.indexOf(',') + 1)
-        const uploadedFile = JSON.stringify({ 'fileName': files[0].name, "imageData": result, "fileType": files[0].type })
-        handleSubmit(uploadedFile, files)
+        result = result.substring(result.indexOf(',') + 1);
+        const uploadedFile = JSON.stringify({
+          fileName: files[0].name,
+          imageData: result,
+          fileType: files[0].type,
+        });
+        handleSubmit(uploadedFile, files);
       });
     }
     if (files) {
@@ -30,7 +36,7 @@ const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit 
     let reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = function () {
-      cb(reader.result)
+      cb(reader.result);
     };
     reader.onerror = function (error) {
       console.log('Error: ', error);
@@ -41,9 +47,8 @@ const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit 
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     if (bytes === 0) return '0 Byte';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (Math.round(bytes / Math.pow(1024, i) * 100) / 100) + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
   };
-
 
   const renderFileList = () => {
     if (selectedFiles) {
@@ -53,12 +58,8 @@ const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit 
           {fileArray.map((file, index) => (
             <li key={index} className={styles.fileUploadComponent}>
               <FileUploderIcon />
-              <span className='pl-2'>
-                {file.name}
-              </span>
-              <small>
-                {formatBytes(file.size)}
-              </small>
+              <span className="pl-2">{file.name}</span>
+              <small>{formatBytes(file.size)}</small>
             </li>
           ))}
         </ul>
@@ -69,18 +70,16 @@ const FileUploadComponent: React.FC<FileUploadComponentProps> = ({ handleSubmit 
 
   return (
     <div>
-      {!selectedFiles && <input
-        type="file"
-        accept=".pdf, .png, .jpeg, .jpg"
-        multiple // Enable multi-select
-        onChange={handleFileChange}
-      />}
-
-      {selectedFiles && (
-        <div>
-          {renderFileList()}
-        </div>
+      {!selectedFiles && (
+        <input
+          type="file"
+          accept=".pdf, .png, .jpeg, .jpg"
+          multiple // Enable multi-select
+          onChange={handleFileChange}
+        />
       )}
+
+      {selectedFiles && <div>{renderFileList()}</div>}
     </div>
   );
 };

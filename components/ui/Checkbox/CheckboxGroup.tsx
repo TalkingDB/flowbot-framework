@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import styles from '@/configuration/CSS/Index.module.css';
+import React, { useState, useContext } from 'react';
 import Button from '../Buttons/Button';
+import ThemeContext from '@/contexts/ThemeContext';
 
 interface Item {
   label: string;
@@ -16,41 +16,62 @@ const CheckboxGroup = ({
   values: string;
   onChange: (value: string) => void;
 }) => {
-
-  const [selectedValues, setSelectedValue] = useState<Item[]>([])
-  const [showButton, setShowButton] = useState(true)
+  const { styles } = useContext(ThemeContext);
+  const [selectedValues, setSelectedValue] = useState<Item[]>([]);
+  const [showButton, setShowButton] = useState(true);
   const handleCheckboxChange = (option: Item) => {
-    if (selectedValues.some((selectedOption) => selectedOption.value === option.value)) {
-      setSelectedValue(selectedValues.filter((item) => item.value !== option.value));
+    if (
+      selectedValues.some(
+        (selectedOption) => selectedOption.value === option.value,
+      )
+    ) {
+      setSelectedValue(
+        selectedValues.filter((item) => item.value !== option.value),
+      );
     } else {
       setSelectedValue([...selectedValues, option]);
-      }
+    }
   };
 
   return (
     <>
       <div className={styles.checkboxGroup}>
         {options.map((option) => (
-          <label key={option.value}
-
-            className={`${styles.checkboxLabel} ${selectedValues.some((selectedOption) => selectedOption.value === option.value) ? styles.selected : ''}`}
+          <label
+            key={option.value}
+            className={`${styles.checkboxLabel} ${
+              selectedValues.some(
+                (selectedOption) => selectedOption.value === option.value,
+              )
+                ? styles.selected
+                : ''
+            }`}
           >
-            <span style={{width: "200px"}}>
-              {option.label}
-            </span>
+            <span style={{ width: '200px' }}>{option.label}</span>
             <input
               type="checkbox"
               value={option.value}
-              checked={selectedValues.some((selectedOption) => selectedOption.value === option.value)}
+              checked={selectedValues.some(
+                (selectedOption) => selectedOption.value === option.value,
+              )}
               onChange={() => handleCheckboxChange(option)}
               className={styles.checkboxInput}
             />
           </label>
         ))}
       </div>
-      {showButton && <div>
-        <Button onClick={() => { onChange(JSON.stringify(selectedValues)); setShowButton(false) }}>Confirm</Button>
-      </div >}
+      {showButton && (
+        <div>
+          <Button
+            onClick={() => {
+              onChange(JSON.stringify(selectedValues));
+              setShowButton(false);
+            }}
+          >
+            Confirm
+          </Button>
+        </div>
+      )}
     </>
   );
 };

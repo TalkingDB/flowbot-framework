@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
-import styles from '../../../configuration/CSS/Index.module.css';
+import React, { useState, useContext } from 'react';
 import Eye from '@/assets/svgs/Eye';
+import ThemeContext from '@/contexts/ThemeContext';
 
-const PasswordInput = ({ disabled, value, onChange }: { disabled: boolean, value: string, onChange: (e: any) => void; }) => {
+const PasswordInput = ({
+  disabled,
+  value,
+  onChange,
+}: {
+  disabled: boolean;
+  value: string;
+  onChange: (e: any) => void;
+}) => {
+  const { styles } = useContext(ThemeContext);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [inputType, setInputType] = useState('password');
 
@@ -15,7 +24,13 @@ const PasswordInput = ({ disabled, value, onChange }: { disabled: boolean, value
     <div className={styles.input_container}>
       <span>Password</span>
       <div className={styles.input_container}>
-        <input type={inputType} className={styles.password_input} disabled={disabled} value={value} onChange={onChange} />
+        <input
+          type={inputType}
+          className={styles.password_input}
+          disabled={disabled}
+          value={value}
+          onChange={onChange}
+        />
         <button
           onClick={togglePasswordVisibility}
           className={styles.show_hide_button}
