@@ -1,7 +1,6 @@
-import { SessionProvider } from 'next-auth/react';
 import '@/styles/base.css';
 import type { AppProps } from 'next/app';
-import "../configuration/CSS/Fonts.css"
+import "@/styles/Fonts.css"
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

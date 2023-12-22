@@ -23,7 +23,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                 resolve({ fields, files })
             })
         })
-
+        //TODO: Fix the new upload logic
+        return
         if (data) {
             /* Create directory for uploads */
             const { chatBotId } = data?.fields

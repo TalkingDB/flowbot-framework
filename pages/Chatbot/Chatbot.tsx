@@ -1,9 +1,8 @@
 import Button from '@/components/ui/Buttons/Button';
-import styles from './Signup.module.css';
+import styles from './Chatbot.module.css';
 import ChatIcon from '@/assets/svgs/ChatIcon';
 import { useEffect, useState, useRef } from 'react';
 import rehypeRaw from 'rehype-raw';
-import Signupform from '@/subcomponents/SignupForm/Signupform';
 import RegisterationGuy from '@/assets/svgs/RegisterationGuy';
 import { Message } from '@/types/chat';
 import LoadingDots from '@/components/ui/LoadingDots';
@@ -62,7 +61,7 @@ const stateOptions = [
 ];
 
 
-const Signup = () => {
+const Chatbot = () => {
   const [step, setStep] = useState(1);
   const [isSignupPage, setIsSignupPage] = useState(false);
   const [JSModule, setJSModule] = useState<any>(null);
@@ -104,7 +103,7 @@ const Signup = () => {
     ],
     history: [],
   });
-  const [homestyles, setStyle] = useState<any>(null);
+  const [homestyles, setStyle] = useState<any>({});
   const { messages, history } = messageState;
 
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -153,27 +152,34 @@ const Signup = () => {
 
   useEffect(() => {
     if (chatId) {
-      import(`@/configuration/JS/${chatId}`).then(module => {
+      import(`@/configuration/${chatId}/webapp`).then(module => {
         setJSModule(module)
       }).catch((error) => {
-        import(`@/configuration/JS/default`).then(module => {
+        import(`@/configuration/default/webapp`).then(module => {
           setJSModule(module)
+        });
+      });
+      import(`@/configuration/${chatId}/webapp/Index.module.css`).then(module => {
+        setStyle(module)
+      }).catch((error) => {
+        import(`@/configuration/default/webapp/Index.module.css`).then(module => {
+          setStyle(module)
         });
       });
     }
   }, [chatId]);
 
 
-
   useEffect(() => {
     setCurrentSession(generateRandomString("session_", 9))
-    import(`@/configuration/JS/default`).then(module => {
+    import(`@/configuration/default/webapp`).then(module => {
       setJSModule(module)
     });
-    import(`@/styles/Home.module.css`).then(module => {
+    import(`@/configuration/default/webapp/Index.module.css`).then(module => {
       setStyle(module)
     });
   }, [])
+  
 
   useEffect(() => {
     if (JSModule && JSModule?.conversational && JSModule?.ChatBotStep[activeIndex]?.fullWidth) {
@@ -440,7 +446,7 @@ const Signup = () => {
     <div className={styles['signup']} style={{ justifyContent: isPublishUrl && !JSModule?.testProject ? "center" : "" }}>
       <div className={styles['sidebar']} style={{ width: isPublishUrl ? "initial" : "" }}>
         {!JSModule?.testProject && !isPublishUrl &&
-          <ChatbotInfo chatBotId={newChatRoom} />
+          <ChatbotInfo chatBotId={newChatRoom} styles={homestyles}/>
         }
         {JSModule?.testProject &&
           <div style={{ backgroundImage: `url('./background.svg')`, backgroundSize: "contain", backgroundRepeat: "no-repeat", width: "518px", height: "848px", padding: "20px", boxSizing: "border-box", paddingTop: "102px", fontFamily: 'Aspekta', position: "relative" }}>
@@ -451,7 +457,7 @@ const Signup = () => {
       <div className={styles['main-content']} style={{ width: isPublishUrl && !JSModule?.testProject ? "initial" : "100%" }}>
         <div className={styles['main-header']}>
           <span>{JSModule?.getTitle}</span>
-          {JSModule?.testProject ? <Button variant="link">
+          {JSModule?.testProject ? <Button variant="link" styles={homestyles}>
             <ChatIcon />
             Chat with Platform Support
           </Button> :
@@ -477,7 +483,7 @@ const Signup = () => {
               <h3>{registrationMessage?.title}</h3>
               <span>{registrationMessage?.description}
               </span>
-              <Button onClick={() => nextStep()}>{`Get Started →`} </Button>
+              <Button onClick={() => nextStep()} styles={homestyles}>{`Get Started →`} </Button>
             </div>
           ) : (
             // <Signupform />
@@ -565,6 +571,7 @@ const Signup = () => {
                                       message?.step?.inputType ===
                                       'radioButton' ? (
                                       <RadioGroup
+                                        styles={homestyles}
                                         options={message?.step?.options}
                                         value={message?.step?.default}
                                         disabled={index !== messages.length - 1 ? true : false}
@@ -586,6 +593,7 @@ const Signup = () => {
                                       message?.step?.inputType ===
                                       'googleLogin' ? (
                                       <GoogleLoginComponent
+                                        styles={homestyles}
                                         disabled={index !== messages.length - 1 ? true : false}
                                         handleSubmit={(value) => {
                                           if (index === messages.length - 1) {
@@ -598,6 +606,7 @@ const Signup = () => {
                                     ) : null}
                                     {message?.step?.inputType === 'password' && index !== messages.length - 1 ? (
                                       <PasswordInput
+                                        styles={homestyles}
                                         disabled={message?.step?.disabled || true}
                                         value={message?.step?.answer}
                                         onChange={() => null}
@@ -625,6 +634,7 @@ const Signup = () => {
                                         }}
                                         zip={''}
                                         street={''}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
@@ -638,6 +648,7 @@ const Signup = () => {
                                           }
                                         }}
                                         options={message?.step?.options}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
@@ -650,6 +661,7 @@ const Signup = () => {
                                           }
                                         }}
                                         options={message?.step?.options}
+                                        styles={homestyles}
                                       // selectedValue={'value'}
                                       />
                                     ) : null}
@@ -663,6 +675,7 @@ const Signup = () => {
                                           }
                                         }}
                                         options={message?.step?.options}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
@@ -675,11 +688,13 @@ const Signup = () => {
                                           }
                                         }}
                                         options={message?.step?.options}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
                                       'autoComplete' ? (
                                       <AutoCompleteInput
+                                        styles={homestyles}
                                         value={message?.step?.default}
                                         onChange={(value) => {
                                           if (index === messages.length - 1) {
@@ -687,6 +702,7 @@ const Signup = () => {
                                           }
                                         }}
                                         options={message?.step?.options}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
@@ -699,6 +715,7 @@ const Signup = () => {
                                             handleSubmit(value);
                                           }
                                         }}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
@@ -724,6 +741,7 @@ const Signup = () => {
                                             handleSubmit(value);
                                           }
                                         }}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {message?.step?.inputType ===
@@ -734,6 +752,7 @@ const Signup = () => {
                                       'constructiondetails' ? (
                                       <ShowDetails
                                         options={message?.step?.options}
+                                        styles={homestyles}
                                         onSave={() => {
                                           if (index === messages.length - 1) {
                                             handleSubmit();
@@ -749,6 +768,7 @@ const Signup = () => {
                                             uploadFilehandler(files)
                                           }
                                         }}
+                                        styles={homestyles}
                                       />
                                     ) : null}
                                     {
@@ -810,6 +830,7 @@ const Signup = () => {
                                     {message?.step?.inputType ===
                                       'dateTimePicker' ? (
                                       <DateTimePicker
+                                        styles={homestyles}
                                         onClose={(value) => {
                                           if (index === messages.length - 1) {
                                             handleSubmit(value);
@@ -864,11 +885,11 @@ const Signup = () => {
                           </div>
                           <div className={homestyles?.editbtn}>
                             {message?.type !== 'apiMessage' && editableIndex !== index && !message?.error ? (
-                              <Button variant="link" onClick={() => { setEditableIndex(index) }}>
+                              <Button variant="link" onClick={() => { setEditableIndex(index) }} styles={homestyles}>
                                 <Pencil /> Edit
                               </Button>
                             ) : message?.type !== 'apiMessage' && editableIndex === index && !message?.error ? (
-                              <Button variant="link" onClick={() => { setEditableIndex(null); console.log("message from save ==> ", message) }}>
+                              <Button variant="link" onClick={() => { setEditableIndex(null); console.log("message from save ==> ", message) }} styles={homestyles}>
                                 Save
                               </Button>
                             )
@@ -937,4 +958,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Chatbot;
