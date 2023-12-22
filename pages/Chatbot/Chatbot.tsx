@@ -65,6 +65,7 @@ const stateOptions = [
 ];
 
 const Chatbot = () => {
+  const [botLoading, setBotLoading] = useState<Boolean>(true);
   const [step, setStep] = useState(1);
   const [isSignupPage, setIsSignupPage] = useState(false);
   const [JSModule, setJSModule] = useState<any>(null);
@@ -125,22 +126,19 @@ const Chatbot = () => {
     const updatedURL = url.toString();
     setCurrentUrl(updatedURL);
 
-    // Check if the chatId contains "publish"
-    if (chatId && !chatId.includes('admin')) {
+    if (chatId) {
       setIsPublishUrl(true);
     } else {
       setIsPublishUrl(false);
-    }
-    // Check if the 'chat-id' query parameter is present
-    if (!urlParams.has('chat-id')) {
-      // Query parameter is not present, redirect to a new URL
-      window.location.href = `${updatedURL}?chat-id=document-admin`;
     }
 
     const createNewChatRoom = () => {
       let chatroom = generateRandomString('document-', 8);
       if (chatId && chatId.includes('cover')) {
         chatroom = generateRandomString('cover-', 8);
+      }
+      if (!chatId) {
+        setNewChatRoom(chatroom);
       }
       if (!newChatRoom && chatId) {
         if (chatId.includes('admin')) {
@@ -156,6 +154,7 @@ const Chatbot = () => {
   }, []);
 
   useEffect(() => {
+    setBotLoading(true);
     if (chatId) {
       import(`@/configuration/${chatId}/webapp`)
         .then((module) => {
@@ -177,18 +176,19 @@ const Chatbot = () => {
             },
           );
         });
+    } else {
+      setCurrentSession(generateRandomString('session_', 9));
+      import(`@/configuration/default/webapp`).then((module) => {
+        setJSModule(module);
+      });
+      import(`@/configuration/default/webapp/Index.module.css`).then(
+        (module) => {
+          setStyle(module);
+        },
+      );
     }
+    setBotLoading(false);
   }, [chatId]);
-
-  useEffect(() => {
-    setCurrentSession(generateRandomString('session_', 9));
-    import(`@/configuration/default/webapp`).then((module) => {
-      setJSModule(module);
-    });
-    import(`@/configuration/default/webapp/Index.module.css`).then((module) => {
-      setStyle(module);
-    });
-  }, []);
 
   useEffect(() => {
     if (

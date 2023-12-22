@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styles from './layout.module.css'; // Import the CSS modules
-import Logo from '@/assets/svgs/Logo';
-import Button from './ui/Buttons/Button';
 import { useRouter } from 'next/router';
 import ThemeContext from '@/contexts/ThemeContext';
 
@@ -10,7 +8,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [JSModule, setJSModule] = useState<any>({});
   const [CSSStyles, setStyles] = useState<any>({});
   const router = useRouter();
   const {
@@ -19,15 +16,6 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     if (chatId) {
-      import(`@/configuration/${chatId}/webapp`)
-        .then((module) => {
-          setJSModule(module);
-        })
-        .catch((error) => {
-          import(`@/configuration/default/webapp`).then((module) => {
-            setJSModule(module);
-          });
-        });
       import(`@/configuration/${chatId}/webapp/Index.module.css`)
         .then((module) => {
           setStyles(module);
@@ -39,29 +27,18 @@ export default function Layout({ children }: LayoutProps) {
             },
           );
         });
+    } else {
+      import(`@/configuration/default/webapp/Index.module.css`).then(
+        (module) => {
+          setStyles(module);
+        },
+      );
     }
   }, [chatId]);
 
   return (
     <ThemeContext.Provider value={{ styles: CSSStyles }}>
       <div className={styles.container}>
-        {JSModule?.Navbar && (
-          <header className={styles.navbar}>
-            <div className={styles.logo}>
-              <Logo />
-            </div>
-            <nav className={styles['nav-links']}>
-              <a href="#">Home</a>
-              <a href="#">Partner With Us</a>
-              <a href="#">How it Works</a>
-            </nav>
-            <div className={styles.buttons}>
-              <Button variant="secondary">+ Post a Project</Button>
-              <Button variant="ghost">Login</Button>
-              <Button>Professional Registration</Button>
-            </div>
-          </header>
-        )}
         <div className={styles['main-content']}>{children}</div>
       </div>
     </ThemeContext.Provider>
