@@ -1,3 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-$APP
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  gcePersistentDisk:
+    pdName: pd-$APP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-$APP
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,6 +52,13 @@ spec:
           envFrom:
             - secretRef:
                 name: $APP-env
+          volumeMounts:
+            - name: app-config-volume
+              mountPath: "/app/configuration"
+      volumes:
+        - name: app-config-volume
+          persistentVolumeClaim:
+            claimName: pvc-$APP
 ---
 apiVersion: v1
 kind: Service

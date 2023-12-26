@@ -1,7 +1,7 @@
 import Button from '@/components/ui/Buttons/Button';
 import styles from './Chatbot.module.css';
 import ChatIcon from '@/assets/svgs/ChatIcon';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Fragment } from 'react';
 import rehypeRaw from 'rehype-raw';
 import RegisterationGuy from '@/assets/svgs/RegisterationGuy';
 import { Message } from '@/types/chat';
@@ -599,7 +599,7 @@ const Chatbot = () => {
                           : homestyles?.usermessage;
                     }
                     return (
-                      <>
+                      <Fragment key={index}>
                         {message?.step?.header && (
                           <div className={homestyles?.headerContainer}>
                             <div className={homestyles?.stepCircle}>
@@ -1042,7 +1042,7 @@ const Chatbot = () => {
                             )}
                           </div>
                         </div>
-                      </>
+                      </Fragment>
                     );
                   })}
                 </div>
