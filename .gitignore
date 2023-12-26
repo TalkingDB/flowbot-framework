@@ -50,3 +50,5 @@ build.sh
 
 configuration/*
 !configuration/default
+
+zipped_configuration
