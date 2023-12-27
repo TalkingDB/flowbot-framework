@@ -13,8 +13,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const requestData = {
             code: code,
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-            client_secret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
-            redirect_uri: process.env.NEXT_PUBLIC_NEXTAUTH_CALLBACK_URL,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
+            redirect_uri: process.env.NEXTAUTH_CALLBACK_URL,
             grant_type: 'authorization_code',
         };
         const response = await axios.post(tokenEndpoint, null, { params: requestData });
