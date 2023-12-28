@@ -76,15 +76,7 @@ const Chatbot = () => {
     history: [string, string][];
     pendingSourceDocs?: Document[];
   }>({
-    messages: [
-      {
-        message: JSModule?.conversational
-          ? JSModule?.ChatBotStep[activeIndex]?.question
-          : JSModule?.getWelcomeMessage,
-        type: 'apiMessage',
-        src: '',
-      },
-    ],
+    messages: [],
     history: [],
   });
   const [styles, setStyle] = useState<any>({});
@@ -171,21 +163,12 @@ const Chatbot = () => {
   useEffect(() => {
     if (
       JSModule &&
-      JSModule?.conversational &&
-      JSModule?.ChatBotStep[activeIndex]?.fullWidth
+      JSModule?.conversational
     ) {
-      setRegistrationMessage(JSModule?.ChatBotStep[activeIndex]);
-      setIsSignupPage(true);
+      handleSubmit()
     } else {
       setMessageState({
         messages: [
-          {
-            message: JSModule?.conversational
-              ? JSModule?.ChatBotStep[0]?.question
-              : JSModule?.getWelcomeMessage,
-            type: 'apiMessage',
-            src: '',
-          },
         ],
         history: [],
       });
@@ -197,33 +180,8 @@ const Chatbot = () => {
 
   async function nextStep() {
     setActiveIndex(1);
+    handleSubmit()
   }
-
-  useEffect(() => {
-    if (activeIndex && activeIndex === 1) {
-      setIsSignupPage(false);
-      setMessageState({
-        messages: [],
-        history: [],
-      });
-      handleSubmit();
-    }
-    if (
-      JSModule &&
-      JSModule?.conversational &&
-      JSModule?.ChatBotStep.find((item: any) => item.id == activeIndex)
-        ?.fullWidth
-    ) {
-      setRegistrationMessage(
-        JSModule?.ChatBotStep.find((item: any) => item.id == activeIndex),
-      );
-      setIsSignupPage(true);
-      setMessageState({
-        messages: [],
-        history: [],
-      });
-    }
-  }, [activeIndex]);
 
   useEffect(() => {
     console.log('getWelcomeMessage  ==>', messageState);
@@ -329,6 +287,12 @@ const Chatbot = () => {
           }));
         }
       } else {
+
+        if (data.currentStep.fullWidth) {
+          setRegistrationMessage(data.currentStep);
+          setIsSignupPage(true);
+          return 
+        }
         if (!data.hideAnswer) {
           setMessageState((state) => ({
             ...state,
@@ -346,7 +310,7 @@ const Chatbot = () => {
         if (data.currentStep.update) {
           JSModule?.leftPanelStateUpdate(+data.currentStep.header.step);
         }
-
+        setIsSignupPage(false);
         setMessageState((state) => ({
           ...state,
           messages: [
