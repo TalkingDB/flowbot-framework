@@ -4,6 +4,7 @@ import Button from '../Buttons/Button';
 import FileUploderIcon from '@/assets/svgs/icons/FileUploderIcon';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import Invoice from '../Invoice/Invoice';
 
 interface IDataItem {
   label: string;
@@ -115,7 +116,9 @@ const Summary = (props: IProps) => {
               {item.data?.map((dataItem, ind) => (
                 <>
                   <div className={styles.item} key={ind}>
+                  {!['invoiceSheet', 'markdown'].includes(dataItem.inputType) && (
                     <h3 className={styles.h3}>{dataItem.label}</h3>
+                  )}
                     {dataItem.inputType === 'password' ? (
                       <span className={styles.span}>
                         {'*'.repeat(dataItem.value.length)}
@@ -160,9 +163,11 @@ const Summary = (props: IProps) => {
                         <FileUploderIcon />
                         <span className={styles.span}>{dataItem.value}</span>
                       </div>
-                    ) : dataItem.inputType !== 'markdown' ? (
-                      <span className={styles.span}>{dataItem.value}</span>
-                    ) : null}
+                    ) : dataItem.inputType === 'invoiceSheet' ? null
+                      :
+                      dataItem.inputType !== 'markdown' ? (
+                        <span className={styles.span}>{dataItem.value}</span>
+                      ) : null}
                   </div>
 
                   {dataItem.inputType === 'markdown' && (
@@ -171,6 +176,19 @@ const Summary = (props: IProps) => {
                       <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                         {dataItem.value}
                       </ReactMarkdown>
+                    </div>
+                  )}
+                  {dataItem.inputType === 'invoiceSheet' && (
+                    <div>
+                      <Invoice
+                        options={JSON.parse(dataItem.value)}
+                        values={JSON.parse(dataItem.value)}
+                        showList={false}
+                        showConfirmButton={false}
+                        disabled={true}
+                        onChange={(value) => {
+                        }}
+                      />
                     </div>
                   )}
                 </>

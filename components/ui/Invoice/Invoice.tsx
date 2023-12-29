@@ -9,21 +9,22 @@ const Invoice = ({
   values,
   onChange,
   disabled,
-  showList=true
+  showList=true,
+  showConfirmButton=true
 }: {
   options: { label: string; value: string; data: any; table: [] }[];
   values: any;
   onChange: (value: string) => void;
   disabled?: boolean;
   showList?: boolean;
+  showConfirmButton?: boolean;
 }) => {
   const [selectedValues, setSelectedValue] = useState<
-    { label: string; value: string; hideList: boolean; data: any; table: [] }[] | []
+    { label: string; value: string; data: any; table: [] }[] | []
   >([]);
   const [showButton, setShowButton] = useState(true);
   const [show, setShow] = useState<null | number>(!showList ? 0 : null);
 
-  console.log("options?.hideList ==>", showList)
   const handleCheckboxChange = (value: {
     label: string;
     value: string;
@@ -159,6 +160,11 @@ const Invoice = ({
                                         <div>Image 3</div>
                                     </div>
                                 </div> */}
+                <div className="mt-4">
+                  <p className={styles.descriptionText}>
+                    {option?.data?.chargeDescription}
+                  </p>
+                </div>
                 <div className="mt-6">
                   <CostCards
                     options={[
@@ -193,7 +199,7 @@ const Invoice = ({
           </>
         ))}
       </div>
-      {showButton && showList && (
+      {showButton && showList && showConfirmButton && (
         <div className="mt-4">
           <Button
             onClick={() => {
@@ -207,11 +213,11 @@ const Invoice = ({
           </Button>
         </div>
       )}
-      {!showList && showButton && (
+      {!showList && showButton && showConfirmButton && (
         <div className="mt-4">
           <Button
             onClick={() => {
-              onChange(JSON.stringify(selectedValues));
+              onChange(JSON.stringify(options));
               setShowButton(false);
             }}
           >
