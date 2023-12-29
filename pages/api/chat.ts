@@ -16,7 +16,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history, enablegptfallback, session } = req.body;
+  const { question, history, enablegptfallback, session, reqQuery } = req.body;
   const { pinecone_name_space } = req.query;
   const chatBotId = String(pinecone_name_space || 'default');
   // console.log('question', question, session);
@@ -51,14 +51,19 @@ export default async function handler(
             fs,
             path,
             FormData,
+            reqQuery
           },
           sanitizedQuestion,
         );
+        if (response?.redirect) {
+          return res.redirect(response.redirect);
+        }
         if (response) {
           return res.status(200).json(response);
         }
       })
       .catch((error) => {
+        console.log("error ==>", error)
         import(`@/configuration/default/server`).then(async (module) => {
           const response = await module.start(
             {

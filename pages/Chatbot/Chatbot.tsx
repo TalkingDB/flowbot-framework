@@ -267,6 +267,7 @@ const Chatbot = () => {
             question,
             history,
             session: currentSession,
+            reqQuery: router.query
           }),
         },
       );
@@ -518,7 +519,7 @@ const Chatbot = () => {
               <RegisterationGuy />
               <h3>{registrationMessage?.title}</h3>
               <span>{registrationMessage?.description}</span>
-              <Button onClick={() => nextStep()}>{`Get Started →`} </Button>
+              <Button onClick={() => nextStep()}>{registrationMessage?.buttonText || `Get Started → `}</Button>
             </div>
           ) : (
             // <Signupform />
