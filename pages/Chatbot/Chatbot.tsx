@@ -285,37 +285,44 @@ const Chatbot = () => {
         }, data.currentStep.await);
       }
       if (data.error) {
-        setMessageState((state) => ({
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              type: 'userMessage',
-              message: data.currentStep.answer || question,
-              error: true,
-              errorMessage: data.errorMessage,
-              src: 'test',
-              id: Math.random(),
-            },
-          ],
-        }));
-        if (data.currentStep.showQuestion) {
-          setMessageState((state) => ({
-            ...state,
-            messages: [
-              ...state.messages,
-              {
-                type: 'apiMessage',
-                message: data.text,
-                src: data.src,
-                step: data.currentStep || {},
-                sourceDocs: data.sourceDocuments,
-                id: Math.random(),
-              },
-            ],
-            history: [...state.history, [question, data.text]],
-          }));
-        }
+          if (data.currentStep.hideUserResponse) {
+            setMessageState((state) => ({
+              ...state,
+              messages: [
+                ...state.messages,
+                {
+                  type: 'apiMessage',
+                  message: `${data.errorMessage}`,
+                  src: data.src,
+                  step: data.currentStep || {},
+                  sourceDocs: data.sourceDocuments,
+                  id: Math.random(),
+                },
+              ],
+            }));
+          } else {
+            setMessageState((state) => ({
+              ...state,
+              messages: [
+                ...state.messages,
+                {
+                  type: 'userMessage',
+                  message: data.currentStep.answer || question,
+                  src: 'test',
+                  id: Math.random(),
+                },
+                {
+                  type: 'apiMessage',
+                  message: `${data.errorMessage}`,
+                  src: data.src,
+                  step: data.currentStep || {},
+                  sourceDocs: data.sourceDocuments,
+                  id: Math.random(),
+                },
+              ],
+              history: [...state.history, [question, data.currentStep.answer || question]],
+            }));
+          }  
       } else {
 
         if (data.currentStep.fullWidth) {
