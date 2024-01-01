@@ -124,13 +124,9 @@ const Summary = (props: IProps) => {
                         {'*'.repeat(dataItem.value.length)}
                       </span>
                     ) : dataItem.inputType === 'multiselect' ||
-                      dataItem.inputType === 'checkboxButton' ? (
+                      dataItem.inputType === 'checkboxButton' && item?.header !== "Services Offered" ? (
                       <div
-                        style={{
-                          display: 'flex',
-                          columnGap: '8px',
-                          paddingTop: '4px',
-                        }}
+                        className={styles.answerContainer}
                       >
                         {JSON.parse(dataItem.value).map(
                           (
@@ -164,11 +160,39 @@ const Summary = (props: IProps) => {
                         <span className={styles.span}>{dataItem.value}</span>
                       </div>
                     ) : dataItem.inputType === 'invoiceSheet' ? null
-                      :
-                      dataItem.inputType !== 'markdown' ? (
+                      : item?.header === "Services Offered" && ind === item.data.length - 1 ? null 
+                      : dataItem.inputType !== 'markdown' ? (
                         <span className={styles.span}>{dataItem.value}</span>
                       ) : null}
                   </div>
+
+                  {
+                    item?.header === "Services Offered"  && ind === item.data.length - 1 && (
+                      <div
+                        className={styles.answerContainer}
+                      >
+                        {JSON.parse(dataItem.value).map(
+                          (
+                            item: { label: string; value: string },
+                            index: any,
+                          ) => (
+                            <span
+                              key={index}
+                              className={styles.span}
+                              style={{
+                                padding: '4px 8px',
+                                backgroundColor: '#F1F4F9',
+                                borderRadius: '6px',
+                                color: '#727A8B',
+                              }}
+                            >
+                              {item.label}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    )
+                  }
 
                   {dataItem.inputType === 'markdown' && (
                     <div>
