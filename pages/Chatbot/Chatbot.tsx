@@ -286,20 +286,49 @@ const Chatbot = () => {
       }
       if (data.error) {
           if (data.currentStep.hideUserResponse) {
-            setMessageState((state) => ({
-              ...state,
-              messages: [
-                ...state.messages,
-                {
-                  type: 'apiMessage',
-                  message: `${data.errorMessage}`,
-                  src: data.src,
-                  step: data.currentStep || {},
-                  sourceDocs: data.sourceDocuments,
-                  id: Math.random(),
-                },
-              ],
-            }));
+            let stepInfo = JSON.parse(JSON.stringify(data.currentStep))
+            {/* @ts-ignore */}
+            stepInfo["inputType"] = 'text'
+            if (data.currentStep.showQuestion) {
+              setMessageState((state) => ({
+                ...state,
+                messages: [
+                  ...state.messages,
+                  {
+                    type: 'apiMessage',
+                    message: `${data.errorMessage}`,
+                    src: data.src,
+                    step: stepInfo || {},
+                    sourceDocs: data.sourceDocuments,
+                    id: Math.random(),
+                  },
+                  {
+                    type: 'apiMessage',
+                    message: data.text,
+                    src: data.src,
+                    step: data.currentStep || {},
+                    sourceDocs: data.sourceDocuments,
+                    id: Math.random(),
+                  },
+                ],
+                history: [...state.history, [question, data.text]],
+              }));
+            } else {
+              setMessageState((state) => ({
+                ...state,
+                messages: [
+                  ...state.messages,
+                  {
+                    type: 'apiMessage',
+                    message: `${data.errorMessage}`,
+                    src: data.src,
+                    step: data.currentStep || {},
+                    sourceDocs: data.sourceDocuments,
+                    id: Math.random(),
+                  },
+                ],
+              }));
+            }
           } else {
             setMessageState((state) => ({
               ...state,
