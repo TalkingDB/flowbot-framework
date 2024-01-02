@@ -20,7 +20,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history, enablegptfallback, session } = req.body;
+  const { question, history, enablegptfallback, session, reqQuery } = req.body;
   const { pinecone_name_space } = req.query;
   const chatBotId = String(pinecone_name_space || 'default');
   // console.log('question', question, session);
@@ -59,6 +59,7 @@ export default async function handler(
                 fs,
                 path,
                 FormData,
+                reqQuery,
                 chatBotId,
                 headers,
                 parser,
@@ -91,6 +92,7 @@ export default async function handler(
                 fs,
                 path,
                 FormData,
+                reqQuery,
                 chatBotId,
                 headers,
                 parser,

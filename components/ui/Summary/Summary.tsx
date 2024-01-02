@@ -4,6 +4,7 @@ import Button from '../Buttons/Button';
 import FileUploderIcon from '@/assets/svgs/icons/FileUploderIcon';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import Invoice from '../Invoice/Invoice';
 
 interface IDataItem {
   label: string;
@@ -115,19 +116,17 @@ const Summary = (props: IProps) => {
               {item.data?.map((dataItem, ind) => (
                 <>
                   <div className={styles.item} key={ind}>
+                  {!['invoiceSheet', 'markdown'].includes(dataItem.inputType) && (
                     <h3 className={styles.h3}>{dataItem.label}</h3>
+                  )}
                     {dataItem.inputType === 'password' ? (
                       <span className={styles.span}>
                         {'*'.repeat(dataItem.value.length)}
                       </span>
                     ) : dataItem.inputType === 'multiselect' ||
-                      dataItem.inputType === 'checkboxButton' ? (
+                      dataItem.inputType === 'checkboxButton' && item?.header !== "Services Offered" ? (
                       <div
-                        style={{
-                          display: 'flex',
-                          columnGap: '8px',
-                          paddingTop: '4px',
-                        }}
+                        className={styles.answerContainer}
                       >
                         {JSON.parse(dataItem.value).map(
                           (
@@ -160,10 +159,40 @@ const Summary = (props: IProps) => {
                         <FileUploderIcon />
                         <span className={styles.span}>{dataItem.value}</span>
                       </div>
-                    ) : dataItem.inputType !== 'markdown' ? (
-                      <span className={styles.span}>{dataItem.value}</span>
-                    ) : null}
+                    ) : dataItem.inputType === 'invoiceSheet' ? null
+                      : item?.header === "Services Offered" && ind === item.data.length - 1 ? null 
+                      : dataItem.inputType !== 'markdown' ? (
+                        <span className={styles.span}>{dataItem.value}</span>
+                      ) : null}
                   </div>
+
+                  {
+                    item?.header === "Services Offered"  && ind === item.data.length - 1 && (
+                      <div
+                        className={styles.answerContainer}
+                      >
+                        {JSON.parse(dataItem.value).map(
+                          (
+                            item: { label: string; value: string },
+                            index: any,
+                          ) => (
+                            <span
+                              key={index}
+                              className={styles.span}
+                              style={{
+                                padding: '4px 8px',
+                                backgroundColor: '#F1F4F9',
+                                borderRadius: '6px',
+                                color: '#727A8B',
+                              }}
+                            >
+                              {item.label}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    )
+                  }
 
                   {dataItem.inputType === 'markdown' && (
                     <div>
@@ -171,6 +200,19 @@ const Summary = (props: IProps) => {
                       <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                         {dataItem.value}
                       </ReactMarkdown>
+                    </div>
+                  )}
+                  {dataItem.inputType === 'invoiceSheet' && (
+                    <div>
+                      <Invoice
+                        options={JSON.parse(dataItem.value)}
+                        values={JSON.parse(dataItem.value)}
+                        showList={false}
+                        showConfirmButton={false}
+                        disabled={true}
+                        onChange={(value) => {
+                        }}
+                      />
                     </div>
                   )}
                 </>
