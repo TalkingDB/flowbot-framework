@@ -61,6 +61,7 @@ const Chatbot = () => {
   const {
     query: { 'chat-id': chatId, code: openidCode },
   } = router;
+  const [initChat, setInitChat] = useState<boolean>(false);
   const [newChatRoom, setNewChatRoom] = useState<string>('');
   const [isPublishUrl, setIsPublishUrl] = useState<boolean>(false);
   const [currentUrl, setCurrentUrl] = useState<string>('');
@@ -164,9 +165,11 @@ const Chatbot = () => {
   }, [chatId]);
 
   useEffect(() => {
-    if (JSModule && JSModule?.conversational) {
+    if (!initChat && JSModule && JSModule?.conversational) {
+      setInitChat(true);
       handleSubmit();
     } else {
+      setInitChat(false);
       setMessageState({
         messages: [],
         history: [],
@@ -290,17 +293,17 @@ const Chatbot = () => {
             question,
             history,
             session: currentSession,
-            reqQuery: router.query
+            reqQuery: router.query,
           }),
         },
       );
       const data = await response.json();
       if (data.redirect) {
-        window.location.href = data.redirect
-        return
+        window.location.href = data.redirect;
+        return;
       }
       if (data?.currentStep?.updateLeftPanel) {
-        setHtmlFile(data?.currentStep?.updateLeftPanel);
+        setLeftPanelHtml(data?.currentStep?.updateLeftPanel);
       }
       if (data.currentStep.await) {
         setTimeout(() => {
@@ -308,61 +311,41 @@ const Chatbot = () => {
         }, data.currentStep.await);
       }
       if (data.error) {
-          if (data.currentStep.hideUserResponse) {
-            let stepInfo = JSON.parse(JSON.stringify(data.currentStep))
-            {/* @ts-ignore */}
-            stepInfo["inputType"] = 'text'
-            if (data.currentStep.showQuestion) {
-              setMessageState((state) => ({
-                ...state,
-                messages: [
-                  ...state.messages,
-                  {
-                    type: 'apiMessage',
-                    message: `${data.errorMessage}`,
-                    src: data.src,
-                    step: stepInfo || {},
-                    sourceDocs: data.sourceDocuments,
-                    id: Math.random(),
-                  },
-                  {
-                    type: 'apiMessage',
-                    message: data.text,
-                    src: data.src,
-                    step: data.currentStep || {},
-                    sourceDocs: data.sourceDocuments,
-                    id: Math.random(),
-                  },
-                ],
-                history: [...state.history, [question, data.text]],
-              }));
-            } else {
-              setMessageState((state) => ({
-                ...state,
-                messages: [
-                  ...state.messages,
-                  {
-                    type: 'apiMessage',
-                    message: `${data.errorMessage}`,
-                    src: data.src,
-                    step: data.currentStep || {},
-                    sourceDocs: data.sourceDocuments,
-                    id: Math.random(),
-                  },
-                ],
-              }));
-            }
-          } else {
+        if (data.currentStep.hideUserResponse) {
+          let stepInfo = JSON.parse(JSON.stringify(data.currentStep));
+          {
+            /* @ts-ignore */
+          }
+          stepInfo['inputType'] = 'text';
+          if (data.currentStep.showQuestion) {
             setMessageState((state) => ({
               ...state,
               messages: [
                 ...state.messages,
                 {
-                  type: 'userMessage',
-                  message: data.currentStep.answer || question,
-                  src: 'test',
+                  type: 'apiMessage',
+                  message: `${data.errorMessage}`,
+                  src: data.src,
+                  step: stepInfo || {},
+                  sourceDocs: data.sourceDocuments,
                   id: Math.random(),
                 },
+                {
+                  type: 'apiMessage',
+                  message: data.text,
+                  src: data.src,
+                  step: data.currentStep || {},
+                  sourceDocs: data.sourceDocuments,
+                  id: Math.random(),
+                },
+              ],
+              history: [...state.history, [question, data.text]],
+            }));
+          } else {
+            setMessageState((state) => ({
+              ...state,
+              messages: [
+                ...state.messages,
                 {
                   type: 'apiMessage',
                   message: `${data.errorMessage}`,
@@ -372,9 +355,34 @@ const Chatbot = () => {
                   id: Math.random(),
                 },
               ],
-              history: [...state.history, [question, data.currentStep.answer || question]],
             }));
-          }  
+          }
+        } else {
+          setMessageState((state) => ({
+            ...state,
+            messages: [
+              ...state.messages,
+              {
+                type: 'userMessage',
+                message: data.currentStep.answer || question,
+                src: 'test',
+                id: Math.random(),
+              },
+              {
+                type: 'apiMessage',
+                message: `${data.errorMessage}`,
+                src: data.src,
+                step: data.currentStep || {},
+                sourceDocs: data.sourceDocuments,
+                id: Math.random(),
+              },
+            ],
+            history: [
+              ...state.history,
+              [question, data.currentStep.answer || question],
+            ],
+          }));
+        }
       } else {
         if (data.currentStep.fullWidth) {
           setRegistrationMessage(data.currentStep);
@@ -569,7 +577,9 @@ const Chatbot = () => {
               <RegisterationGuy />
               <h3>{registrationMessage?.title}</h3>
               <span>{registrationMessage?.description}</span>
-              <Button onClick={() => nextStep()}>{registrationMessage?.buttonText || `Get Started → `}</Button>
+              <Button onClick={() => nextStep()}>
+                {registrationMessage?.buttonText || `Get Started → `}
+              </Button>
             </div>
           ) : (
             <>
@@ -856,11 +866,15 @@ const Chatbot = () => {
                                         }}
                                       />
                                     ) : null}
-                                    {message?.step?.inputType === 'invoice' || message?.step?.inputType === "invoiceSheet" ? (
+                                    {message?.step?.inputType === 'invoice' ||
+                                    message?.step?.inputType ===
+                                      'invoiceSheet' ? (
                                       <Invoice
                                         options={message?.step?.options}
                                         values={message?.step?.options}
-                                        showList={message?.step?.inputType === 'invoice'}
+                                        showList={
+                                          message?.step?.inputType === 'invoice'
+                                        }
                                         disabled={
                                           index !== messages.length - 1
                                             ? true
