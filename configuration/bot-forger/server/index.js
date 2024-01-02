@@ -434,7 +434,7 @@ export const ChatBotStep = ({ chatBotId, tokenUser, answer }) => [
               chatbot_id: chatbot_id,
               node_name: intent_data?.webapp_node,
             });
-            let update_webapp_prompt = `update above with request '${intent_data?.node_update_request}'. Ensure to keep same data type and structure`;
+            let update_webapp_prompt = `update above with request '${intent_data?.node_update_request}'. Ensure to keep same data type and structure and show full code with no description and no explaination.`;
             content = await handleChatGPT(
               event,
               webapp_node_value,
