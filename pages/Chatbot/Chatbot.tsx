@@ -73,6 +73,7 @@ const Chatbot = () => {
 
   const [leftPanelHtml, setLeftPanelHtml] = useState('');
   const [headerPaneHtml, setHeaderPaneHtml] = useState('');
+  const [content, setContent] = useState('');
 
   const [messageState, setMessageState] = useState<{
     messages: Message[];
@@ -256,6 +257,11 @@ const Chatbot = () => {
     }
   };
 
+  const handleInputChange = (event: any) => {
+    const newContent = event.target.innerText;
+    setContent(newContent);
+  };
+
   const disableUserInput = () => {
     if (messages.length > 0 && messages[messages.length - 1]?.step) {
       let message = messages[messages.length - 1];
@@ -267,16 +273,21 @@ const Chatbot = () => {
     }
   };
 
+  function getContent(index: number) {
+    messages.splice(index, 2)
+    setMessageState((state) => ({
+      ...state,
+      messages: [...messages],
+    }));
+  }
+
   //handle form submission
-  async function handleSubmit(value?: string, update?: boolean) {
+  async function handleSubmit(value?: string, update: boolean=false) {
     let question = query.trim();
     if (!query) {
       question = value?.trim() || '';
     }
-    // console.log("Value handleSubmit question ==>", question)
-    if (update !== false) {
-      checklastmessage(question);
-    }
+    
     setLoading(true);
     setQuery('');
     try {
@@ -294,6 +305,7 @@ const Chatbot = () => {
             history,
             session: currentSession,
             reqQuery: router.query,
+            edit: update
           }),
         },
       );
@@ -430,7 +442,7 @@ const Chatbot = () => {
       } else {
         setHiddenInput(false);
       }
-
+      setContent('')
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -671,6 +683,7 @@ const Chatbot = () => {
                                           ? true
                                           : false
                                       }
+                                      onInput={handleInputChange}
                                     >
                                       <ReactMarkdown
                                         // @ts-ignore
@@ -1043,13 +1056,16 @@ const Chatbot = () => {
                             </div>
                           </div>
                           <div className={styles?.editbtn}>
-                            {message?.type !== 'apiMessage' &&
+                            {message?.type !== 'apiMessage' && 
+                            (messages[index - 1]?.step?.inputType === 'text' || messages[index - 1]?.step?.inputType === 'number') && 
+                            messages?.length - 2 === index &&
                             editableIndex !== index &&
                             !message?.error ? (
                               <Button
                                 variant="link"
                                 onClick={() => {
                                   setEditableIndex(index);
+                                  setContent(message.message)
                                 }}
                               >
                                 <Pencil /> Edit
@@ -1061,17 +1077,13 @@ const Chatbot = () => {
                                 variant="link"
                                 onClick={() => {
                                   setEditableIndex(null);
-                                  console.log(
-                                    'message from save ==> ',
-                                    message,
-                                  );
+                                  getContent(index)
+                                  handleSubmit(content,true)
                                 }}
                               >
                                 Save
                               </Button>
-                            ) : (
-                              <></>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                       </Fragment>

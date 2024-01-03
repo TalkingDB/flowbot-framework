@@ -60,6 +60,7 @@ export default async function handler(
                 path,
                 FormData,
                 reqQuery,
+                reqBody: req.body,
                 chatBotId,
                 headers,
                 parser,
