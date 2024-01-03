@@ -166,7 +166,7 @@ const Chatbot = () => {
   }, [chatId]);
 
   useEffect(() => {
-    if (!initChat && JSModule && JSModule?.conversational) {
+    if (!initChat && JSModule && JSModule?.conversational && chatId) {
       setInitChat(true);
       handleSubmit();
     } else {
@@ -279,6 +279,22 @@ const Chatbot = () => {
       ...state,
       messages: [...messages],
     }));
+  }
+
+  // remove redirect url parameters
+  function removeAuthTokenFromURL() {
+    let currentUrl = window.location.href;
+    if (currentUrl.includes('authtoken=')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const chatIdParam = urlParams.get('chat-id');
+      const newSearchParams = new URLSearchParams();
+      if (chatIdParam) {
+        newSearchParams.set('chat-id', chatIdParam);
+      }
+      const updatedUrl = `${window.location.origin}${window.location.pathname}?${newSearchParams.toString()}${window.location.hash}`;
+      window.history.replaceState({ path: updatedUrl }, '', updatedUrl);
+    }
+    return
   }
 
   //handle form submission
@@ -444,6 +460,7 @@ const Chatbot = () => {
       }
       setContent('')
       setLoading(false);
+      removeAuthTokenFromURL()
     } catch (error) {
       setLoading(false);
       console.log('error', error);
