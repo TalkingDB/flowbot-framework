@@ -1,5 +1,4 @@
 import Button from '@/components/ui/Buttons/Button';
-import styles from './Chatbot.module.css';
 import ChatIcon from '@/assets/svgs/ChatIcon';
 import { useEffect, useState, useRef, Fragment } from 'react';
 import rehypeRaw from 'rehype-raw';
@@ -24,7 +23,6 @@ import {
 } from '@/apiRequests';
 import { PromptModal } from '@/components/customPromptModal';
 import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
-import Generate from '@/assets/svgs/icons/Generate';
 import CheckboxGroup from '@/components/ui/Checkbox/CheckboxGroup';
 import SelectInputField from '@/components/ui/SelectInputField/SelectInputField';
 import NextFunction from '@/components/NextFunction';
@@ -34,14 +32,12 @@ import LoginPasswordAsk from '@/components/ui/LoginPasswordAsk/LoginPasswordAsk'
 import ColumnCards from '@/components/ui/Radio/ColumnCards';
 import GoogleLoginComponent from '@/components/ui/Radio/GoogleLoginComponent';
 import Summary from '@/components/ui/Summary/Summary';
-import { useSession, signIn, signOut } from 'next-auth/react';
 import MultiSelectInput from '@/components/ui/MutiSelectInput/MultiSelectInput';
 import AutoCompleteInput from '@/components/ui/AutoCompleteInput/AutoCompleteInput';
 import Table from '@/components/ui/Table/Table';
 import CostCards from '@/components/ui/CostCards/CostCards';
 import InstallationInfo from '@/components/ui/InstallationInfo/InstallationInfo';
 import Invoice from '@/components/ui/Invoice/Invoice';
-import TextInput from '@/components/ui/Input/TextInput';
 import SearchInput from '@/components/ui/Search/Search';
 import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
@@ -50,23 +46,10 @@ import ProjectCard from '@/components/ui/ProjectCard/ProjectCard';
 import RatingCard from '@/components/ui/RatingCard/RatingCard';
 import ReferralCard from '@/components/ui/ReferralCard/ReferralCard';
 
-const cityOptions = [
-  { value: 'new-york', label: 'New York' },
-  { value: 'los-angeles', label: 'Los Angeles' },
-  { value: 'chicago', label: 'Chicago' },
-  // Add more city options as needed
-];
-
-const stateOptions = [
-  { value: 'new-york', label: 'New York' },
-  { value: 'california', label: 'California' },
-  { value: 'illinois', label: 'Illinois' },
-  // Add more state options as needed
-];
+declare const window: any;
 
 const Chatbot = () => {
   const [botLoading, setBotLoading] = useState<Boolean>(true);
-  const [step, setStep] = useState(1);
   const [isSignupPage, setIsSignupPage] = useState(false);
   const [JSModule, setJSModule] = useState<any>(null);
   const [query, setQuery] = useState<string>('');
@@ -76,21 +59,20 @@ const Chatbot = () => {
   const [currentSession, setCurrentSession] = useState<string>('');
   const router = useRouter();
   const {
-    query: { 'chat-id': chatId },
+    query: { 'chat-id': chatId, code: openidCode },
   } = router;
+  const [initChat, setInitChat] = useState<boolean>(false);
   const [newChatRoom, setNewChatRoom] = useState<string>('');
   const [isPublishUrl, setIsPublishUrl] = useState<boolean>(false);
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [promptModal, setPromptModal] = useState<boolean>(false);
   const [promptTemplate, setPromptTemplate] = useState<string | any>('');
-  const [selectedValues, setSelectedValues] = useState([]); // Initial empty array
-  const [htmlFile, setHtmlFile] = useState('');
   const [editableIndex, setEditableIndex] = useState<number | null>(null);
   const [disableInput, setDisableInput] = useState(false);
+  const [hiddenInput, setHiddenInput] = useState(false);
 
-  const handleCheckboxChange = (values: any) => {
-    setSelectedValues(values);
-  };
+  const [leftPanelHtml, setLeftPanelHtml] = useState('');
+  const [headerPaneHtml, setHeaderPaneHtml] = useState('');
 
   const [messageState, setMessageState] = useState<{
     messages: Message[];
@@ -101,7 +83,7 @@ const Chatbot = () => {
     messages: [],
     history: [],
   });
-  const [homestyles, setStyle] = useState<any>({});
+  const [styles, setStyle] = useState<any>({});
   const { messages, history } = messageState;
 
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -183,26 +165,69 @@ const Chatbot = () => {
   }, [chatId]);
 
   useEffect(() => {
-    if (
-      JSModule &&
-      JSModule?.conversational
-    ) {
-      handleSubmit()
+    if (!initChat && JSModule && JSModule?.conversational) {
+      setInitChat(true);
+      handleSubmit();
     } else {
+      setInitChat(false);
       setMessageState({
-        messages: [
-        ],
+        messages: [],
         history: [],
       });
     }
     if (JSModule) {
-      setHtmlFile(JSModule?.leftPanelHtml);
+      setLeftPanelHtml(JSModule?.leftPanelHtml);
+      window.handleLeftPanel = JSModule?.handleLeftPanel;
+      setHeaderPaneHtml(JSModule?.headerPaneHtml);
+      window.handleHeaderPane = JSModule?.handleHeaderPane;
     }
   }, [JSModule]);
 
+  useEffect(() => {
+    let access_token = localStorage.getItem('access_token');
+    if (access_token && JSModule?.handleHeaderPane) {
+      JSModule?.handleHeaderPane('login');
+    }
+  }, [JSModule?.handleHeaderPane]);
+
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        if (openidCode && JSModule?.openid) {
+          const response = await fetch(JSModule?.openid?.token_endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              grant_type: 'authorization_code',
+              client_id: JSModule?.openid?.client_id,
+              code: openidCode as string,
+              redirect_uri: `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}?chat-id=${chatId}`,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const { access_token } = data;
+
+            localStorage.setItem('access_token', access_token);
+            window.location.href = `/?chat-id=${chatId}`;
+          } else {
+            console.error('Token request failed:', response.statusText);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching token:', error);
+      }
+    };
+
+    getToken();
+  }, [openidCode, JSModule?.openid]);
+
   async function nextStep() {
     setActiveIndex(1);
-    handleSubmit()
+    handleSubmit();
   }
 
   useEffect(() => {
@@ -254,30 +279,31 @@ const Chatbot = () => {
     }
     setLoading(true);
     setQuery('');
-
     try {
+      let access_token = localStorage.getItem('access_token');
       const response = await fetch(
         `/api/chat?pinecone_name_space=${newChatRoom}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${access_token}`,
           },
           body: JSON.stringify({
             question,
             history,
             session: currentSession,
-            reqQuery: router.query
+            reqQuery: router.query,
           }),
         },
       );
       const data = await response.json();
       if (data.redirect) {
-        window.location.href = data.redirect
-        return
+        window.location.href = data.redirect;
+        return;
       }
       if (data?.currentStep?.updateLeftPanel) {
-        setHtmlFile(data?.currentStep?.updateLeftPanel);
+        setLeftPanelHtml(data?.currentStep?.updateLeftPanel);
       }
       if (data.currentStep.await) {
         setTimeout(() => {
@@ -285,61 +311,41 @@ const Chatbot = () => {
         }, data.currentStep.await);
       }
       if (data.error) {
-          if (data.currentStep.hideUserResponse) {
-            let stepInfo = JSON.parse(JSON.stringify(data.currentStep))
-            {/* @ts-ignore */}
-            stepInfo["inputType"] = 'text'
-            if (data.currentStep.showQuestion) {
-              setMessageState((state) => ({
-                ...state,
-                messages: [
-                  ...state.messages,
-                  {
-                    type: 'apiMessage',
-                    message: `${data.errorMessage}`,
-                    src: data.src,
-                    step: stepInfo || {},
-                    sourceDocs: data.sourceDocuments,
-                    id: Math.random(),
-                  },
-                  {
-                    type: 'apiMessage',
-                    message: data.text,
-                    src: data.src,
-                    step: data.currentStep || {},
-                    sourceDocs: data.sourceDocuments,
-                    id: Math.random(),
-                  },
-                ],
-                history: [...state.history, [question, data.text]],
-              }));
-            } else {
-              setMessageState((state) => ({
-                ...state,
-                messages: [
-                  ...state.messages,
-                  {
-                    type: 'apiMessage',
-                    message: `${data.errorMessage}`,
-                    src: data.src,
-                    step: data.currentStep || {},
-                    sourceDocs: data.sourceDocuments,
-                    id: Math.random(),
-                  },
-                ],
-              }));
-            }
-          } else {
+        if (data.currentStep.hideUserResponse) {
+          let stepInfo = JSON.parse(JSON.stringify(data.currentStep));
+          {
+            /* @ts-ignore */
+          }
+          stepInfo['inputType'] = 'text';
+          if (data.currentStep.showQuestion) {
             setMessageState((state) => ({
               ...state,
               messages: [
                 ...state.messages,
                 {
-                  type: 'userMessage',
-                  message: data.currentStep.answer || question,
-                  src: 'test',
+                  type: 'apiMessage',
+                  message: `${data.errorMessage}`,
+                  src: data.src,
+                  step: stepInfo || {},
+                  sourceDocs: data.sourceDocuments,
                   id: Math.random(),
                 },
+                {
+                  type: 'apiMessage',
+                  message: data.text,
+                  src: data.src,
+                  step: data.currentStep || {},
+                  sourceDocs: data.sourceDocuments,
+                  id: Math.random(),
+                },
+              ],
+              history: [...state.history, [question, data.text]],
+            }));
+          } else {
+            setMessageState((state) => ({
+              ...state,
+              messages: [
+                ...state.messages,
                 {
                   type: 'apiMessage',
                   message: `${data.errorMessage}`,
@@ -349,17 +355,41 @@ const Chatbot = () => {
                   id: Math.random(),
                 },
               ],
-              history: [...state.history, [question, data.currentStep.answer || question]],
             }));
-          }  
+          }
+        } else {
+          setMessageState((state) => ({
+            ...state,
+            messages: [
+              ...state.messages,
+              {
+                type: 'userMessage',
+                message: data.currentStep.answer || question,
+                src: 'test',
+                id: Math.random(),
+              },
+              {
+                type: 'apiMessage',
+                message: `${data.errorMessage}`,
+                src: data.src,
+                step: data.currentStep || {},
+                sourceDocs: data.sourceDocuments,
+                id: Math.random(),
+              },
+            ],
+            history: [
+              ...state.history,
+              [question, data.currentStep.answer || question],
+            ],
+          }));
+        }
       } else {
-
         if (data.currentStep.fullWidth) {
           setRegistrationMessage(data.currentStep);
           setIsSignupPage(true);
-          return 
+          return;
         }
-        if (!data.hideAnswer) {
+        if (!data.hideAnswer && (data.currentStep.answer || question)) {
           setMessageState((state) => ({
             ...state,
             messages: [
@@ -393,6 +423,12 @@ const Chatbot = () => {
           history: [...state.history, [question, data.text]],
         }));
         setActiveIndex(data.currentStep.id);
+      }
+
+      if (data.currentStep?.inputHidden) {
+        setHiddenInput(true);
+      } else {
+        setHiddenInput(false);
       }
 
       setLoading(false);
@@ -473,102 +509,83 @@ const Chatbot = () => {
   }, [newChatRoom]);
 
   return (
-    <div
-      className={styles['signup']}
-      style={{
-        justifyContent: isPublishUrl && !JSModule?.testProject ? 'center' : '',
-      }}
-    >
-      <div
-        className={styles['sidebar']}
-        style={{ width: isPublishUrl ? 'initial' : '' }}
-      >
-        {!JSModule?.testProject && !isPublishUrl && (
-          <ChatbotInfo chatBotId={newChatRoom} />
-        )}
-        {JSModule?.testProject && (
+    <div className={styles['container']}>
+      {JSModule?.enabled && (
+        <div
+          className={styles['sidebar']}
+          dangerouslySetInnerHTML={{ __html: leftPanelHtml }}
+        />
+      )}
+      <div className={styles['main-content']}>
+        {headerPaneHtml ? (
           <div
-            style={{
-              backgroundImage: `url('./background.webp')`,
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              width: '518px',
-              height: '848px',
-              padding: '20px',
-              boxSizing: 'border-box',
-              paddingTop: '102px',
-              fontFamily: 'Aspekta',
-              position: 'relative',
-            }}
-          >
-            <div dangerouslySetInnerHTML={{ __html: htmlFile }} />
+            className={styles['main-header']}
+            dangerouslySetInnerHTML={{ __html: headerPaneHtml }}
+          />
+        ) : (
+          <div className={styles['main-header']}>
+            <span>{JSModule?.getTitle}</span>
+            {JSModule?.enabled ? (
+              <Button variant="link">
+                <ChatIcon />
+                Chat with Platform Support
+              </Button>
+            ) : (
+              <div className="flex items-center ">
+                <button
+                  className={`${styles.buttonWrapper} bg-white mr-4`}
+                  onClick={() => setPromptModal(true)}
+                >
+                  Custom Prompt
+                </button>
+                {promptModal && (
+                  <PromptModal
+                    onChangeHandler={onPromptChange}
+                    onClose={(val: string | undefined) => {
+                      val === 'submit' ? updatePrompt() : null;
+                      setPromptModal(false);
+                    }}
+                    resetTemplate={resetdefaultPromptTemplate}
+                    data={promptTemplate}
+                    onSubmit={() => updatePrompt()}
+                  />
+                )}
+
+                {!isPublishUrl && (
+                  <div className="flex">
+                    <button
+                      className={`${styles.buttonWrapper}`}
+                      onClick={() => {
+                        window.alert(
+                          `Copy the Url for chatbot - ${currentUrl}?chat-id=${newChatRoom}`,
+                        );
+                      }}
+                    >
+                      Publish & Share
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
-      </div>
-      <div
-        className={styles['main-content']}
-        style={{
-          width: isPublishUrl && !JSModule?.testProject ? 'initial' : '100%',
-        }}
-      >
-        <div className={styles['main-header']}>
-          <span>{JSModule?.getTitle}</span>
-          {JSModule?.testProject ? (
-            <Button variant="link">
-              <ChatIcon />
-              Chat with Platform Support
-            </Button>
-          ) : (
-            <div className="flex items-center ">
-              <button
-                className={`${styles.buttonWrapper} bg-white mr-4`}
-                onClick={() => setPromptModal(true)}
-              >
-                Custom Prompt
-              </button>
-              {promptModal && (
-                <PromptModal
-                  onChangeHandler={onPromptChange}
-                  onClose={(val: string | undefined) => {
-                    val === 'submit' ? updatePrompt() : null;
-                    setPromptModal(false);
-                  }}
-                  resetTemplate={resetdefaultPromptTemplate}
-                  data={promptTemplate}
-                  onSubmit={() => updatePrompt()}
-                />
-              )}
 
-              {!isPublishUrl && (
-                <div className="flex">
-                  <button
-                    className={`${styles.buttonWrapper}`}
-                    onClick={() => {
-                      window.alert(
-                        `Copy the Url for chatbot - ${currentUrl}?chat-id=${newChatRoom}`,
-                      );
-                    }}
-                  >
-                    Publish & Share
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
         <div className={styles['main']}>
+          {/* TODO: Move RegisterationGuy to conf */}
           {isSignupPage ? (
             <div className={styles['registerguy']}>
               <RegisterationGuy />
               <h3>{registrationMessage?.title}</h3>
               <span>{registrationMessage?.description}</span>
-              <Button onClick={() => nextStep()}>{registrationMessage?.buttonText || `Get Started → `}</Button>
+              <Button onClick={() => nextStep()}>
+                {registrationMessage?.buttonText || `Get Started → `}
+              </Button>
             </div>
           ) : (
-            // <Signupform />
             <>
-              <div className={homestyles?.cloud}>
-                <div ref={messageListRef} className={homestyles?.messagelist}>
+              <div className={styles?.cloud}>
+                <div ref={messageListRef} className={styles?.messagelist}>
+                  {/* TODO: Move Icon to conf */}
                   {messages.map((message, index) => {
                     let icon;
                     let className;
@@ -586,40 +603,40 @@ const Chatbot = () => {
                           />
                         </div>
                       );
-                      if (JSModule?.testProject) {
+                      if (JSModule?.enabled) {
                         icon = (
-                          <div className={homestyles?.libby}>
+                          <div className={styles?.libby}>
                             <Libby />
                           </div>
                         );
                       }
-                      className = homestyles?.apimessage;
+                      className = styles?.apimessage;
                     } else {
                       icon = (
-                        <div className={homestyles?.libby}>
+                        <div className={styles?.libby}>
                           <You />
                         </div>
                       );
                       // The latest message sent by the user will be animated while waiting for a response
                       className =
                         loading && index === messages?.length - 1
-                          ? homestyles?.usermessagewaiting
-                          : homestyles?.usermessage;
+                          ? styles?.usermessagewaiting
+                          : styles?.usermessage;
                     }
                     return (
                       <Fragment key={index}>
                         {message?.step?.header && (
-                          <div className={homestyles?.headerContainer}>
-                            <div className={homestyles?.stepCircle}>
+                          <div className={styles?.headerContainer}>
+                            <div className={styles?.stepCircle}>
                               {message?.step?.header?.step}
                             </div>
-                            <div className={homestyles?.stepText}>
+                            <div className={styles?.stepText}>
                               {message?.step?.header?.text}
                             </div>
                           </div>
                         )}
                         <div key={`chatMessage-${index}`} className={className}>
-                          <div className={homestyles?.container}>
+                          <div className={styles?.container}>
                             {icon}
                             <div
                               style={{
@@ -629,16 +646,14 @@ const Chatbot = () => {
                               }}
                             >
                               {message?.type == 'apiMessage' ? (
-                                <span className={homestyles?.botName}>
+                                <span className={styles?.botName}>
                                   {JSModule?.botName}
                                 </span>
                               ) : (
-                                <span className={homestyles?.botName}>You</span>
+                                <span className={styles?.botName}>You</span>
                               )}
-                              <div className={homestyles?.markdownanswer}>
-                                <span
-                                  className={homestyles?.markdownanswerspan}
-                                >
+                              <div className={styles?.markdownanswer}>
+                                <span className={styles?.markdownanswerspan}>
                                   <div style={{ display: 'flex' }}>
                                     <div
                                       style={
@@ -678,7 +693,7 @@ const Chatbot = () => {
                                   </div>
                                 </span>
                                 {JSModule?.conversational && (
-                                  <div className={homestyles?.extraContainer}>
+                                  <div className={styles?.extraContainer}>
                                     {message.type === 'apiMessage' &&
                                     message?.step?.inputType ===
                                       'radioButton' ? (
@@ -753,8 +768,12 @@ const Chatbot = () => {
                                     ) : null}
                                     {message?.step?.inputType === 'address' ? (
                                       <Address
-                                        states={stateOptions}
-                                        cities={cityOptions}
+                                        states={
+                                          message?.step?.options?.stateOptions
+                                        }
+                                        cities={
+                                          message?.step?.options?.cityOptions
+                                        }
                                         onSave={() => {
                                           if (index === messages.length - 1) {
                                             handleSubmit();
@@ -847,11 +866,15 @@ const Chatbot = () => {
                                         }}
                                       />
                                     ) : null}
-                                    {message?.step?.inputType === 'invoice' || message?.step?.inputType === "invoiceSheet" ? (
+                                    {message?.step?.inputType === 'invoice' ||
+                                    message?.step?.inputType ===
+                                      'invoiceSheet' ? (
                                       <Invoice
                                         options={message?.step?.options}
                                         values={message?.step?.options}
-                                        showList={message?.step?.inputType === 'invoice'}
+                                        showList={
+                                          message?.step?.inputType === 'invoice'
+                                        }
                                         disabled={
                                           index !== messages.length - 1
                                             ? true
@@ -1019,7 +1042,7 @@ const Chatbot = () => {
                               </div>
                             </div>
                           </div>
-                          <div className={homestyles?.editbtn}>
+                          <div className={styles?.editbtn}>
                             {message?.type !== 'apiMessage' &&
                             editableIndex !== index &&
                             !message?.error ? (
@@ -1056,63 +1079,67 @@ const Chatbot = () => {
                   })}
                 </div>
               </div>
-              <div className={homestyles?.center}>
-                <div className={homestyles?.cloudform}>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSubmit();
-                    }}
-                  >
-                    <textarea
-                      disabled={disableInput || loading}
-                      onKeyDown={handleEnter}
-                      ref={textAreaRef}
-                      autoFocus={false}
-                      rows={1}
-                      maxLength={10000}
-                      id="userInput"
-                      name="userInput"
-                      placeholder={
-                        loading
-                          ? 'Waiting for response...'
-                          : JSModule?.getInputPlaceholder
-                      }
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      className={homestyles?.textarea}
-                    />
-                    <button
-                      type="submit"
-                      disabled={!query || loading}
-                      className={homestyles?.generatebutton}
-                      style={{
-                        background:
-                          JSModule?.sendIcon && !loading
-                            ? JSModule?.themeColor
-                            : '',
+              <div className={styles?.center}>
+                <div className={styles?.cloudform}>
+                  {hiddenInput ? (
+                    <></>
+                  ) : (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit();
                       }}
                     >
-                      {loading ? (
-                        <div className={homestyles?.loadingwheel}>
-                          <LoadingDots color="#000" />
-                        </div>
-                      ) : (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              JSModule?.sendIcon ??
-                              `
+                      <textarea
+                        disabled={disableInput || loading}
+                        onKeyDown={handleEnter}
+                        ref={textAreaRef}
+                        autoFocus={false}
+                        rows={1}
+                        maxLength={10000}
+                        id="userInput"
+                        name="userInput"
+                        placeholder={
+                          loading
+                            ? 'Waiting for response...'
+                            : JSModule?.getInputPlaceholder
+                        }
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        className={styles?.textarea}
+                      />
+                      <button
+                        type="submit"
+                        disabled={!query || loading}
+                        className={styles?.generatebutton}
+                        style={{
+                          background:
+                            JSModule?.sendIcon && !loading
+                              ? JSModule?.themeColor
+                              : '',
+                        }}
+                      >
+                        {loading ? (
+                          <div className={styles?.loadingwheel}>
+                            <LoadingDots color="#000" />
+                          </div>
+                        ) : (
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                JSModule?.sendIcon ??
+                                `
                           <svg viewBox="0 0 20 20" class="Home_svgicon__PLaWz" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
                             </path>
                         </svg>
                           `,
-                          }}
-                        />
-                      )}
-                    </button>
-                  </form>
+                            }}
+                          />
+                        )}
+                      </button>
+                    </form>
+                  )}
                 </div>
               </div>
             </>
