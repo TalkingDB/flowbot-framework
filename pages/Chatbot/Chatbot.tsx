@@ -603,9 +603,20 @@ const Chatbot = () => {
           {/* TODO: Move RegisterationGuy to conf */}
           {isSignupPage ? (
             <div className={styles['registerguy']}>
-              <RegisterationGuy />
+              {registrationMessage?.image && 
+                <div
+                  dangerouslySetInnerHTML={{ __html: registrationMessage?.image }}
+                />
+              }
               <h3>{registrationMessage?.title}</h3>
-              <span>{registrationMessage?.description}</span>
+              <span>
+                <ReactMarkdown
+                  // @ts-ignore
+                  rehypePlugins={[rehypeRaw]}
+                >
+                  {registrationMessage?.description}
+                </ReactMarkdown>
+              </span>
               <Button onClick={() => nextStep()}>
                 {registrationMessage?.buttonText || `Get Started → `}
               </Button>
@@ -770,7 +781,7 @@ const Chatbot = () => {
                                         value={message?.step?.answer}
                                       />
                                     ) : null}
-                                    {message?.step?.inputType === 'password' &&
+                                    {message?.step?.inputType === 'password' &&                                    
                                     index !== messages.length - 1 ? (
                                       <PasswordInput
                                         disabled={
