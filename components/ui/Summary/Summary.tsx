@@ -155,10 +155,14 @@ const Summary = (props: IProps) => {
                         {JSON.parse(dataItem.value).label}
                       </span>
                     ) : dataItem.inputType === 'fileUploader' ? (
+                      JSON.parse(dataItem.value).map((item: string) => 
+                      <div>
                       <div className="flex gap-x-1 pt-1">
                         <FileUploderIcon />
-                        <span className={styles.span}>{dataItem.value}</span>
+                          <span className={styles.span}>{item}</span>
+                        </div>
                       </div>
+                        )
                     ) : dataItem.inputType === 'invoiceSheet' ? null
                       : item?.header === "Services Offered" && ind === item.data.length - 1 ? null 
                       : dataItem.inputType !== 'markdown' ? (
