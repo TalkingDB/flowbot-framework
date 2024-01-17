@@ -45,6 +45,9 @@ import CostMilestone from '@/components/ui/CostMilestone/CostMilestone';
 import ProjectCard from '@/components/ui/ProjectCard/ProjectCard';
 import RatingCard from '@/components/ui/RatingCard/RatingCard';
 import ReferralCard from '@/components/ui/ReferralCard/ReferralCard';
+import io from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import ToolTip from '@/assets/svgs/icons/ToolTip';
 
 declare const window: any;
 
@@ -297,7 +300,6 @@ const Chatbot = () => {
     return
   }
 
-  //handle form submission
   async function handleSubmit(value?: string, update: boolean=false) {
     let question = query.trim();
     if (!query) {
@@ -326,14 +328,15 @@ const Chatbot = () => {
         },
       );
       const data = await response.json();
-      if (data.redirect) {
+      console.log("data",data)
+      if (data?.redirect) {
         window.location.href = data.redirect;
         return;
       }
       if (data?.currentStep?.updateLeftPanel) {
         setLeftPanelHtml(data?.currentStep?.updateLeftPanel);
       }
-      if (data.currentStep.await) {
+      if (data?.currentStep?.await) {
         setTimeout(() => {
           handleSubmit('dummy', false);
         }, data.currentStep.await);
@@ -686,9 +689,26 @@ const Chatbot = () => {
                               }}
                             >
                               {message?.type == 'apiMessage' ? (
-                                <span className={styles?.botName}>
-                                  {JSModule?.botName}
-                                </span>
+                               <span
+                                 className={styles?.botName}
+                                 style={{
+                                   display: 'flex',
+                                   flexDirection: 'row',
+                                   gap: '2px',
+                                   width: '100%',
+                                 }}
+                               >
+                                 {JSModule?.botName}
+                                 {message?.step?.tooltip && (
+                                   <p
+                                     title={message?.step?.tooltip}
+                                     className={styles?.tooltipIcon}
+                                   >
+                                     <ToolTip />
+                                   </p>
+                                 )}
+                               </span>
+
                               ) : (
                                 <span className={styles?.botName}>You</span>
                               )}
