@@ -398,7 +398,7 @@ const Chatbot = () => {
     if(socketMode){
       setLoading(false)
     }
-     if (socketState ) {
+     if (socketState && !value) {
       setQuery('');
       console.log('inside setSocket true',value)
       console.log('inside setSocket query', query)
