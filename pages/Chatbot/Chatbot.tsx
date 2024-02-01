@@ -435,6 +435,9 @@ const Chatbot = () => {
         window.location.href = data.redirect;
         return;
       }
+      if (data?.currentStep?.windowOpen) {
+        window.open(data?.currentStep?.windowOpen,"_blank")
+      }
       if (data?.currentStep?.updateLeftPanel) {
         setLeftPanelHtml(data?.currentStep?.updateLeftPanel);
       }
