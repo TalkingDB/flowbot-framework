@@ -69,6 +69,8 @@ deploy() {
     local CONNECTOR="$4"
     local SIMILARITY="$5"
     local ENV_FILE="$6"
+
+    echo "$ENV_FILE"
     
     if [ -n "$K8S_KEY" ]; then
         echo "$K8S_KEY" > k8s-key.json
@@ -107,7 +109,7 @@ deploy-dev() {
     "$GCP_CLUSTER_DEV" \
     "$CONNECTOR_DEV" \
     "$SIMILARITY_DEV" \
-    "$ENV_DEV"
+    "$ENV_FILE"
 }
 
 deploy-prod() {
