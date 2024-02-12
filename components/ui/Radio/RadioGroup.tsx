@@ -38,7 +38,7 @@ const RadioGroup = ({
             selectedValue?.value === option.value ? styles.selected : ''
           }`}
         >
-          <span style={{ width: '180px' }}>{option.label}</span>
+          <span style={{ width: '200px' }}>{option.label}</span>
           <input
             type="radio"
             value={option.value}
