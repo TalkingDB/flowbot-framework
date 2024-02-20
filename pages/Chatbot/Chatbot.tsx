@@ -42,12 +42,18 @@ import { Message } from '@/types/chat';
 import { generateRandomString } from '@/utils/generateRandomeString';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useDebugValue, useEffect, useRef, useState } from 'react';
 import { InlineWidget } from "react-calendly";
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client';
+import Drawer from 'react-modern-drawer'
+import 'react-modern-drawer/dist/index.css'
+import HamburgerIcon from '@/assets/HamburgerIcon';
+import PdfIcon from '@/assets/svgs/PdfIcon';
+import DownloadIcon from '@/assets/svgs/downloadIcon';
+import FileList from './File';
 
 declare const window: any;
 
@@ -77,6 +83,21 @@ const Chatbot = () => {
   const [leftPanelHtml, setLeftPanelHtml] = useState('');
   const [headerPaneHtml, setHeaderPaneHtml] = useState('');
   const [content, setContent] = useState('');
+  const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState('right');
+  const [chatbots, setChatbots] = useState([])
+  const [pdfList, setPdfList] = useState<
+  { name?: string; training_id?: string; is_trained: boolean }[]
+>([]);
+  const fileInputRef = useRef(null);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
+  const [selectedFileType, setSelectedFileType] = useState<string>('PDF');
+  const [selecteduploadFile, setSelecteduploadFile] = useState<File | null>(
+    null,
+  );
+  const [trainingInProgress, setTrainingInProgress] = useState(false);
+
+
 
   const [messageState, setMessageState] = useState<{
     messages: Message[];
@@ -697,6 +718,98 @@ const Chatbot = () => {
     }
   }, [newChatRoom]);
 
+
+
+  useEffect(()=>{
+    const fetchData = async (chatbotUrl: string, apiKey: string) => {
+      try {
+        const response = await fetch(chatbotUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'API-KEY': apiKey
+          }
+        });
+        const jsonData = await response.json();
+        console.log("data response::::::", jsonData.data)
+        setChatbots(jsonData.data)
+        setPdfList(jsonData.data)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    if(JSModule?.trainedChatbotUrl){
+      console.log("inside chatbot call:::::")
+      fetchData(JSModule?.trainedChatbotUrl as string, JSModule?.trainedChatbotAPIKey as string);
+    }
+  },[JSModule])
+
+
+  const [uploading, setUploading] = useState(false);
+
+
+
+  useEffect(()=>{
+    const fetchData = async (chatbotUrl: string, apiKey: string) => {
+      try {
+        const response = await fetch(chatbotUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'API-KEY': apiKey
+          }
+        });
+        const jsonData = await response.json();
+        console.log("data response::::::", jsonData.data)
+        setChatbots(jsonData.data)
+        setPdfList(jsonData.data)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    const uploadPDFFile = async (uploadUrl: string, apiKey: string) => {
+      setUploading(true);
+      const FormData = require('form-data');
+      let data = new FormData();
+      data.append('file', selecteduploadFile);
+  
+      try {
+        const response = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'API-KEY': apiKey
+          },
+          body: data
+        });
+        const jsonData = await response.json();
+        console.log("uploaded data----::::::", jsonData)
+        console.log("filename",selecteduploadFile?.name)
+        fetchData(JSModule?.trainedChatbotUrl as string, JSModule?.trainedChatbotAPIKey as string);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setUploading(false); 
+      }
+    }
+
+    if(JSModule?.documentUploadUrl && selecteduploadFile){
+      console.log("inside upload call:::::")
+      uploadPDFFile(JSModule?.documentUploadUrl as string, JSModule?.trainedChatbotAPIKey as string);
+    }
+  },[selecteduploadFile])
+
+
+  const handlePDFFileChange = (e: any) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setShowLoader(true);
+      setSelectedFileType('PDF');
+      setSelecteduploadFile(selectedFile);
+      setTrainingInProgress(true);
+    }
+  };
+
   if(botLoading || !(JSModule?.enabled)){
     return(
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -709,6 +822,95 @@ const Chatbot = () => {
   else{
   return (
     <div className={styles['container']}>
+      {JSModule?.drawerEnabled && (
+        <Drawer
+          open={open}
+          onClose={() => setOpen(false)}
+          direction="right"
+          className="bla bla bla"
+          style={{ width: '400px' }}
+        >
+          <div className={styles['HamburgerContainer']}>
+            <div className={styles['HamburgerHeaderContainer']}>
+              <div className={styles['HamburgerHeader']}>
+                Trained on documents
+              </div>
+            </div>
+            <div className={styles['DataContainer']}>
+              {chatbots.map((chatbot, index) => (
+                <div key={index} className={styles['DataItem']}>
+                  <PdfIcon />
+                  <span>{chatbot?.name}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles['Divider']}></div>
+            <div className={styles['UploaderHeader']}>Upload Document</div>
+            <div className={styles['UploadContainer']}>
+              {!uploading ? <div className={styles['UploadButtonContainer']}>
+                <label className={styles['uploadButton']}>
+                  <input
+                    type="file"
+                    accept=".pdf,.docx"
+                    className="hidden"
+                    onChange={handlePDFFileChange}
+                    ref={fileInputRef}
+                  />
+                  <div style={{ transform: 'translateY(2px)' }} >
+                  <DownloadIcon />
+                  </div>
+                  <span style={{ transform: 'translateY(-2px)' }} className="mt-2 text-base leading-normal">
+                    Select a file
+                  </span>
+                </label>
+                <div>
+                   <span>Supported Files: Pdf</span>
+                </div>
+              </div>:
+               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+               <div style={{ width: '150px',  height: '150px' }}>
+                 <Loader loader="https://lottie.host/d1fd738a-f930-465e-b6ff-cf2412f791db/8r36ZWTWb2.json" />
+               </div>
+             </div>
+              }
+              
+            </div>
+            {pdfList &&
+            <div style={{ width: '100%' }}>
+              {pdfList.map((item, index) => {
+                return (
+                  <FileList
+                    key={index}
+                    selectedFileType={selectedFileType}
+                    filename={item.name || item.training_id}
+                    index={index}
+                    progressUrl={JSModule?.trainedChatbotProgressUrl}
+                    apiKey={JSModule?.trainedChatbotAPIKey}
+                    trained={item.is_trained}
+                    setTrainingInProgress={setTrainingInProgress}
+                  />
+                );
+              })}
+            </div>}
+            {/* <div className={styles['InProgressContainer']}>
+                <div className={styles['DataItem']}>
+                    <PdfIcon />
+                    
+                  </div>
+              </div> */}
+          </div>
+        </Drawer>
+      )}
+      {JSModule?.drawerEnabled && (
+        <div style={{ position: 'absolute', top: 8, right: 20 }}>
+          <span
+            style={{ cursor: 'pointer', background: 'transparent' }}
+            onClick={() => setOpen(true)}
+          >
+            <HamburgerIcon />
+          </span>
+        </div>
+      )}
       {JSModule?.enabled && (
         <div
           className={styles['sidebar']}
@@ -716,7 +918,7 @@ const Chatbot = () => {
         />
       )}
       <div className={styles['main-content']}>
-        {(headerPaneHtml|| JSModule?.headerPaneHtml) ? (
+        {headerPaneHtml || JSModule?.headerPaneHtml ? (
           <div
             className={styles['main-header']}
             dangerouslySetInnerHTML={{ __html: headerPaneHtml }}
@@ -773,11 +975,13 @@ const Chatbot = () => {
           {/* TODO: Move RegisterationGuy to conf */}
           {isSignupPage ? (
             <div className={styles['registerguy']}>
-              {registrationMessage?.image && 
+              {registrationMessage?.image && (
                 <div
-                  dangerouslySetInnerHTML={{ __html: registrationMessage?.image }}
+                  dangerouslySetInnerHTML={{
+                    __html: registrationMessage?.image,
+                  }}
                 />
-              }
+              )}
               <h3>{registrationMessage?.title}</h3>
               <span>
                 <ReactMarkdown
@@ -816,9 +1020,15 @@ const Chatbot = () => {
                       if (JSModule?.enabled) {
                         icon = (
                           <div className={styles?.libby}>
-                            {
-                              JSModule.chatbotIcon ? <span dangerouslySetInnerHTML={{ __html: JSModule.chatbotIcon }} /> : <Libby/>
-                            }
+                            {JSModule.chatbotIcon ? (
+                              <span
+                                dangerouslySetInnerHTML={{
+                                  __html: JSModule.chatbotIcon,
+                                }}
+                              />
+                            ) : (
+                              <Libby />
+                            )}
                           </div>
                         );
                       }
@@ -826,9 +1036,15 @@ const Chatbot = () => {
                     } else {
                       icon = (
                         <div className={styles?.libby}>
-                          {
-                              JSModule.userIcon ? <span dangerouslySetInnerHTML={{ __html: JSModule.userIcon }} />: <You/>
-                            }
+                          {JSModule.userIcon ? (
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: JSModule.userIcon,
+                              }}
+                            />
+                          ) : (
+                            <You />
+                          )}
                         </div>
                       );
                       // The latest message sent by the user will be animated while waiting for a response
@@ -860,26 +1076,25 @@ const Chatbot = () => {
                               }}
                             >
                               {message?.type == 'apiMessage' ? (
-                               <span
-                                 className={styles?.botName}
-                                 style={{
-                                   display: 'flex',
-                                   flexDirection: 'row',
-                                   gap: '2px',
-                                   width: '100%',
-                                 }}
-                               >
-                                 {JSModule?.botName}
-                                 {message?.step?.tooltip && (
-                                   <p
-                                     title={message?.step?.tooltip}
-                                     className={styles?.tooltipIcon}
-                                   >
-                                     <ToolTip />
-                                   </p>
-                                 )}
-                               </span>
-
+                                <span
+                                  className={styles?.botName}
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    gap: '2px',
+                                    width: '100%',
+                                  }}
+                                >
+                                  {JSModule?.botName}
+                                  {message?.step?.tooltip && (
+                                    <p
+                                      title={message?.step?.tooltip}
+                                      className={styles?.tooltipIcon}
+                                    >
+                                      <ToolTip />
+                                    </p>
+                                  )}
+                                </span>
                               ) : (
                                 <span className={styles?.botName}>You</span>
                               )}
@@ -909,7 +1124,12 @@ const Chatbot = () => {
                                         rehypePlugins={[rehypeRaw]}
                                         components={{
                                           p: ({ node, children, ...props }) => (
-                                            <p className={styles?.userMessageFont} {...props}>
+                                            <p
+                                              className={
+                                                styles?.userMessageFont
+                                              }
+                                              {...props}
+                                            >
                                               {children}
                                             </p>
                                           ),
@@ -951,10 +1171,11 @@ const Chatbot = () => {
                                         }}
                                       />
                                     ) : null}
-                                    {(message.type === 'apiMessage' &&
+                                    {message.type === 'apiMessage' &&
                                     message?.step?.inputType ===
-                                      'radioButton' && message?.step?.integration == 'Calandly') ? (
-                                        <InlineWidget url="https://calendly.com/aashishrawte1/15min" />
+                                      'radioButton' &&
+                                    message?.step?.integration == 'Calandly' ? (
+                                      <InlineWidget url="https://calendly.com/aashishrawte1/15min" />
                                     ) : null}
                                     {message.type === 'apiMessage' &&
                                     message?.step?.inputType === 'html' ? (
@@ -984,7 +1205,7 @@ const Chatbot = () => {
                                         value={message?.step?.answer}
                                       />
                                     ) : null}
-                                    {message?.step?.inputType === 'password' &&                                    
+                                    {message?.step?.inputType === 'password' &&
                                     index !== messages.length - 1 ? (
                                       <PasswordInput
                                         disabled={
@@ -1287,19 +1508,29 @@ const Chatbot = () => {
                             </div>
                           </div>
                           <div className={styles?.editbtn}>
-                            {message?.type !== 'apiMessage' && 
-                            (messages[index - 1]?.step?.inputType === 'text' || messages[index - 1]?.step?.inputType === 'number') && 
+                            {message?.type !== 'apiMessage' &&
+                            (messages[index - 1]?.step?.inputType === 'text' ||
+                              messages[index - 1]?.step?.inputType ===
+                                'number') &&
                             messages?.length - 2 === index &&
                             editableIndex !== index &&
-                            !message?.error && !JSModule?.hideEditButton ? (
+                            !message?.error &&
+                            !JSModule?.hideEditButton ? (
                               <Button
                                 variant="link"
                                 onClick={() => {
                                   setEditableIndex(index);
-                                  setContent(message.message)
+                                  setContent(message.message);
                                 }}
                               >
-                                <Pencil color={JSModule.editButtonColor? JSModule.editButtonColor : '#FF6900'} /> Edit
+                                <Pencil
+                                  color={
+                                    JSModule.editButtonColor
+                                      ? JSModule.editButtonColor
+                                      : '#FF6900'
+                                  }
+                                />{' '}
+                                Edit
                               </Button>
                             ) : message?.type !== 'apiMessage' &&
                               editableIndex === index &&
@@ -1308,8 +1539,8 @@ const Chatbot = () => {
                                 variant="link"
                                 onClick={() => {
                                   setEditableIndex(null);
-                                  getContent(index)
-                                  handleSubmit(content,true)
+                                  getContent(index);
+                                  handleSubmit(content, true);
                                 }}
                               >
                                 Save
@@ -1321,12 +1552,12 @@ const Chatbot = () => {
                     );
                   })}
                 </div>
-                {(loading && JSModule?.loaderEnabled) && 
-                <span style={{ marginLeft: "10px"}}>
-                  Typing
-                  <LoadingDots color="#000" />
-                </span>
-                }
+                {loading && JSModule?.loaderEnabled && (
+                  <span style={{ marginLeft: '10px' }}>
+                    Typing
+                    <LoadingDots color="#000" />
+                  </span>
+                )}
               </div>
               <div className={styles?.center}>
                 <div className={styles?.cloudform}>
@@ -1339,12 +1570,12 @@ const Chatbot = () => {
                         handleSubmit();
                       }}
                     >
-                      { typingState && 
-                        <span style={{ marginLeft: "10px"}}>
+                      {typingState && (
+                        <span style={{ marginLeft: '10px' }}>
                           Typing
                           <LoadingDots color="#000" />
                         </span>
-                      }
+                      )}
                       <textarea
                         disabled={disableInput || loading}
                         onKeyDown={handleEnter}
@@ -1361,7 +1592,12 @@ const Chatbot = () => {
                         }
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        className={messages[messages.length - 1]?.step?.inputType === 'password' ? `${styles?.textarea} ${styles?.passwordTextarea}` : styles?.textarea}
+                        className={
+                          messages[messages.length - 1]?.step?.inputType ===
+                          'password'
+                            ? `${styles?.textarea} ${styles?.passwordTextarea}`
+                            : styles?.textarea
+                        }
                       />
                       <button
                         type="submit"
