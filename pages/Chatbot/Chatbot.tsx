@@ -52,8 +52,8 @@ import Drawer from 'react-modern-drawer'
 import 'react-modern-drawer/dist/index.css'
 import HamburgerIcon from '@/assets/HamburgerIcon';
 import PdfIcon from '@/assets/svgs/PdfIcon';
-import DownloadIcon from '@/assets/svgs/downloadIcon';
 import FileList from './File';
+import DownloadIcon from '@/assets/svgs/DownloadIcon';
 
 declare const window: any;
 
