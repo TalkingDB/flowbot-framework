@@ -15,6 +15,7 @@ export default function FileList({ selectedFileType, progressUrl, apiKey, filena
 
     async function pdfProgress() {
         if (filename) {
+
             try {
                 const response = await fetch(`${progressUrl}${filename}`, {
                     method: 'GET',
@@ -24,9 +25,10 @@ export default function FileList({ selectedFileType, progressUrl, apiKey, filena
                     },
                   });
                 if (response) {
-                    setProgress(Math.ceil(Number(response.data.data.deep.replace(/%/g, ""))))
-                    let deepdataProgress = Math.ceil(Number(response.data.data.deep.replace(/%/g, "")))
-                    let shallowdataProgress = Math.ceil(Number(response.data.data.shallow.replace(/%/g, "")))
+                    const responseJson = await response.json()
+                    setProgress(Math.ceil(Number(responseJson.data.deep.replace(/%/g, ""))))
+                    let deepdataProgress = Math.ceil(Number(responseJson.data.deep.replace(/%/g, "")))
+                    let shallowdataProgress = Math.ceil(Number(responseJson.data.shallow.replace(/%/g, "")))
                     if (deepdataProgress === 100) {
                         setTimeout(() => {
                             setIs_Trained(true)
