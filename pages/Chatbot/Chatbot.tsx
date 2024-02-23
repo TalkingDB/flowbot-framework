@@ -1078,7 +1078,7 @@ const Chatbot = () => {
                                 width: '100%',
                                 marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
                               }}
-                              className={message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}
+                              
                             >
                               {message?.type == 'apiMessage' ? (
                                 <span
@@ -1108,7 +1108,9 @@ const Chatbot = () => {
                                   }}
                                 >You</span>
                               )}
-                              <div className={styles?.markdownanswer}>
+                              <div
+                                className={`${styles?.markdownanswer} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                              >
                                 <span className={styles?.markdownanswerspan}>
                                   <div style={{ display: 'flex' }}>
                                     <div
