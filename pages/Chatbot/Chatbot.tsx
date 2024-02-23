@@ -3,8 +3,11 @@ import {
   resetPromptTemplate,
   submitPromptTemplate,
 } from '@/apiRequests';
+import HamburgerIcon from '@/assets/HamburgerIcon';
 import ChatIcon from '@/assets/svgs/ChatIcon';
+import DownloadIcon from '@/assets/svgs/DownloadIcon';
 import Libby from '@/assets/svgs/Libby';
+import PdfIcon from '@/assets/svgs/PdfIcon';
 import Pencil from '@/assets/svgs/Pencil';
 import You from '@/assets/svgs/You';
 import ToolTip from '@/assets/svgs/icons/ToolTip';
@@ -42,18 +45,15 @@ import { Message } from '@/types/chat';
 import { generateRandomString } from '@/utils/generateRandomeString';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Fragment, useDebugValue, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { InlineWidget } from "react-calendly";
 import ReactMarkdown from 'react-markdown';
+import Drawer from 'react-modern-drawer';
+import 'react-modern-drawer/dist/index.css';
 import rehypeRaw from 'rehype-raw';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client';
-import Drawer from 'react-modern-drawer'
-import 'react-modern-drawer/dist/index.css'
-import HamburgerIcon from '@/assets/HamburgerIcon';
-import PdfIcon from '@/assets/svgs/PdfIcon';
 import FileList from './File';
-import DownloadIcon from '@/assets/svgs/DownloadIcon';
 
 declare const window: any;
 
@@ -1066,13 +1066,17 @@ const Chatbot = () => {
                           </div>
                         )}
                         <div key={`chatMessage-${index}`} className={className}>
-                          <div className={styles?.container}>
+                          <div
+                            className={styles?.container}
+                            style={{ flexDirection: JSModule?.botName == 'LocalVR' ? (message?.type == 'apiMessage' ? 'row' : 'row-reverse') : 'row' }}
+                          >
                             {icon}
                             <div
                               style={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 width: '100%',
+                                marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
                               }}
                             >
                               {message?.type == 'apiMessage' ? (
@@ -1096,7 +1100,12 @@ const Chatbot = () => {
                                   )}
                                 </span>
                               ) : (
-                                <span className={styles?.botName}>You</span>
+                                <span
+                                  className={styles?.botName}
+                                  style={{
+                                    textAlign: JSModule?.botName == 'LocalVR' ? 'right' : 'left'
+                                  }}
+                                >You</span>
                               )}
                               <div className={styles?.markdownanswer}>
                                 <span className={styles?.markdownanswerspan}>
@@ -1530,7 +1539,7 @@ const Chatbot = () => {
                                       : '#FF6900'
                                   }
                                 />{' '}
-                                Edit
+                                {JSModule?.botName == 'LocalVR' ? '' : 'Edit'}
                               </Button>
                             ) : message?.type !== 'apiMessage' &&
                               editableIndex === index &&
