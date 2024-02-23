@@ -1078,6 +1078,7 @@ const Chatbot = () => {
                                 width: '100%',
                                 marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
                               }}
+                              className={message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}
                             >
                               {message?.type == 'apiMessage' ? (
                                 <span
