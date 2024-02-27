@@ -1071,9 +1071,18 @@ const Chatbot = () => {
                             style={{ flexDirection: JSModule?.botName == 'LocalVR' ? (message?.type == 'apiMessage' ? 'row' : 'row-reverse') : 'row' }}
                           >
                             {JSModule?.botName !== 'LocalVR' && 
-                              <>
+                              <div>
                                 {icon}
-                              </>
+                              </div>
+                            }
+
+                            {
+                              JSModule?.botName == 'LocalVR' && 
+                              message?.type == 'apiMessage' && 
+                              (index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage')) &&
+                              <div className={styles?.botIcon}>
+                                {icon}
+                              </div>
                             }
                             
                             <div
@@ -1081,7 +1090,7 @@ const Chatbot = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 width: '100%',
-                                marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
+                                // marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
                               }}
                               
                             >
@@ -1119,9 +1128,17 @@ const Chatbot = () => {
                               }
                               
                               <div
-                                className={`${styles?.markdownanswer} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                className={`${styles?.markdownanswer}`}
+                                style={{
+                                  maxWidth: message?.step?.showBotIcon && JSModule?.botName == 'LocalVR' ? 'auto' : '82%',
+                                  marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.botName == 'LocalVR' ? '8%' : '',
+                                  width: '100%',
+                                  alignSelf: message?.type == 'userMessage' && JSModule?.botName == 'LocalVR' ? 'self-end' : 'flex-start'
+                                }}
                               >
-                                <span className={styles?.markdownanswerspan}>
+                                <span 
+                                  className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                >
                                   <div style={{ display: 'flex' }}>
                                     <div
                                       style={
