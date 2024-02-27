@@ -1131,9 +1131,13 @@ const Chatbot = () => {
                                 className={`${styles?.markdownanswer}`}
                                 style={{
                                   maxWidth: message?.step?.showBotIcon && JSModule?.botName == 'LocalVR' ? 'auto' : '82%',
-                                  marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.botName == 'LocalVR' ? '8%' : '',
+                                  marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.botName == 'LocalVR' ? '9%' : '',
                                   width: '100%',
-                                  alignSelf: message?.type == 'userMessage' && JSModule?.botName == 'LocalVR' ? 'self-end' : 'flex-start'
+                                  alignSelf: message?.type == 'userMessage' && JSModule?.botName == 'LocalVR' ? 
+                                            'self-end' : 
+                                            message?.type == 'apiMessage' && JSModule?.botName == 'LocalVR' ?
+                                            'self-start' :
+                                            'flex-start'
                                 }}
                               >
                                 <span 
@@ -1547,7 +1551,7 @@ const Chatbot = () => {
                             </div>
                           </div>
                           <div className={styles?.editbtn}>
-                            {message?.type !== 'apiMessage' &&
+                            {message?.type !== 'apiMessage' && JSModule?.botName !== 'LocalVR' &&
                             (messages[index - 1]?.step?.inputType === 'text' ||
                               messages[index - 1]?.step?.inputType ===
                                 'number') &&
