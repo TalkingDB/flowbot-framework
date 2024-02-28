@@ -719,6 +719,15 @@ const Chatbot = () => {
   }, [newChatRoom]);
 
 
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    setShowLoading(true);
+    const timeout = setTimeout(() => {
+      setShowLoading(false);
+    }, 60000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(()=>{
     const fetchData = async (chatbotUrl: string, apiKey: string) => {
@@ -1130,14 +1139,16 @@ const Chatbot = () => {
                               <div
                                 className={`${styles?.markdownanswer}`}
                                 style={{
-                                  maxWidth: message?.step?.showBotIcon && JSModule?.botName == 'LocalVR' ? 'auto' : '82%',
+                                  maxWidth: message?.step?.showBotIcon && JSModule?.botName == 'LocalVR' ? 'auto' : '90%',
                                   marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.botName == 'LocalVR' ? '9%' : '',
                                   width: '100%',
                                   alignSelf: message?.type == 'userMessage' && JSModule?.botName == 'LocalVR' ? 
                                             'self-end' : 
                                             message?.type == 'apiMessage' && JSModule?.botName == 'LocalVR' ?
                                             'self-start' :
-                                            'flex-start'
+                                            'flex-start',
+                                  display: 'flex',
+                                  flexDirection: 'column',
                                 }}
                               >
                                 <span 
@@ -1194,6 +1205,18 @@ const Chatbot = () => {
                                     )}
                                   </div>
                                 </span>
+                                {showLoading &&( JSModule?.botName == 'LocalVR' && ((message?.step?.inputType === 'await' && index === messages.length - 1) || ( typingState && index === messages.length - 1) || ( loading && index === messages.length - 1 )) )&&
+                                <span
+                                  className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                  style={{
+                                    width: '40px',
+                                    marginTop: '20px',
+                                  }}
+                                >
+                                  <LoadingDots color="#000" />
+                                  
+                                </span>}
+                                
                                 {JSModule?.conversational && (
                                   <div className={styles?.extraContainer}>
                                     {message.type === 'apiMessage' &&
