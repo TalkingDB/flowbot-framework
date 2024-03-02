@@ -3,8 +3,11 @@ import {
   resetPromptTemplate,
   submitPromptTemplate,
 } from '@/apiRequests';
+import HamburgerIcon from '@/assets/HamburgerIcon';
 import ChatIcon from '@/assets/svgs/ChatIcon';
+import DownloadIcon from '@/assets/svgs/DownloadIcon';
 import Libby from '@/assets/svgs/Libby';
+import PdfIcon from '@/assets/svgs/PdfIcon';
 import Pencil from '@/assets/svgs/Pencil';
 import You from '@/assets/svgs/You';
 import ToolTip from '@/assets/svgs/icons/ToolTip';
@@ -42,18 +45,15 @@ import { Message } from '@/types/chat';
 import { generateRandomString } from '@/utils/generateRandomeString';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Fragment, useDebugValue, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { InlineWidget } from "react-calendly";
 import ReactMarkdown from 'react-markdown';
+import Drawer from 'react-modern-drawer';
+import 'react-modern-drawer/dist/index.css';
 import rehypeRaw from 'rehype-raw';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client';
-import Drawer from 'react-modern-drawer'
-import 'react-modern-drawer/dist/index.css'
-import HamburgerIcon from '@/assets/HamburgerIcon';
-import PdfIcon from '@/assets/svgs/PdfIcon';
 import FileList from './File';
-import DownloadIcon from '@/assets/svgs/DownloadIcon';
 
 declare const window: any;
 
@@ -719,6 +719,15 @@ const Chatbot = () => {
   }, [newChatRoom]);
 
 
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    setShowLoading(true);
+    const timeout = setTimeout(() => {
+      setShowLoading(false);
+    }, 60000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(()=>{
     const fetchData = async (chatbotUrl: string, apiKey: string) => {
@@ -1066,40 +1075,85 @@ const Chatbot = () => {
                           </div>
                         )}
                         <div key={`chatMessage-${index}`} className={className}>
-                          <div className={styles?.container}>
-                            {icon}
+                          <div
+                            className={styles?.container}
+                            style={{ flexDirection: JSModule?.conversationLayout ? (message?.type == 'apiMessage' ? 'row' : 'row-reverse') : 'row' }}
+                          >
+                            {JSModule?.botName !== 'LocalVR' && 
+                              <div>
+                                {icon}
+                              </div>
+                            }
+
+                            {
+                              JSModule?.conversationLayout && 
+                              message?.type == 'apiMessage' && 
+                              (index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage')) &&
+                              <div className={styles?.botIcon}>
+                                {icon}
+                              </div>
+                            }
+                            
                             <div
                               style={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 width: '100%',
+                                // marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
                               }}
+                              
                             >
-                              {message?.type == 'apiMessage' ? (
-                                <span
-                                  className={styles?.botName}
-                                  style={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    gap: '2px',
-                                    width: '100%',
-                                  }}
-                                >
-                                  {JSModule?.botName}
-                                  {message?.step?.tooltip && (
-                                    <p
-                                      title={message?.step?.tooltip}
-                                      className={styles?.tooltipIcon}
-                                    >
-                                      <ToolTip />
-                                    </p>
+                              {JSModule?.botName !== 'LocalVR' && 
+                                <>
+                                  {message?.type == 'apiMessage' ? (
+                                  <span
+                                    className={styles?.botName}
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'row',
+                                      gap: '2px',
+                                      width: '100%',
+                                    }}
+                                  >
+                                    {JSModule?.botName}
+                                    {message?.step?.tooltip && (
+                                      <p
+                                        title={message?.step?.tooltip}
+                                        className={styles?.tooltipIcon}
+                                      >
+                                        <ToolTip />
+                                      </p>
+                                    )}
+                                  </span>
+                                  ) : (
+                                    <span
+                                      className={styles?.botName}
+                                      style={{
+                                        textAlign: JSModule?.conversationLayout ? 'right' : 'left'
+                                      }}
+                                    >You</span>
                                   )}
-                                </span>
-                              ) : (
-                                <span className={styles?.botName}>You</span>
-                              )}
-                              <div className={styles?.markdownanswer}>
-                                <span className={styles?.markdownanswerspan}>
+                                </>
+                              }
+                              
+                              <div
+                                className={`${styles?.markdownanswer}`}
+                                style={{
+                                  maxWidth: message?.step?.showBotIcon && JSModule?.conversationLayout ? 'auto' : '90%',
+                                  marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.conversationLayout ? '2rem' : '',
+                                  width: '100%',
+                                  alignSelf: message?.type == 'userMessage' && JSModule?.conversationLayout ? 
+                                            'self-end' : 
+                                            message?.type == 'apiMessage' && JSModule?.conversationLayout ?
+                                            'self-start' :
+                                            'flex-start',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                }}
+                              >
+                                <span 
+                                  className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                >
                                   <div style={{ display: 'flex' }}>
                                     <div
                                       style={
@@ -1151,26 +1205,20 @@ const Chatbot = () => {
                                     )}
                                   </div>
                                 </span>
+                                {showLoading &&( JSModule?.conversationLayout && ((message?.step?.inputType === 'await' && index === messages.length - 1) || ( typingState && index === messages.length - 1) || ( loading && index === messages.length - 1 )) )&&
+                                <span
+                                  className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                  style={{
+                                    width: '40px',
+                                    marginTop: '20px',
+                                  }}
+                                >
+                                  <LoadingDots color="#000" />
+                                  
+                                </span>}
+                                
                                 {JSModule?.conversational && (
                                   <div className={styles?.extraContainer}>
-                                    {message.type === 'apiMessage' &&
-                                    message?.step?.inputType ===
-                                      'radioButton' ? (
-                                      <RadioGroup
-                                        options={message?.step?.options}
-                                        value={message?.step?.default}
-                                        disabled={
-                                          index !== messages.length - 1
-                                            ? true
-                                            : false
-                                        }
-                                        onChange={(value) => {
-                                          if (index === messages.length - 1) {
-                                            handleSubmit(value);
-                                          }
-                                        }}
-                                      />
-                                    ) : null}
                                     {message.type === 'apiMessage' &&
                                     message?.step?.inputType ===
                                       'radioButton' &&
@@ -1507,8 +1555,26 @@ const Chatbot = () => {
                               </div>
                             </div>
                           </div>
+                          {message.type === 'apiMessage' &&
+                                    message?.step?.inputType ===
+                                      'radioButton' ? (
+                                      <RadioGroup
+                                        options={message?.step?.options}
+                                        value={message?.step?.default}
+                                        disabled={
+                                          index !== messages.length - 1
+                                            ? true
+                                            : false
+                                        }
+                                        onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
                           <div className={styles?.editbtn}>
-                            {message?.type !== 'apiMessage' &&
+                            {message?.type !== 'apiMessage' && JSModule?.conversationLayout &&
                             (messages[index - 1]?.step?.inputType === 'text' ||
                               messages[index - 1]?.step?.inputType ===
                                 'number') &&
@@ -1530,7 +1596,7 @@ const Chatbot = () => {
                                       : '#FF6900'
                                   }
                                 />{' '}
-                                Edit
+                                {JSModule?.hideEditButton? '' : 'Edit'}
                               </Button>
                             ) : message?.type !== 'apiMessage' &&
                               editableIndex === index &&
