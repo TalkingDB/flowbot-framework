@@ -1,53 +1,59 @@
-import Button from '@/components/ui/Buttons/Button';
-import ChatIcon from '@/assets/svgs/ChatIcon';
-import { useEffect, useState, useRef, Fragment } from 'react';
-import rehypeRaw from 'rehype-raw';
-import RegisterationGuy from '@/assets/svgs/RegisterationGuy';
-import { Message } from '@/types/chat';
-import LoadingDots from '@/components/ui/LoadingDots';
-import Image from 'next/image';
-import ReactMarkdown from 'react-markdown';
-import { generateRandomString } from '@/utils/generateRandomeString';
-import RadioGroup from '@/components/ui/Radio/RadioGroup';
-import Libby from '@/assets/svgs/Libby';
-import You from '@/assets/svgs/You';
-import Pencil from '@/assets/svgs/Pencil';
-import PasswordInput from '@/components/ui/Input/PasswordInput';
-import Address from '@/components/ui/Address/Address';
-import { useRouter } from 'next/router';
-import ChatbotInfo from '@/components/ui/ChatbotInfo';
 import {
   getDefaultPromptTemplate,
   resetPromptTemplate,
   submitPromptTemplate,
 } from '@/apiRequests';
-import { PromptModal } from '@/components/customPromptModal';
-import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
-import CheckboxGroup from '@/components/ui/Checkbox/CheckboxGroup';
-import SelectInputField from '@/components/ui/SelectInputField/SelectInputField';
+import HamburgerIcon from '@/assets/HamburgerIcon';
+import ChatIcon from '@/assets/svgs/ChatIcon';
+import DownloadIcon from '@/assets/svgs/DownloadIcon';
+import Libby from '@/assets/svgs/Libby';
+import PdfIcon from '@/assets/svgs/PdfIcon';
+import Pencil from '@/assets/svgs/Pencil';
+import You from '@/assets/svgs/You';
+import ToolTip from '@/assets/svgs/icons/ToolTip';
 import NextFunction from '@/components/NextFunction';
-import ShowDetails from '@/components/ui/ShowDetails/ShowDetails';
-import FileUploadComponent from '@/components/ui/FileUpload/FileUploadComponent';
-import LoginPasswordAsk from '@/components/ui/LoginPasswordAsk/LoginPasswordAsk';
-import ColumnCards from '@/components/ui/Radio/ColumnCards';
-import GoogleLoginComponent from '@/components/ui/Radio/GoogleLoginComponent';
-import Summary from '@/components/ui/Summary/Summary';
-import MultiSelectInput from '@/components/ui/MutiSelectInput/MultiSelectInput';
+import { PromptModal } from '@/components/customPromptModal';
+import Address from '@/components/ui/Address/Address';
 import AutoCompleteInput from '@/components/ui/AutoCompleteInput/AutoCompleteInput';
-import Table from '@/components/ui/Table/Table';
+import Button from '@/components/ui/Buttons/Button';
+import CheckboxGroup from '@/components/ui/Checkbox/CheckboxGroup';
 import CostCards from '@/components/ui/CostCards/CostCards';
+import CostMilestone from '@/components/ui/CostMilestone/CostMilestone';
+import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
+import FileUploadComponent from '@/components/ui/FileUpload/FileUploadComponent';
+import PasswordInput from '@/components/ui/Input/PasswordInput';
 import InstallationInfo from '@/components/ui/InstallationInfo/InstallationInfo';
 import Invoice from '@/components/ui/Invoice/Invoice';
-import SearchInput from '@/components/ui/Search/Search';
-import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
-import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
-import CostMilestone from '@/components/ui/CostMilestone/CostMilestone';
+import Loader from '@/components/ui/Loader/Loader';
+import LoadingDots from '@/components/ui/LoadingDots';
+import LoginPasswordAsk from '@/components/ui/LoginPasswordAsk/LoginPasswordAsk';
+import MultiSelectInput from '@/components/ui/MutiSelectInput/MultiSelectInput';
 import ProjectCard from '@/components/ui/ProjectCard/ProjectCard';
+import CardRadioGroup from '@/components/ui/Radio/CardRadioGroup';
+import ColumnCards from '@/components/ui/Radio/ColumnCards';
+import GoogleLoginComponent from '@/components/ui/Radio/GoogleLoginComponent';
+import RadioGroup from '@/components/ui/Radio/RadioGroup';
 import RatingCard from '@/components/ui/RatingCard/RatingCard';
 import ReferralCard from '@/components/ui/ReferralCard/ReferralCard';
-import io from 'socket.io-client';
+import SearchInput from '@/components/ui/Search/Search';
+import SelectInputField from '@/components/ui/SelectInputField/SelectInputField';
+import ShowDetails from '@/components/ui/ShowDetails/ShowDetails';
+import StripeComponent from '@/components/ui/StripeComponent/StripeComponent';
+import Summary from '@/components/ui/Summary/Summary';
+import Table from '@/components/ui/Table/Table';
+import { Message } from '@/types/chat';
+import { generateRandomString } from '@/utils/generateRandomeString';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { InlineWidget } from "react-calendly";
+import ReactMarkdown from 'react-markdown';
+import Drawer from 'react-modern-drawer';
+import 'react-modern-drawer/dist/index.css';
+import rehypeRaw from 'rehype-raw';
 import type { Socket } from 'socket.io-client';
-import ToolTip from '@/assets/svgs/icons/ToolTip';
+import io from 'socket.io-client';
+import FileList from './File';
 
 declare const window: any;
 
@@ -77,6 +83,21 @@ const Chatbot = () => {
   const [leftPanelHtml, setLeftPanelHtml] = useState('');
   const [headerPaneHtml, setHeaderPaneHtml] = useState('');
   const [content, setContent] = useState('');
+  const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState('right');
+  const [chatbots, setChatbots] = useState([])
+  const [pdfList, setPdfList] = useState<
+  { name?: string; training_id?: string; is_trained: boolean }[]
+>([]);
+  const fileInputRef = useRef(null);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
+  const [selectedFileType, setSelectedFileType] = useState<string>('PDF');
+  const [selecteduploadFile, setSelecteduploadFile] = useState<File | null>(
+    null,
+  );
+  const [trainingInProgress, setTrainingInProgress] = useState(false);
+
+
 
   const [messageState, setMessageState] = useState<{
     messages: Message[];
@@ -89,6 +110,7 @@ const Chatbot = () => {
   });
   const [styles, setStyle] = useState<any>({});
   const { messages, history } = messageState;
+  const [typingState, setTypingState] = useState<boolean>(false);
 
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -155,18 +177,19 @@ const Chatbot = () => {
             },
           );
         });
-    } else {
-      setCurrentSession(generateRandomString('session_', 9));
-      import(`@/configuration/default/webapp`).then((module) => {
-        setJSModule(module);
-      });
-      import(`@/configuration/default/webapp/Index.module.css`).then(
-        (module) => {
-          setStyle(module);
-        },
-      );
-    }
-    setBotLoading(false);
+        setBotLoading(false);
+    } 
+    // else {
+    //   setCurrentSession(generateRandomString('session_', 9));
+    //   import(`@/configuration/default/webapp`).then((module) => {
+    //     setJSModule(module);
+    //   });
+    //   import(`@/configuration/default/webapp/Index.module.css`).then(
+    //     (module) => {
+    //       setStyle(module);
+    //     },
+    //   );
+    // }
   }, [chatId]);
 
   useEffect(() => {
@@ -336,6 +359,12 @@ const Chatbot = () => {
           },
         ],
       }));
+      setTypingState(false);
+    })
+
+    newSocket.on('received-slack-user-typing', (data) => {
+      console.log('typing data received =>', data);
+      setTypingState(true);
     })
 
       newSocket.on('close-socket-connection',(data) =>{
@@ -689,8 +718,208 @@ const Chatbot = () => {
     }
   }, [newChatRoom]);
 
+
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    setShowLoading(true);
+    const timeout = setTimeout(() => {
+      setShowLoading(false);
+    }, 60000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(()=>{
+    const fetchData = async (chatbotUrl: string, apiKey: string) => {
+      try {
+        const response = await fetch(chatbotUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'API-KEY': apiKey
+          }
+        });
+        const jsonData = await response.json();
+        console.log("data response::::::", jsonData.data)
+        setChatbots(jsonData.data)
+        setPdfList(jsonData.data)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    if(JSModule?.trainedChatbotUrl){
+      console.log("inside chatbot call:::::")
+      fetchData(JSModule?.trainedChatbotUrl as string, JSModule?.trainedChatbotAPIKey as string);
+    }
+  },[JSModule])
+
+
+  const [uploading, setUploading] = useState(false);
+
+
+
+  useEffect(()=>{
+    const fetchData = async (chatbotUrl: string, apiKey: string) => {
+      try {
+        const response = await fetch(chatbotUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'API-KEY': apiKey
+          }
+        });
+        const jsonData = await response.json();
+        console.log("data response::::::", jsonData.data)
+        setChatbots(jsonData.data)
+        setPdfList(jsonData.data)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    const uploadPDFFile = async (uploadUrl: string, apiKey: string) => {
+      setUploading(true);
+      const FormData = require('form-data');
+      let data = new FormData();
+      data.append('file', selecteduploadFile);
+  
+      try {
+        const response = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'API-KEY': apiKey
+          },
+          body: data
+        });
+        const jsonData = await response.json();
+        console.log("uploaded data----::::::", jsonData)
+        console.log("filename",selecteduploadFile?.name)
+        fetchData(JSModule?.trainedChatbotUrl as string, JSModule?.trainedChatbotAPIKey as string);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setUploading(false); 
+      }
+    }
+
+    if(JSModule?.documentUploadUrl && selecteduploadFile){
+      console.log("inside upload call:::::")
+      uploadPDFFile(JSModule?.documentUploadUrl as string, JSModule?.trainedChatbotAPIKey as string);
+    }
+  },[selecteduploadFile])
+
+
+  const handlePDFFileChange = (e: any) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setShowLoader(true);
+      setSelectedFileType('PDF');
+      setSelecteduploadFile(selectedFile);
+      setTrainingInProgress(true);
+    }
+  };
+
+  if(botLoading || !(JSModule?.enabled)){
+    return(
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <div style={{ width: '150px',  height: '150px' }}>
+          <Loader loader="https://lottie.host/d1fd738a-f930-465e-b6ff-cf2412f791db/8r36ZWTWb2.json" />
+        </div>
+      </div>
+    )
+  }
+  else{
   return (
     <div className={styles['container']}>
+      {JSModule?.drawerEnabled && (
+        <Drawer
+          open={open}
+          onClose={() => setOpen(false)}
+          direction="right"
+          className="bla bla bla"
+          style={{ width: '400px' }}
+        >
+          <div className={styles['HamburgerContainer']}>
+            <div className={styles['HamburgerHeaderContainer']}>
+              <div className={styles['HamburgerHeader']}>
+                Trained on documents
+              </div>
+            </div>
+            <div className={styles['DataContainer']}>
+              {chatbots.map((chatbot, index) => (
+                <div key={index} className={styles['DataItem']}>
+                  <PdfIcon />
+                  <span>{chatbot?.name}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles['Divider']}></div>
+            <div className={styles['UploaderHeader']}>Upload Document</div>
+            <div className={styles['UploadContainer']}>
+              {!uploading ? <div className={styles['UploadButtonContainer']}>
+                <label className={styles['uploadButton']}>
+                  <input
+                    type="file"
+                    accept=".pdf,.docx"
+                    className="hidden"
+                    onChange={handlePDFFileChange}
+                    ref={fileInputRef}
+                  />
+                  <div style={{ transform: 'translateY(2px)' }} >
+                  <DownloadIcon />
+                  </div>
+                  <span style={{ transform: 'translateY(-2px)' }} className="mt-2 text-base leading-normal">
+                    Select a file
+                  </span>
+                </label>
+                <div>
+                   <span>Supported Files: Pdf</span>
+                </div>
+              </div>:
+               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+               <div style={{ width: '150px',  height: '150px' }}>
+                 <Loader loader="https://lottie.host/d1fd738a-f930-465e-b6ff-cf2412f791db/8r36ZWTWb2.json" />
+               </div>
+             </div>
+              }
+              
+            </div>
+            {pdfList &&
+            <div style={{ width: '100%' }}>
+              {pdfList.map((item, index) => {
+                return (
+                  <FileList
+                    key={index}
+                    selectedFileType={selectedFileType}
+                    filename={item.name || item.training_id}
+                    index={index}
+                    progressUrl={JSModule?.trainedChatbotProgressUrl}
+                    apiKey={JSModule?.trainedChatbotAPIKey}
+                    trained={item.is_trained}
+                    setTrainingInProgress={setTrainingInProgress}
+                  />
+                );
+              })}
+            </div>}
+            {/* <div className={styles['InProgressContainer']}>
+                <div className={styles['DataItem']}>
+                    <PdfIcon />
+                    
+                  </div>
+              </div> */}
+          </div>
+        </Drawer>
+      )}
+      {JSModule?.drawerEnabled && (
+        <div style={{ position: 'absolute', top: 8, right: 20 }}>
+          <span
+            style={{ cursor: 'pointer', background: 'transparent' }}
+            onClick={() => setOpen(true)}
+          >
+            <HamburgerIcon />
+          </span>
+        </div>
+      )}
       {JSModule?.enabled && (
         <div
           className={styles['sidebar']}
@@ -698,7 +927,7 @@ const Chatbot = () => {
         />
       )}
       <div className={styles['main-content']}>
-        {headerPaneHtml ? (
+        {headerPaneHtml || JSModule?.headerPaneHtml ? (
           <div
             className={styles['main-header']}
             dangerouslySetInnerHTML={{ __html: headerPaneHtml }}
@@ -755,11 +984,13 @@ const Chatbot = () => {
           {/* TODO: Move RegisterationGuy to conf */}
           {isSignupPage ? (
             <div className={styles['registerguy']}>
-              {registrationMessage?.image && 
+              {registrationMessage?.image && (
                 <div
-                  dangerouslySetInnerHTML={{ __html: registrationMessage?.image }}
+                  dangerouslySetInnerHTML={{
+                    __html: registrationMessage?.image,
+                  }}
                 />
-              }
+              )}
               <h3>{registrationMessage?.title}</h3>
               <span>
                 <ReactMarkdown
@@ -798,9 +1029,15 @@ const Chatbot = () => {
                       if (JSModule?.enabled) {
                         icon = (
                           <div className={styles?.libby}>
-                            {
-                              JSModule.chatbotIcon ? <span dangerouslySetInnerHTML={{ __html: JSModule.chatbotIcon }} /> : <Libby/>
-                            }
+                            {JSModule.chatbotIcon ? (
+                              <span
+                                dangerouslySetInnerHTML={{
+                                  __html: JSModule.chatbotIcon,
+                                }}
+                              />
+                            ) : (
+                              <Libby />
+                            )}
                           </div>
                         );
                       }
@@ -808,9 +1045,15 @@ const Chatbot = () => {
                     } else {
                       icon = (
                         <div className={styles?.libby}>
-                          {
-                              JSModule.userIcon ? <span dangerouslySetInnerHTML={{ __html: JSModule.userIcon }} />: <You/>
-                            }
+                          {JSModule.userIcon ? (
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: JSModule.userIcon,
+                              }}
+                            />
+                          ) : (
+                            <You />
+                          )}
                         </div>
                       );
                       // The latest message sent by the user will be animated while waiting for a response
@@ -832,41 +1075,85 @@ const Chatbot = () => {
                           </div>
                         )}
                         <div key={`chatMessage-${index}`} className={className}>
-                          <div className={styles?.container}>
-                            {icon}
+                          <div
+                            className={styles?.container}
+                            style={{ flexDirection: JSModule?.conversationLayout ? (message?.type == 'apiMessage' ? 'row' : 'row-reverse') : 'row' }}
+                          >
+                            {JSModule?.botName !== 'LocalVR' && 
+                              <div>
+                                {icon}
+                              </div>
+                            }
+
+                            {
+                              JSModule?.conversationLayout && 
+                              message?.type == 'apiMessage' && 
+                              (index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage')) &&
+                              <div className={styles?.botIcon}>
+                                {icon}
+                              </div>
+                            }
+                            
                             <div
                               style={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 width: '100%',
+                                // marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
                               }}
+                              
                             >
-                              {message?.type == 'apiMessage' ? (
-                               <span
-                                 className={styles?.botName}
-                                 style={{
-                                   display: 'flex',
-                                   flexDirection: 'row',
-                                   gap: '2px',
-                                   width: '100%',
-                                 }}
-                               >
-                                 {JSModule?.botName}
-                                 {message?.step?.tooltip && (
-                                   <p
-                                     title={message?.step?.tooltip}
-                                     className={styles?.tooltipIcon}
-                                   >
-                                     <ToolTip />
-                                   </p>
-                                 )}
-                               </span>
-
-                              ) : (
-                                <span className={styles?.botName}>You</span>
-                              )}
-                              <div className={styles?.markdownanswer}>
-                                <span className={styles?.markdownanswerspan}>
+                              {JSModule?.botName !== 'LocalVR' && 
+                                <>
+                                  {message?.type == 'apiMessage' ? (
+                                  <span
+                                    className={styles?.botName}
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'row',
+                                      gap: '2px',
+                                      width: '100%',
+                                    }}
+                                  >
+                                    {JSModule?.botName}
+                                    {message?.step?.tooltip && (
+                                      <p
+                                        title={message?.step?.tooltip}
+                                        className={styles?.tooltipIcon}
+                                      >
+                                        <ToolTip />
+                                      </p>
+                                    )}
+                                  </span>
+                                  ) : (
+                                    <span
+                                      className={styles?.botName}
+                                      style={{
+                                        textAlign: JSModule?.conversationLayout ? 'right' : 'left'
+                                      }}
+                                    >You</span>
+                                  )}
+                                </>
+                              }
+                              
+                              <div
+                                className={`${styles?.markdownanswer}`}
+                                style={{
+                                  maxWidth: message?.step?.showBotIcon && JSModule?.conversationLayout ? 'auto' : '90%',
+                                  marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.conversationLayout ? '2rem' : '',
+                                  width: '100%',
+                                  alignSelf: message?.type == 'userMessage' && JSModule?.conversationLayout ? 
+                                            'self-end' : 
+                                            message?.type == 'apiMessage' && JSModule?.conversationLayout ?
+                                            'self-start' :
+                                            'flex-start',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                }}
+                              >
+                                <span 
+                                  className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                >
                                   <div style={{ display: 'flex' }}>
                                     <div
                                       style={
@@ -891,7 +1178,12 @@ const Chatbot = () => {
                                         rehypePlugins={[rehypeRaw]}
                                         components={{
                                           p: ({ node, children, ...props }) => (
-                                            <p className={styles?.userMessageFont} {...props}>
+                                            <p
+                                              className={
+                                                styles?.userMessageFont
+                                              }
+                                              {...props}
+                                            >
                                               {children}
                                             </p>
                                           ),
@@ -913,25 +1205,25 @@ const Chatbot = () => {
                                     )}
                                   </div>
                                 </span>
+                                {showLoading &&( JSModule?.conversationLayout && ((message?.step?.inputType === 'await' && index === messages.length - 1) || ( typingState && index === messages.length - 1) || ( loading && index === messages.length - 1 )) )&&
+                                <span
+                                  className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
+                                  style={{
+                                    width: '40px',
+                                    marginTop: '20px',
+                                  }}
+                                >
+                                  <LoadingDots color="#000" />
+                                  
+                                </span>}
+                                
                                 {JSModule?.conversational && (
                                   <div className={styles?.extraContainer}>
                                     {message.type === 'apiMessage' &&
                                     message?.step?.inputType ===
-                                      'radioButton' ? (
-                                      <RadioGroup
-                                        options={message?.step?.options}
-                                        value={message?.step?.default}
-                                        disabled={
-                                          index !== messages.length - 1
-                                            ? true
-                                            : false
-                                        }
-                                        onChange={(value) => {
-                                          if (index === messages.length - 1) {
-                                            handleSubmit(value);
-                                          }
-                                        }}
-                                      />
+                                      'radioButton' &&
+                                    message?.step?.integration == 'Calandly' ? (
+                                      <InlineWidget url="https://calendly.com/aashishrawte1/15min" />
                                     ) : null}
                                     {message.type === 'apiMessage' &&
                                     message?.step?.inputType === 'html' ? (
@@ -961,7 +1253,7 @@ const Chatbot = () => {
                                         value={message?.step?.answer}
                                       />
                                     ) : null}
-                                    {message?.step?.inputType === 'password' &&                                    
+                                    {message?.step?.inputType === 'password' &&
                                     index !== messages.length - 1 ? (
                                       <PasswordInput
                                         disabled={
@@ -1263,20 +1555,48 @@ const Chatbot = () => {
                               </div>
                             </div>
                           </div>
+                          {message.type === 'apiMessage' &&
+                                    message?.step?.inputType ===
+                                      'radioButton' ? (
+                                      <RadioGroup
+                                        options={message?.step?.options}
+                                        value={message?.step?.default}
+                                        disabled={
+                                          index !== messages.length - 1
+                                            ? true
+                                            : false
+                                        }
+                                        onChange={(value) => {
+                                          if (index === messages.length - 1) {
+                                            handleSubmit(value);
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
                           <div className={styles?.editbtn}>
-                            {message?.type !== 'apiMessage' && 
-                            (messages[index - 1]?.step?.inputType === 'text' || messages[index - 1]?.step?.inputType === 'number') && 
+                            {message?.type !== 'apiMessage' && JSModule?.conversationLayout &&
+                            (messages[index - 1]?.step?.inputType === 'text' ||
+                              messages[index - 1]?.step?.inputType ===
+                                'number') &&
                             messages?.length - 2 === index &&
                             editableIndex !== index &&
-                            !message?.error && !JSModule?.hideEditButton ? (
+                            !message?.error &&
+                            !JSModule?.hideEditButton ? (
                               <Button
                                 variant="link"
                                 onClick={() => {
                                   setEditableIndex(index);
-                                  setContent(message.message)
+                                  setContent(message.message);
                                 }}
                               >
-                                <Pencil color={JSModule.editButtonColor? JSModule.editButtonColor : '#FF6900'} /> Edit
+                                <Pencil
+                                  color={
+                                    JSModule.editButtonColor
+                                      ? JSModule.editButtonColor
+                                      : '#FF6900'
+                                  }
+                                />{' '}
+                                {JSModule?.hideEditButton? '' : 'Edit'}
                               </Button>
                             ) : message?.type !== 'apiMessage' &&
                               editableIndex === index &&
@@ -1285,8 +1605,8 @@ const Chatbot = () => {
                                 variant="link"
                                 onClick={() => {
                                   setEditableIndex(null);
-                                  getContent(index)
-                                  handleSubmit(content,true)
+                                  getContent(index);
+                                  handleSubmit(content, true);
                                 }}
                               >
                                 Save
@@ -1298,12 +1618,12 @@ const Chatbot = () => {
                     );
                   })}
                 </div>
-                {(loading && JSModule?.loaderEnabled) && 
-                <span style={{ marginLeft: "10px"}}>
-                  Typing
-                  <LoadingDots color="#000" />
-                </span>
-                }
+                {loading && JSModule?.loaderEnabled && (
+                  <span style={{ marginLeft: '10px' }}>
+                    Typing
+                    <LoadingDots color="#000" />
+                  </span>
+                )}
               </div>
               <div className={styles?.center}>
                 <div className={styles?.cloudform}>
@@ -1316,6 +1636,12 @@ const Chatbot = () => {
                         handleSubmit();
                       }}
                     >
+                      {typingState && (
+                        <span style={{ marginLeft: '10px' }}>
+                          Typing
+                          <LoadingDots color="#000" />
+                        </span>
+                      )}
                       <textarea
                         disabled={disableInput || loading}
                         onKeyDown={handleEnter}
@@ -1332,7 +1658,12 @@ const Chatbot = () => {
                         }
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        className={messages[messages.length - 1]?.step?.inputType === 'password' ? `${styles?.textarea} ${styles?.passwordTextarea}` : styles?.textarea}
+                        className={
+                          messages[messages.length - 1]?.step?.inputType ===
+                          'password'
+                            ? `${styles?.textarea} ${styles?.passwordTextarea}`
+                            : styles?.textarea
+                        }
                       />
                       <button
                         type="submit"
@@ -1374,6 +1705,6 @@ const Chatbot = () => {
       </div>
     </div>
   );
-};
+}}
 
 export default Chatbot;
