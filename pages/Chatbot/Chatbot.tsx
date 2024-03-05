@@ -1079,7 +1079,7 @@ const Chatbot = () => {
                             className={styles?.container}
                             style={{ flexDirection: JSModule?.conversationLayout ? (message?.type == 'apiMessage' ? 'row' : 'row-reverse') : 'row' }}
                           >
-                            {JSModule?.botName !== 'LocalVR' && 
+                            { !JSModule?.hideBotIcon && 
                               <div>
                                 {icon}
                               </div>
@@ -1103,7 +1103,7 @@ const Chatbot = () => {
                               }}
                               
                             >
-                              {JSModule?.botName !== 'LocalVR' && 
+                              {!JSModule?.hideBotIcon && 
                                 <>
                                   {message?.type == 'apiMessage' ? (
                                   <span
@@ -1558,6 +1558,8 @@ const Chatbot = () => {
                           {message.type === 'apiMessage' &&
                                     message?.step?.inputType ===
                                       'radioButton' ? (
+                                        <>
+                                         {/* <audio src="https://bigsoundbank.com/UPLOAD/mp3/0001.mp3" autoPlay /> */}
                                       <RadioGroup
                                         options={message?.step?.options}
                                         value={message?.step?.default}
@@ -1572,6 +1574,8 @@ const Chatbot = () => {
                                           }
                                         }}
                                       />
+                                        </>
+                                       
                                     ) : null}
                           <div className={styles?.editbtn}>
                             {message?.type !== 'apiMessage' && JSModule?.conversationLayout &&
@@ -1627,7 +1631,7 @@ const Chatbot = () => {
               </div>
               <div className={styles?.center}>
                 <div className={styles?.cloudform}>
-                  {hiddenInput ? (
+                  {hiddenInput || JSModule?.hideTextArea ? (
                     <></>
                   ) : (
                     <form
