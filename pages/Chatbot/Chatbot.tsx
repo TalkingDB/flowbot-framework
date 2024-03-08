@@ -1167,7 +1167,7 @@ const Chatbot = () => {
                                   flexDirection: 'column',
                                 }}
                               >
-                                { (!loading ) &&
+                                { 
                                   <span 
                                   className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
                                 >
