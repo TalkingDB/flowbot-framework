@@ -1155,11 +1155,11 @@ const Chatbot = () => {
                               <div
                                 className={`${styles?.markdownanswer}`}
                                 style={{
-                                  maxWidth: message?.step?.showBotIcon && JSModule?.conversationLayout ? 'auto' : '90%',
+                                  minWidth: message?.step?.showBotIcon && JSModule?.conversationLayout ? 'auto' : '90%',
                                   marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.conversationLayout ? '2rem' : '',
                                   width: '100%',
                                   alignSelf: message?.type == 'userMessage' && JSModule?.conversationLayout ? 
-                                            'self-end' : 
+                                            'flex-end' : 
                                             message?.type == 'apiMessage' && JSModule?.conversationLayout ?
                                             'self-start' :
                                             'flex-start',
@@ -1665,7 +1665,7 @@ const Chatbot = () => {
                   </span>
                 )}
               </div>
-              { JSModule?.removeTextArea !== true &&
+              {/* { JSModule?.removeTextArea !== true && */}
               <div className={styles?.center}>
                 <div className={styles?.cloudform}>
                   {hiddenInput || JSModule?.hideTextArea ? (
@@ -1740,7 +1740,7 @@ const Chatbot = () => {
                   )}
                 </div>
               </div>
-              }
+              {/* } */}
             </>
           )}
         </div>
