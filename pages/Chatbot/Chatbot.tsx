@@ -932,7 +932,9 @@ const Chatbot = () => {
             style={{ cursor: 'pointer', background: 'transparent' }}
             onClick={() => setOpen(true)}
           >
-            <HamburgerIcon />
+            <div style={{ display: 'flex', gap: '1rem'}}>
+              <span style={{ margin: '0.5rem 0 0 0', color: JSModule?.editButtonColor }}>Managed Documents</span> <HamburgerIcon iconColor={JSModule?.editButtonColor}/>
+            </div>
           </span>
         </div>
       )}
