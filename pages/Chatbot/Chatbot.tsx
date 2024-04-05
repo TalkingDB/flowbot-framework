@@ -115,6 +115,11 @@ const Chatbot = () => {
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
+  const askQuestion = () => {
+    console.log('question');
+    handleSubmit('contact us');
+  }
+
   useEffect(() => {
     // Get the URL search parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -420,6 +425,10 @@ const Chatbot = () => {
   setSocketInitstate(!socketInitstate)
  }
 
+ const createMarkup = (question: any) => {
+        return { __html: question };
+  };
+
 
   async function handleSubmit(value?: string, update: boolean=false, socketMode : boolean= false) {
     setLoading(true);
@@ -446,7 +455,7 @@ const Chatbot = () => {
           ...state.messages,
           {
             type: 'userMessage',
-            message: `${JSON.parse(question)['label']}`,
+            message: `${question ? question : JSON.parse(question)['label']}`,
             src: "test",
             id: Math.random(),
           },
@@ -1155,7 +1164,8 @@ const Chatbot = () => {
                               <div
                                 className={`${styles?.markdownanswer}`}
                                 style={{
-                                  minWidth: message?.step?.showBotIcon && JSModule?.conversationLayout ? 'auto' : '90%',
+                                  minWidth: 'auto',
+                                  maxWidth: 'auto',
                                   marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.conversationLayout ? '2rem' : '',
                                   width: '100%',
                                   alignSelf: message?.type == 'userMessage' && JSModule?.conversationLayout ? 
@@ -1171,6 +1181,7 @@ const Chatbot = () => {
                                   className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
                                 >
                                   <div style={{ display: 'flex' }}>
+                                    {!message?.step?.injectionType && 
                                     <div
                                       style={
                                         message?.type !== 'apiMessage' &&
@@ -1207,7 +1218,13 @@ const Chatbot = () => {
                                       >
                                         {message.message}
                                       </ReactMarkdown>
-                                    </div>
+                                    </div>}
+                                    {message?.step?.injectionType === 'contactUs' && 
+                                    <div>
+                                      <div dangerouslySetInnerHTML={createMarkup(message.message)} />
+                                      <span style={{ cursor: 'pointer' }} onClick={askQuestion}><b><u>Contact Us</u></b></span>
+                                    </div>                                  
+                                    }
                                     {message?.error && (
                                       <div
                                         style={{
