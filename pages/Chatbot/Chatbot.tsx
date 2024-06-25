@@ -54,6 +54,7 @@ import rehypeRaw from 'rehype-raw';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client';
 import FileList from './File';
+import config from '@/config/constants';
 
 declare const window: any;
 
@@ -758,11 +759,11 @@ const Chatbot = () => {
   useEffect(()=>{
     const fetchData = async (chatbotUrl: string, apiKey: string) => {
       try {
-        const response = await fetch(chatbotUrl, {
+        const response = await fetch(`${config.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}/${chatbotUrl}${newChatRoom}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'API-KEY': apiKey
+            'API-KEY': config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
           }
         });
         const jsonData = await response.json();
@@ -787,11 +788,11 @@ const Chatbot = () => {
   useEffect(()=>{
     const fetchData = async (chatbotUrl: string, apiKey: string) => {
       try {
-        const response = await fetch(chatbotUrl, {
+        const response = await fetch(`${config.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}/chatbotUrl${newChatRoom}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'API-KEY': apiKey
+            'API-KEY': config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
           }
         });
         const jsonData = await response.json();
@@ -809,17 +810,18 @@ const Chatbot = () => {
       data.append('file', selecteduploadFile);
   
       try {
-        const response = await fetch(uploadUrl, {
+        const response = await fetch(`${config.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}/${uploadUrl}${newChatRoom}`, {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
-            'API-KEY': apiKey
+            'API-KEY': config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
           },
           body: data
         });
         const jsonData = await response.json();
         console.log("uploaded data----::::::", jsonData)
         console.log("filename",selecteduploadFile?.name)
+        console.log("new chatroom-----", newChatRoom)
         fetchData(JSModule?.trainedChatbotUrl as string, JSModule?.trainedChatbotAPIKey as string);
       } catch (error) {
         console.log(error);
@@ -828,11 +830,11 @@ const Chatbot = () => {
       }
     }
 
-    if(JSModule?.documentUploadUrl && selecteduploadFile){
+    if(JSModule?.documentUploadUrl && selecteduploadFile && newChatRoom){
       console.log("inside upload call:::::")
       uploadPDFFile(JSModule?.documentUploadUrl as string, JSModule?.trainedChatbotAPIKey as string);
     }
-  },[selecteduploadFile])
+  },[selecteduploadFile, newChatRoom])
 
 
   const handlePDFFileChange = (e: any) => {
@@ -872,7 +874,7 @@ const Chatbot = () => {
               </div>
             </div>
             <div className={styles['DataContainer']}>
-              {chatbots.map((chatbot, index) => (
+              {chatbots?.map((chatbot, index) => (
                 <div key={index} className={styles['DataItem']}>
                   <PdfIcon />
                   <span>{chatbot?.name}</span>
@@ -920,7 +922,7 @@ const Chatbot = () => {
                     filename={item.name || item.training_id}
                     index={index}
                     progressUrl={JSModule?.trainedChatbotProgressUrl}
-                    apiKey={JSModule?.trainedChatbotAPIKey}
+                    apiKey={config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY}
                     trained={item.is_trained}
                     setTrainingInProgress={setTrainingInProgress}
                   />

@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import PdfIcon from '@/assets/svgs/PdfIcon';
+import config from '@/config/constants';
 
 export default function FileList({ selectedFileType, progressUrl, apiKey, filename, index, trained, setTrainingInProgress
-}: { selectedFileType: string, progressUrl: string, apiKey: string, filename: string | undefined, index: number, trained: boolean, setTrainingInProgress: (value: boolean) => void }) {
+}: { selectedFileType: string, progressUrl: string, apiKey: string, filename: string | undefined, index: number, trained: boolean, setTrainingInProgress: (value: boolean) => void  }) {
     const router = useRouter();
     const { query: { 'chat-id': chatId } } = router
 
@@ -17,7 +18,7 @@ export default function FileList({ selectedFileType, progressUrl, apiKey, filena
         if (filename) {
 
             try {
-                const response = await fetch(`${progressUrl}${filename}`, {
+                const response = await fetch(`${config.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}/${progressUrl}${filename}`, {
                     method: 'GET',
                     headers: {
                       'Accept': 'application/json',
