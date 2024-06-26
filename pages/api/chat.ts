@@ -20,7 +20,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history, enablegptfallback, session, reqQuery } = req.body;
+  const { question, history, enablegptfallback, session, reqQuery, chainStatus=false } = req.body;
   const { pinecone_name_space } = req.query;
   const chatBotId = String(pinecone_name_space || 'default');
   // console.log('question', question, session);
@@ -39,6 +39,10 @@ export default async function handler(
   try {
     //create chain
     const chain = new makeChain(chatBotId);
+    if (chainStatus){
+      const response = await chain.run(question)
+      return res.status(200).json(response);
+    }
 
     const user = await upsertUser(chatBotId, session);
 
