@@ -1,10 +1,11 @@
 import React from 'react';
 import { useChatbot } from '@/hooks/useChatbot';
 import { ChatHeader } from '@/modules/ChatHeader';
-import {SideDrawer} from '@/modules/SideDrawer';
+import { SideDrawer } from '@/modules/SideDrawer';
 import { ChatMessages } from '@/modules/ChatMessages';
 import { ChatInput } from '@/modules/ChatInput';
 import 'react-modern-drawer/dist/index.css';
+import HamburgerIcon from '@/assets/HamburgerIcon';
 
 const Chatbot: React.FC = () => {
   const {
@@ -20,19 +21,21 @@ const Chatbot: React.FC = () => {
     setOpen,
     styles,
   } = useChatbot();
-  
+
   return (
     <div className={styles['container']}>
+      {JSModule?.drawerEnabled &&
+        <SideDrawer open={open} setOpen={(val) => setOpen(val)} />
+      }
       {JSModule?.enabled && (
-          <div
-              className={styles['sidebar']}
-              dangerouslySetInnerHTML={{ __html: JSModule.leftPanelHtml }}
-          />
+        <div
+          className={styles['sidebar']}
+          dangerouslySetInnerHTML={{ __html: JSModule.leftPanelHtml }}
+        />
       )}
-      <SideDrawer open={open} setOpen={(val) => setOpen(val)} />
-      <div className={styles.mainContent}>
-        <ChatHeader  />
-        <div className={styles.main}>
+      <div className={styles['main-content']}>
+        <ChatHeader />
+        <div className={styles['main']}>
           <ChatMessages messages={messages} loading={loading} handleSubmit={handleSubmit} />
           <ChatInput
             query={query}
@@ -46,7 +49,7 @@ const Chatbot: React.FC = () => {
       </div>
     </div>
   )
-  
+
 }
 
 export default Chatbot;

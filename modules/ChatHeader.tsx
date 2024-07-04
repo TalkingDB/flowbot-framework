@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Button } from '@/components/ui';
 import ThemeContext from '@/contexts/ThemeContext';
+import ChatIcon from '@/assets/svgs/ChatIcon';
 
 
 
@@ -19,7 +20,7 @@ export const ChatHeader: React.FC = () => {
                     <span>{JSModule?.getTitle}</span>
                     {JSModule?.enabled ? (
                         <Button variant="link">
-                            {/* <ChatIcon /> */}
+                            <ChatIcon />
                             Chat with Platform Support
                         </Button>
                     ) : (

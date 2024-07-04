@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useRouter }  from 'next/router';
 import io from 'socket.io-client';
 import { Message } from '@/types/chat';
@@ -9,6 +9,7 @@ import {
 } from '@/apiRequests';
 
 import type { Socket } from 'socket.io-client';
+import ThemeContext from '@/contexts/ThemeContext';
 // import FileList from './File';
 
 declare const window: any;
@@ -21,7 +22,6 @@ export const useChatbot = () => {
     const [botLoading, setBotLoading] = useState<boolean>(true);
     const [initChat, setInitChat] = useState<boolean>(false);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [JSModule, setJSModule] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [query, setQuery] = useState<string>('');
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -36,7 +36,6 @@ export const useChatbot = () => {
     const [hiddenInput, setHiddenInput] = useState(false);
     const [leftPanelHtml, setLeftPanelHtml] = useState('');
     const [headerPaneHtml, setHeaderPaneHtml] = useState('');
-    const [styles, setStyle] = useState<any>({});
     const [messageState, setMessageState] = useState<{
         messages: Message[];
         pending?: string;
@@ -51,6 +50,7 @@ export const useChatbot = () => {
     const [socketState, setSocketState] = useState(false);
     const [socketInitstate, setSocketInitstate] = useState(false)
 
+    const { JSModule, styles } = useContext(ThemeContext);
 
     // Effect for initializing chat and socket
     useEffect(() => {
@@ -66,27 +66,6 @@ export const useChatbot = () => {
         // This includes setting up newChatRoom, currentSession, etc.
         setBotLoading(true);
         if (chatId) {
-            import(`@/configuration/${chatId}/webapp`)
-                .then((module) => {
-                    console.log("modeule", module)
-                    setJSModule(module);
-                })
-                .catch((error) => {
-                    import(`@/configuration/default/webapp`).then((module) => {
-                        setJSModule(module);
-                    });
-                });
-            import(`@/configuration/${chatId}/webapp/Index.module.css`)
-                .then((module) => {
-                    setStyle(module);
-                })
-                .catch((error) => {
-                    import(`@/configuration/default/webapp/Index.module.css`).then(
-                        (module) => {
-                            setStyle(module);
-                        },
-                    );
-                });
             setBotLoading(false);
         }
     };

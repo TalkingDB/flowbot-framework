@@ -16,6 +16,7 @@ export default function Layout({ children }: LayoutProps) {
     query: { 'chat-id': chatId },
   } = router;
 
+  // Function to initialize style and jsmodule config according to chatID
   useEffect(() => {
     if (chatId) {
       import(`@/configuration/${chatId}/webapp/Index.module.css`)
@@ -51,7 +52,7 @@ export default function Layout({ children }: LayoutProps) {
   }, [chatId]);
 
   return (
-    <ThemeContext.Provider value={{ styles: CSSStyles }}>
+    <ThemeContext.Provider value={{ styles: CSSStyles, JSModule: JSModule }}>
       <div className={styles.container}>
         <div className={`${styles['main-content']} ${CSSStyles['main-content']}`}>{children}</div>
       </div>
