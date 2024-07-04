@@ -9,6 +9,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [CSSStyles, setStyles] = useState<any>({});
+  const [JSModule, setJSModule] = useState<any>(null);
+
   const router = useRouter();
   const {
     query: { 'chat-id': chatId },
@@ -27,12 +29,24 @@ export default function Layout({ children }: LayoutProps) {
             },
           );
         });
+      import(`@/configuration/${chatId}/webapp`)
+        .then((module) => {
+          setJSModule(module);
+        })
+        .catch((error) => {
+          import(`@/configuration/default/webapp`).then((module) => {
+            setJSModule(module);
+          });
+        });
     } else {
       import(`@/configuration/default/webapp/Index.module.css`).then(
         (module) => {
           setStyles(module);
         },
       );
+      import(`@/configuration/default/webapp`).then((module) => {
+        setJSModule(module);
+      });
     }
   }, [chatId]);
 
