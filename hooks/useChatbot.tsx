@@ -31,7 +31,7 @@ export const useChatbot = () => {
     const [newChatRoom, setNewChatRoom] = useState<string>('');
     const [currentSession, setCurrentSession] = useState<string>('');
     const [content, setContent] = useState('');
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const [hiddenInput, setHiddenInput] = useState(false);
     const [leftPanelHtml, setLeftPanelHtml] = useState('');
     const [headerPaneHtml, setHeaderPaneHtml] = useState('');

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { Address, CardRadioGroup, ColumnCards, GoogleLoginComponent, LoginPasswordAsk, PasswordInput, SelectInputField, MultiSelectInput, AutoCompleteInput, CheckboxGroup, Invoice, SearchInput, ShowDetails, FileUploadComponent, Summary, Table, CostCards, InstallationInfo, StripeComponent, DateTimePicker, CostMilestone, ProjectCard, RatingCard, ReferralCard } from './ui';
+import { Address, CardRadioGroup, ColumnCards, GoogleLoginComponent, LoginPasswordAsk, PasswordInput, SelectInputField, MultiSelectInput, AutoCompleteInput, CheckboxGroup, Invoice, SearchInput, ShowDetails, FileUploadComponent, Summary, Table, CostCards, InstallationInfo, StripeComponent, DateTimePicker, CostMilestone, ProjectCard, RatingCard, ReferralCard, RadioGroup } from './ui';
 import { InlineWidget } from 'react-calendly';
 import NextFunction from './NextFunction';
 import { Message } from '@/types/chat';
@@ -33,7 +33,16 @@ export const DynamicComponent: React.FC<DynamicComponentProps> = ({ message, ind
 
   const components: ComponentsType = {
     radioButton: () =>
-      integration === 'Calandly' ? <InlineWidget url="https://calendly.com/aashishrawte1/15min" /> : null,
+      integration === 'Calandly' ? <InlineWidget url="https://calendly.com/aashishrawte1/15min" />
+        :
+        <RadioGroup
+          options={options}
+          value={message?.step?.default}
+          disabled={!isLastMessage}
+          onChange={(value: any) => isLastMessage && handleSubmit(value)}
+        />
+    ,
+
 
     html: () => <div dangerouslySetInnerHTML={{ __html: html }} />,
 

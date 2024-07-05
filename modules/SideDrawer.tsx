@@ -5,13 +5,15 @@ import ThemeContext from "@/contexts/ThemeContext";
 import Drawer from 'react-modern-drawer';
 import DownloadIcon from "@/assets/svgs/DownloadIcon";
 import { useTainPDF } from "@/hooks/useTrainPDF";
+import FileList from "@/pages/Chatbot/File";
+import config from '@/config/constants';
 
 
 
 export const SideDrawer = ({ open, setOpen }: { open: boolean, setOpen: (val: boolean) => void }) => {
 
     const { JSModule, styles } = useContext(ThemeContext);
-    const {handlePDFFileChange} = useTainPDF()
+    const { pdfList, uploading, selectedFileType, setTrainingInProgress, handlePDFFileChange } = useTainPDF()
 
     const fileInputRef = useRef(null);
 
@@ -36,7 +38,7 @@ export const SideDrawer = ({ open, setOpen }: { open: boolean, setOpen: (val: bo
                             <div className={styles['Divider']}></div>
                             <div className={styles['UploaderHeader']}>Upload Document</div>
                             <div className={styles['UploadContainer']}>
-                                {!false ? <div className={styles['UploadButtonContainer']}>
+                                {!uploading ? <div className={styles['UploadButtonContainer']}>
                                     <label className={styles['uploadButton']}>
                                         <input
                                             type="file"
@@ -62,6 +64,22 @@ export const SideDrawer = ({ open, setOpen }: { open: boolean, setOpen: (val: bo
                                         </div>
                                     </div>
                                 }
+                                <div style={{ width: '100%' }}>
+                                    {pdfList?.map((item, index) => {
+                                        return (
+                                            <FileList
+                                                key={index+1}
+                                                selectedFileType={selectedFileType}
+                                                filename={item.name ?? item.training_id}
+                                                index={index}
+                                                progressUrl={JSModule?.trainedChatbotProgressUrl}
+                                                apiKey={config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY}
+                                                trained={item.is_trained || false}
+                                                setTrainingInProgress={setTrainingInProgress}
+                                            />
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
 
