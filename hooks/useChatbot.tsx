@@ -267,17 +267,6 @@ export const useChatbot = () => {
                     },
                 );
                 const data = await response.json();
-                // const data = {
-                //     "text": "Hi there! I'm your Enjoy Mondays talent advisor, and I'm here to help! I can offer personalized career advice, valuable job search tips, and even suggest upskilling opportunities to boost your resume.",
-                //     "src": "talkingDb",
-                //     "currentStep": {
-                //         "id": 0,
-                //         "inputType": "await",
-                //         "question": "Hi there! I'm your Enjoy Mondays talent advisor, and I'm here to help! I can offer personalized career advice, valuable job search tips, and even suggest upskilling opportunities to boost your resume.",
-                //         "await": 1000
-                //     },
-                //     "hideAnswer": false
-                // }
                 console.log("data", data)
                 if (data?.redirect) {
                     window.location.href = data.redirect;
