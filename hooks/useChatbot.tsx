@@ -565,6 +565,7 @@ export const useChatbot = () => {
     return {
         messages,
         loading,
+        botLoading,
         query,
         setQuery,
         open,
