@@ -51,25 +51,26 @@ export const useChatbot = () => {
     const { messages, history } = messageState;
     // Effect for initializing chat and socket
     useEffect(() => {
+        // Function to initialize chat
+        const initializeChat = async () => {
+            // Logic to set up initial chat state
+            // This includes setting up newChatRoom, currentSession, etc.
+            
+            setBotLoading(true);
+            if (chatId) {
+                if (typeof chatId === 'string') {
+                    setNewChatRoom(chatId)
+                    if (!currentSession) setCurrentSession(generateRandomString('session_', 9));
+                }
+                setBotLoading(false);
+            }
+        };
         initializeChat();
         if (JSModule?.socket_base_url) {
             initializeSocket();
         }
     }, [chatId, JSModule?.socket_base_url]);
 
-    // Function to initialize chat
-    const initializeChat = async () => {
-        // Logic to set up initial chat state
-        // This includes setting up newChatRoom, currentSession, etc.
-        setBotLoading(true);
-        if (chatId) {
-            if (typeof chatId === 'string') {
-                setNewChatRoom(chatId)
-                setCurrentSession(generateRandomString('session_', 9));
-            }
-            setBotLoading(false);
-        }
-    };
 
     // Function to initialize socket
     const initializeSocket = async () => {
