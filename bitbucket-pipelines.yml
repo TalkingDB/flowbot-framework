@@ -6,7 +6,6 @@ definitions:
         name: Build
         size: 4x
         script:
-          - npx browserslist@latest --update-db
           - export SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
           - bash ./run.sh build
         services:
