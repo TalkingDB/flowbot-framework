@@ -4,6 +4,7 @@ definitions:
   steps:
     - step: &build
         name: Build
+        size: 2x
         script:
           - bash ./run.sh build
         services:
