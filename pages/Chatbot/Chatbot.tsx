@@ -22,6 +22,8 @@ const Chatbot: React.FC = () => {
     open,
     setOpen,
     styles,
+    references,
+    chatId
   } = useChatbot();
 
   if (botLoading || !(JSModule?.enabled)) {
@@ -33,41 +35,43 @@ const Chatbot: React.FC = () => {
       </div>
     )
   }
-
-  return (
-    <div className={styles['container']}>
-      {JSModule?.drawerEnabled &&
-        <SideDrawer open={open} setOpen={(val) => setOpen(val)} />
-      }
-      {JSModule?.enabled && (
-        <div
-          className={styles['sidebar']}
-          dangerouslySetInnerHTML={{ __html: JSModule.leftPanelHtml }}
-        />
-      )}
-      <div className={styles['main-content']}>
-        <ChatHeader />
-        <div className={styles['main']}>
-          <ChatMessages
-            messages={messages}
-            loading={loading}
-            handleSubmit={handleSubmit}
-            handleFileUpload={handleFileUpload}
-            typingState={typingState}
+  else {
+    return (
+      <div className={styles['container']}>
+        {JSModule?.drawerEnabled &&
+          <SideDrawer open={open} setOpen={(val) => setOpen(val)} />
+        }
+        {JSModule?.enabled && (
+          <div
+            className={styles['sidebar']}
+            dangerouslySetInnerHTML={{ __html: JSModule.leftPanelHtml }}
           />
-          <ChatInput
-            query={query}
-            messages={messages}
-            typingState={typingState}
-            loading={loading}
-            onSubmit={handleSubmit}
-            onChange={setQuery}
-          />
+        )}
+        <div className={styles['main-content']}>
+          <ChatHeader />
+          <div className={styles['main']}>
+            <ChatMessages
+              chatId={String(chatId)}
+              references={references}
+              messages={messages}
+              loading={loading}
+              handleSubmit={handleSubmit}
+              handleFileUpload={handleFileUpload}
+              typingState={typingState}
+            />
+            <ChatInput
+              query={query}
+              messages={messages}
+              typingState={typingState}
+              loading={loading}
+              onSubmit={handleSubmit}
+              onChange={setQuery}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  )
-
+    )
+  }
 }
 
 export default Chatbot;
