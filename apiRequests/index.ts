@@ -1,29 +1,30 @@
-import { axiosPDFInstance, axiosConvInstance } from "@/utils/axiosInstance";
+import { axiosPDFInstance, axiosConvInstance } from "@/utils/axiosInstance"
 
 type CHAT_ID = string | string[] | undefined
 
 export const getPDFList = async (chatId: CHAT_ID) => {
     try {
-        const response = await axiosPDFInstance.get(`/data/list?chatbot_id=${chatId}`);
+        const response = await axiosPDFInstance.get(`/data/list?chatbot_id=document-${chatId}`);
         return response.data.data;
     } catch (error) {
-
+        return false;
     }
 }
 
 export const uploadPDF = async (chatId: CHAT_ID, data: any) => {
     try {
-        await axiosPDFInstance.post(`/data/upload?chatbot_id=${chatId}`, data);
+        await axiosPDFInstance.post(`/data/upload?chatbot_id=document-${chatId}`, data);
     } catch (error) {
-
+        console.log(`something went wrong during uploading pdf: ${error}`);
+        return false;
     }
 }
 
 export const deletePDFList = async (chatId: CHAT_ID) => {
     try {
-        await axiosPDFInstance.get(`/chatbot/untrain?chatbot_id=${chatId}`);
+        await axiosPDFInstance.get(`/chatbot/untrain?chatbot_id=document-${chatId}`);
     } catch (error) {
-
+        
     }
 }
 
@@ -91,5 +92,15 @@ export const submitPromptTemplate = async (chatId: CHAT_ID, data: any) => {
         return await axiosConvInstance.post(`/prompt_template?chat_id=${chatId}`, data);
     } catch (error) {
 
+    }
+}
+
+export const deleteDocument = async ( documentName: string, chatId: string | unknown) => {
+    try {
+        const response = await axiosPDFInstance.delete(`/data/${documentName}?chatbot_id=document-${chatId}`)
+        return response;
+    } catch (error) {
+        console.log(`something went wrong during deleting the doc ${documentName}: ${error}`);
+        return false;
     }
 }
