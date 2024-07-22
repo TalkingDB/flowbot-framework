@@ -23,3 +23,8 @@ export type Page = {
   page_number: string;
   page_body: string
 };
+
+export interface IReferences {
+  documentName: string;
+  pageNumber: number;
+}

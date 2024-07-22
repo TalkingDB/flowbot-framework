@@ -1,13 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
+import { getPDFList, uploadPDF } from '@/apiRequests';
 import ThemeContext from '@/contexts/ThemeContext';
-import config from '@/config/constants';
 import { useRouter } from 'next/router';
 
 
 export const useTainPDF = () => {
 
     const router = useRouter();
-    const { JSModule } = useContext(ThemeContext);
     const [pdfList, setPdfList] = useState<
         { name?: string; training_id?: string; is_trained: boolean }[]
     >([]);
@@ -21,6 +20,15 @@ export const useTainPDF = () => {
     const { 'chat-id': chatId } = router.query;
 
 
+    useEffect(() => {
+        const fetchDocuments = async () => {
+            const response = await getPDFList(chatId)
+            if (response) {
+                setPdfList(response)
+            }
+        }
+        fetchDocuments()
+    }, [chatId])
 
     // Function to handle PDFfile upload
     const handlePDFFileChange = (e: any) => {
@@ -34,39 +42,14 @@ export const useTainPDF = () => {
     };
 
     useEffect(() => {
-        const fetchData = async (chatbotUrl: string, apiKey: string) => {
-            try {
-                const response = await fetch(`${config.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}/${chatbotUrl}${chatId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'API-KEY': config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
-                    }
-                });
-                const jsonData = await response.json();
-                console.log("data response::::::", jsonData.data)
-                setChatbots(jsonData.data)
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        const uploadPDFFile = async (uploadUrl: string, apiKey: string) => {
+        const uploadPDFFile = async () => {
             setUploading(true);
             const FormData = require('form-data');
             let data = new FormData();
             data.append('file', selecteduploadFile);
 
             try {
-                const response = await fetch(`${config.NEXT_PUBLIC_BACKEND_CONNECTOR_HOST}/${uploadUrl}${chatId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'API-KEY': config.NEXT_PUBLIC_BACKEND_CONNECTOR_KEY
-                    },
-                    body: data
-                });
-                const jsonData = await response.json();
-                fetchData(JSModule?.trainedChatbotUrl as string, JSModule?.trainedChatbotAPIKey as string);
+                await uploadPDF(chatId, data);
             } catch (error) {
                 console.log(error);
             } finally {
@@ -74,15 +57,15 @@ export const useTainPDF = () => {
             }
         }
 
-        if (JSModule?.documentUploadUrl && selecteduploadFile && chatId) {
-            console.log("inside upload call:::::")
-            uploadPDFFile(JSModule?.documentUploadUrl as string, JSModule?.trainedChatbotAPIKey as string);
+        if (selecteduploadFile && chatId) {
+            uploadPDFFile();
         }
     }, [selecteduploadFile])
 
 
     return {
         pdfList,
+        setPdfList,
         chatbots,
         selectedFileType,
         uploading,

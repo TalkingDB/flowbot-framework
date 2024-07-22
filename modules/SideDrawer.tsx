@@ -1,21 +1,39 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
+import { useRouter } from 'next/router';
 import HamburgerIcon from "@/assets/HamburgerIcon";
 import { Loader } from "@/components/ui";
 import ThemeContext from "@/contexts/ThemeContext";
 import Drawer from 'react-modern-drawer';
 import DownloadIcon from "@/assets/svgs/DownloadIcon";
+import PdfIcon from "@/assets/svgs/PdfIcon";
+import TrashIcon from "@/assets/svgs/TrashIcon";
 import { useTainPDF } from "@/hooks/useTrainPDF";
 import FileList from "@/modules/File";
 import config from '@/config/constants';
+import { getPDFList, deleteDocument } from "@/apiRequests";
 
 
 
 export const SideDrawer = ({ open, setOpen }: { open: boolean, setOpen: (val: boolean) => void }) => {
 
     const { JSModule, styles } = useContext(ThemeContext);
-    const { pdfList, uploading, selectedFileType, setTrainingInProgress, handlePDFFileChange } = useTainPDF()
+    const { pdfList, setPdfList, uploading, selectedFileType, setTrainingInProgress, handlePDFFileChange } = useTainPDF()
 
+    const router = useRouter();
+    const { 'chat-id': chatId } = router.query;
     const fileInputRef = useRef(null);
+    const handleDeleteDocument = async ( documentName: string) => {
+        try {
+          const response = await deleteDocument(documentName, `${chatId}` )
+          if (response) {
+            const uploadedDocuments = await getPDFList(`${chatId}`)
+            setPdfList(uploadedDocuments)
+          }
+        } catch (error) {
+          console.log(`something went wrong during deleting the doc ${documentName}: ${error}`);
+          return;
+        }
+      }
 
 
     return (
@@ -34,6 +52,22 @@ export const SideDrawer = ({ open, setOpen }: { open: boolean, setOpen: (val: bo
                                 <div className={styles['HamburgerHeader']}>
                                     Trained on documents
                                 </div>
+                            </div>
+                            <div className={styles['DataContainer']}>
+                                {pdfList?.map((document: { name?: string | undefined; training_id?: string | undefined; is_trained: boolean; }, index) => (
+                                  <div key={index} className={styles['DataItem']}>
+                                    <PdfIcon />
+                                    <span>{document?.name}</span>
+                                    <div
+                                        onClick={() => {
+                                          handleDeleteDocument(document?.name!)
+                                        }}
+                                        className={styles['IconContainer']}
+                                    >
+                                      <TrashIcon />
+                                    </div>
+                                  </div>
+                                ))}
                             </div>
                             <div className={styles['Divider']}></div>
                             <div className={styles['UploaderHeader']}>Upload Document</div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
 import io from 'socket.io-client';
-import { Message } from '@/types/chat';
+import { Message, IReferences } from '@/types/chat';
 import {
     getDefaultPromptTemplate,
     resetPromptTemplate,
@@ -11,6 +11,7 @@ import {
 import type { Socket } from 'socket.io-client';
 import ThemeContext from '@/contexts/ThemeContext';
 import { generateRandomString } from '@/utils/generateRandomeString';
+import { getDocumentNameAndPageNumber } from '@/utils/extractDocumentNameAndPage';
 
 declare const window: any;
 
@@ -33,6 +34,7 @@ export const useChatbot = () => {
     const [content, setContent] = useState('');
     const [open, setOpen] = useState(false);
     const [hiddenInput, setHiddenInput] = useState(false);
+    const [references, setReferences] = useState<IReferences[]>([]);
     const [messageState, setMessageState] = useState<{
         messages: Message[];
         pending?: string;
@@ -269,6 +271,13 @@ export const useChatbot = () => {
                 );
                 const data = await response.json();
                 console.log("data", data)
+                const message: string = data?.errorMessage
+                if ( message && message.includes('For more information,') ){
+                    const { documentName, pageNumbers } = getDocumentNameAndPageNumber(message)
+                    pageNumbers?.map((pageNumber) => {
+                      setReferences((prev) => [ ...prev, { documentName, pageNumber: Number(pageNumber)}])
+                    })
+                }
                 if (data?.redirect) {
                     window.location.href = data.redirect;
                     return;
@@ -549,6 +558,7 @@ export const useChatbot = () => {
     };
 
     return {
+        chatId,
         messages,
         loading,
         botLoading,
@@ -564,6 +574,8 @@ export const useChatbot = () => {
         handleInputChange,
         handleFileUpload,
         updatePromptTemplate,
-        resetPromptTemplateHandler
+        resetPromptTemplateHandler,
+        references, 
+        setReferences
     };
 };
