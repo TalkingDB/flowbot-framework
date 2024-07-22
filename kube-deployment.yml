@@ -52,9 +52,9 @@ spec:
               mountPath: "/app/configuration"
           resources:
             limits:
-              memory: 2Gi  # Adjust the memory limit as needed
+              memory: 4Gi  # Adjust the memory limit as needed
             requests:
-              memory: 1Gi  # Set a reasonable memory request
+              memory: 2Gi  # Set a reasonable memory request
       volumes:
         - name: app-config-volume
           persistentVolumeClaim:
