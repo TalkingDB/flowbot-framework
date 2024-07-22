@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 const AdmZip = require('adm-zip');
+import { exec } from 'child_process';
+import util from 'util';
 
 // first we need to disable the default body parser
 export const config = {
@@ -13,6 +15,8 @@ export const config = {
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+
+    console.log(" ==== UPLOAD API Called ==== ")
     // parse form with a Promise wrapper
     const data = await new Promise<any>((resolve, reject) => {
       const form = new IncomingForm();
@@ -56,7 +60,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // Optionally, you can remove the original zip file after extraction
         // fs.unlink(tempPath);
       }
-
+      const execAsync = util.promisify(exec);
+      console.log("executing build process .....")
+      await execAsync('npm run build');
       return res.status(200).json({ msg: 'file uploaded' });
     } else {
       return res.status(500).json({ error: 'Something went wrong' });
