@@ -4,11 +4,10 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY yarn.lock ./
-
 RUN yarn
 
 COPY . .
 
 ENV PORT 80 9229
 
-CMD [ "yarn","run", "start"]
+CMD [ "yarn", "run", "dev"]
