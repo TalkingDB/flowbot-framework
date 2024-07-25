@@ -6,24 +6,27 @@ const uploadTypes = ["Upload configuration zip file", "Upload the CSS file", "Up
 const config = [
     {
         title: "Upload configuration zip file",
-        description: "* Chatbot-id will be same as the name of zip folder.",
+        description: "",
         submitButtonText: "Upload",
         allowedFileType: ['application/zip', 'application/x-zip-compressed'],
-        inputList: []
+        inputList: [{ label: "Chatbot Id", placeholder: "Enter chatbot Id to create", type: 'input' }]
     },
     {
         title: "Upload configuration css file",
         description: "",
         submitButtonText: "Upload",
         allowedFileType: ['text/css'],
-        inputList: [{ label: "Chatbot Id", placeholder: "Enter chatbot Id to update" }]
+        inputList: [{ label: "Chatbot Id", placeholder: "Enter chatbot Id to update", type: 'input' }]
     },
     {
         title: "Upload configuration js file",
         description: "",
         submitButtonText: "Upload",
         allowedFileType: ['text/javascript'],
-        inputList: [{ label: "Chatbot Id", placeholder: "Enter chatbot Id to update" }]
+        inputList: [
+            { label: "Chatbot Id", placeholder: "Enter chatbot Id to update", type: 'input' },
+            { label: "File location", placeholder: "Select file location", type: 'radioGroup', data: ["Server", "WebApp"] }
+        ]
     }
 ];
 

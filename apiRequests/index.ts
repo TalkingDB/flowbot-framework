@@ -125,3 +125,32 @@ export const deleteChatbot = async (chatbotId: string) => {
         return null;
     }
 }
+
+
+export const UploadChatbotZip = async (chatBotId:string, file: File) => {
+    try {
+        const formData = new FormData()
+        formData.append("chatBotId", chatBotId)
+        formData.append("file", file)
+        const response = await axios.post(`/api/upload`, formData)
+        return response;
+    } catch (error) {
+        // console.log("error occured at UploadChatbotZip ==>", error)
+        return null;
+    }
+}
+
+export const UploadConfig = async (chatBotId: string, fileType: string, serverType: string, file: File ) => {
+    try {
+        const formData = new FormData()
+        formData.append("chatBotId", chatBotId)
+        formData.append("fileType", fileType)
+        formData.append("serverType", serverType)
+        formData.append("file", file)
+        const response = await axios.post(`/api/config-upload`, formData)
+        return response;
+    } catch (error) {
+        // console.log("error occured at UploadConfig ==>", error)
+        return null;
+    }
+}
