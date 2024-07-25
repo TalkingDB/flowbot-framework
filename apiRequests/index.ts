@@ -1,4 +1,6 @@
+import { ChatbotsResponse, LiveChatbot } from "@/types/chat";
 import { axiosPDFInstance, axiosConvInstance } from "@/utils/axiosInstance"
+import axios from 'axios';
 
 type CHAT_ID = string | string[] | undefined
 
@@ -102,5 +104,24 @@ export const deleteDocument = async ( documentName: string, chatId: string | unk
     } catch (error) {
         console.log(`something went wrong during deleting the doc ${documentName}: ${error}`);
         return false;
+    }
+}
+
+
+export const getChatbots = async (): Promise<LiveChatbot[] | null> => {
+    try {
+        const response: ChatbotsResponse = await axios.get(`/api/chatbot`)
+        return response.data.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const deleteChatbot = async (chatbotId: string) => {
+    try {
+        const response = await axios.delete(`/api/chatbot/${chatbotId}`)
+        return response.data.data;
+    } catch (error) {
+        return null;
     }
 }
