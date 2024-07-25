@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import CreateChatbot from "@/modules/CreateChatbot";
 import Leftarrow from "@/assets/svgs/Leftarrow";
+import UploadIcon from "@/assets/svgs/UploadIcon";
 
-const uploadTypes = ["Upload configuration zip file", "Upload the CSS file", "Upload JS files"]
+const uploadTypes = ["Upload ZIP", "Upload CSS", "Upload JS"]
 const config = [
     {
         title: "Upload configuration zip file",
@@ -31,8 +32,8 @@ const config = [
 ];
 
 const UploadConfig = () => {
-    const [selectedIndex, setSelectedIndex] = useState<null | number>(null)
-    const selectedConfig = selectedIndex !== null ? config[selectedIndex] : null;
+    const [selectedIndex, setSelectedIndex] = useState<null | number>(0)
+    const selectedConfig = selectedIndex !== null ? config[selectedIndex] : config[0];
     return (
         <div className="m-6">
             <button className="flex gap-2"  onClick={() => window.history.back()}>
@@ -45,11 +46,13 @@ const UploadConfig = () => {
                     <div
                         key={index + 1}
                         className="relative max-w-sm bg-white shadow-lg rounded-lg overflow-hidden h-24 hover:shadow-xl"
+                        style={{ border: selectedIndex === index ? '2px solid black' : 'none' }}
                     >
                         <button
-                            className="mr-4 p-4 h-full flex flex-col justify-center items-center"
+                            className="mr-4 p-4 h-full flex justify-center items-center gap-4"
                             onClick={() => setSelectedIndex(index)}
                         >
+                            <UploadIcon />
                             <h2 className="text-xl font-bold text-gray-800">{item}</h2>
                         </button>
                     </div>
