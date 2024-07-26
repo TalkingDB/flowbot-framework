@@ -124,7 +124,7 @@ const CreateChatbot = ({ title, description, submitButtonText, inputList, allowe
                                     className={`text-blue-600 my-5 w-full flex justify-center p-4 rounded-full tracking-wide font-semibold focus:outline-none focus:shadow-outline transition ease-in duration-300
                                     ${!file ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-blue-500 text-gray-100 hover:bg-blue-600 hover:shadow-xl shadow-lg cursor-pointer'}`}
                                     disabled={!file}
-                                    style={{ border: file ? '2px solid black' : 'none' }}
+                                    style={{ border: file ? '2px solid black' : 'none', backgroundColor: '#CFDDFC', cursor: file ? 'pointer' : 'not-allowed' }}
                                 >
                                     {submitButtonText || "Submit"}
                                 </button>

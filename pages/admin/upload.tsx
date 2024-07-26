@@ -45,8 +45,8 @@ const UploadConfig = () => {
                 {uploadTypes?.map((item, index) => (
                     <div
                         key={index + 1}
-                        className="relative max-w-sm bg-white shadow-lg rounded-lg overflow-hidden h-24 hover:shadow-xl"
-                        style={{ border: selectedIndex === index ? '2px solid black' : 'none' }}
+                        className="relative text-white max-w-sm bg-white shadow-lg rounded-lg overflow-hidden h-24 hover:shadow-xl"
+                        style={{ border: selectedIndex === index ? '2px solid black' : 'none', backgroundColor: '#CFDDFC' }}
                     >
                         <button
                             className="mr-4 p-4 h-full flex justify-center items-center gap-4"

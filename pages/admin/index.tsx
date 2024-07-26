@@ -48,12 +48,13 @@ const AdminPage: React.FC = () => {
                 <div className='m-6'>
                     <div className='flex justify-between  mb-12'>
                         <div className='flex gap-x-2'>
-                            <h1 className='text-red-500 font-bold'>* Live</h1>
-                            <h1 className='font-bold'>Chatbots</h1>
+                            <h1 className='text-2xl text-red-500 font-bold'>* Live</h1>
+                            <h1 className='text-2xl font-bold'>Chatbots</h1>
                         </div>
                         <div>
                             <button
-                                className='px-4 py-2 bg-green-500 text-white rounded'
+                                className='px-4 py-2 text-white rounded'
+                                style={{ backgroundColor: '#4968DD' }}
                                 onClick={() => router.push('/admin/upload')}
                             >
                                 Create new Chatbot
@@ -61,11 +62,12 @@ const AdminPage: React.FC = () => {
                         </div>
 
                     </div>
-                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
                         {liveChatbots?.map((item, index) => (
                             <div
                                 key={index + 1}
                                 className="relative max-w-sm bg-white shadow-lg rounded-lg overflow-hidden h-24 hover:shadow-xl"
+                                style={{ backgroundColor: '#CFDDFC' }}
                             >
                                 <button
                                     className="mr-4 p-4 h-full flex flex-col justify-center items-center"
