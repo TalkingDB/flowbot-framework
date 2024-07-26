@@ -4,6 +4,7 @@ import { deleteChatbot, getChatbots } from '@/apiRequests';
 import { LiveChatbot } from '@/types/chat';
 import CustomModal from '@/components/ui/customModal';
 import {useRouter} from 'next/router';
+import { ToastContainer, toast } from 'react-toastify';
 
 const AdminPage: React.FC = () => {
 
@@ -12,6 +13,8 @@ const AdminPage: React.FC = () => {
     const [deleteChatbotKey, setDeleteChatbotKey] = useState<string>('');
     const router = useRouter();
     const { key } = router.query;
+    // Remove fallback value later
+    const verificationKey = process.env.NEXT_PUBLIC_ADMIN_KEY ?? "12345"
 
 
     const fetchLiveChatbots = async () => {
@@ -27,14 +30,17 @@ const AdminPage: React.FC = () => {
         if (Id) {
             await deleteChatbot(Id)
             await fetchLiveChatbots()
+            toast("chatbot deleted successfully", {type: "success"});
         }
         setModalStatus(false)
         setDeleteChatbotKey('')
+
     }
 
     return (
         <>
-            {key !== process.env.NEXT_PUBLIC_ADMIN_KEY ? (
+        <ToastContainer />
+            {key !== verificationKey ? (
                 <div className='m-8 flex justify-center items-center h-screen'>
                     <h1>You don't have access of this page <br/> Please contact admin for access. </h1>
                 </div>
