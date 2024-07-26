@@ -1,4 +1,6 @@
+import { ChatbotsResponse, LiveChatbot } from "@/types/chat";
 import { axiosPDFInstance, axiosConvInstance } from "@/utils/axiosInstance"
+import axios from 'axios';
 
 type CHAT_ID = string | string[] | undefined
 
@@ -102,5 +104,53 @@ export const deleteDocument = async ( documentName: string, chatId: string | unk
     } catch (error) {
         console.log(`something went wrong during deleting the doc ${documentName}: ${error}`);
         return false;
+    }
+}
+
+
+export const getChatbots = async (): Promise<LiveChatbot[] | null> => {
+    try {
+        const response: ChatbotsResponse = await axios.get(`/api/chatbot`)
+        return response.data.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const deleteChatbot = async (chatbotId: string) => {
+    try {
+        const response = await axios.delete(`/api/chatbot/${chatbotId}`)
+        return response.data.data;
+    } catch (error) {
+        return null;
+    }
+}
+
+
+export const UploadChatbotZip = async (chatBotId:string, file: File) => {
+    try {
+        const formData = new FormData()
+        formData.append("chatBotId", chatBotId)
+        formData.append("file", file)
+        const response = await axios.post(`/api/upload`, formData)
+        return response;
+    } catch (error) {
+        // console.log("error occured at UploadChatbotZip ==>", error)
+        return null;
+    }
+}
+
+export const UploadConfig = async (chatBotId: string, fileType: string, serverType: string, file: File ) => {
+    try {
+        const formData = new FormData()
+        formData.append("chatBotId", chatBotId)
+        formData.append("fileType", fileType)
+        formData.append("serverType", serverType)
+        formData.append("file", file)
+        const response = await axios.post(`/api/config-upload`, formData)
+        return response;
+    } catch (error) {
+        // console.log("error occured at UploadConfig ==>", error)
+        return null;
     }
 }
