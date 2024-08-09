@@ -1,5 +1,5 @@
 import path from "path";
-import fs from "fs";
+import fs from 'fs-extra';
 
 
 export const getChatbotsList = async () => {
@@ -37,5 +37,24 @@ export const deleteChatbot = async (chatbotId: string) => {
         }
     } catch (error) {
         return `Error while deleting chatbotId: ${chatbotId}`
+    }
+};
+
+
+export const cloneChatbot = async (chatbotId: string, newChatbotId: string) => {
+    try {
+        const configPath = path.join(process.cwd(), 'configuration', chatbotId);
+        const newConfigPath = path.join(process.cwd(), 'configuration', newChatbotId);
+
+
+        if (await fs.pathExists(configPath)) {
+            await fs.mkdirp(newConfigPath);
+            await fs.copy(configPath, newConfigPath)
+            return `Successfully created folder: ${newChatbotId}`;
+        } else {
+            return `Folder not found: ${chatbotId}`
+        }
+    } catch (error) {
+        return `Error while created chatbotId: ${chatbotId}`
     }
 };

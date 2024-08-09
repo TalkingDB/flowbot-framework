@@ -154,3 +154,17 @@ export const UploadConfig = async (chatBotId: string, fileType: string, serverTy
         return null;
     }
 }
+
+
+export const cloneChatbot = async (chatbotId: string, newChatbotId: string) => {
+    try {
+        const body = {
+            chatbotId,
+            newChatbotId
+        }
+        const data = await axios.post(`/api/clone-chatbot`, body)
+        return data
+    } catch (error) {
+        return null
+    }
+}

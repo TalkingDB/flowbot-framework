@@ -5,12 +5,16 @@ import { LiveChatbot } from '@/types/chat';
 import CustomModal from '@/components/ui/customModal';
 import {useRouter} from 'next/router';
 import { ToastContainer, toast } from 'react-toastify';
+import CopyIcon from '@/assets/svgs/CopyIcon';
+import CloneChatbot from '@/modules/CloneChatbot';
 
 const AdminPage: React.FC = () => {
 
     const [liveChatbots, setLiveChatbots] = useState<LiveChatbot[] | null>(null);
     const [modalStatus, setModalStatus] = useState(false);
-    const [deleteChatbotKey, setDeleteChatbotKey] = useState<string>('');
+    const [cloneStatus, setCloneStatus] = useState(false);
+    const [createChatbot, setCreateChatbot] = useState(false);
+    const [selectedChatbotKey, setSelectedChatbotKey] = useState<string>('');
     const router = useRouter();
     const { key } = router.query;
     // Remove fallback value later
@@ -27,14 +31,37 @@ const AdminPage: React.FC = () => {
     }, [])
 
     const deleteLiveChatbot = async (Id?: string) => {
-        if (Id) {
+        if (Id && Id !== "close modal") {
             await deleteChatbot(Id)
             await fetchLiveChatbots()
-            toast("chatbot deleted successfully", {type: "success"});
+            toast(`${Id} chatbot deleted successfully`, {type: "success"});
         }
         setModalStatus(false)
-        setDeleteChatbotKey('')
+        setSelectedChatbotKey('')
 
+    }
+
+    const handleCloneChatbot = async (Id?: string) => {
+        // console.log("cloned succesfully", Id)
+
+
+        if (Id === "close modal") {
+            setCloneStatus(false)
+            setCreateChatbot(false)
+            setSelectedChatbotKey('')
+        } else if (Id === "created") {
+            toast("Chatbot cloned successfully", {type: "success"})
+            setCreateChatbot(false)
+            setSelectedChatbotKey('')
+            await fetchLiveChatbots()
+        } else if (Id) {
+            setCreateChatbot(true);
+            setCloneStatus(false)
+        } else {
+            if (cloneStatus) setCloneStatus(false)
+            setCreateChatbot(false)
+            setSelectedChatbotKey('')
+        }
     }
 
     return (
@@ -78,16 +105,47 @@ const AdminPage: React.FC = () => {
                                 <button
                                     onClick={() => {
                                         setModalStatus(true)
-                                        setDeleteChatbotKey(item?.file)
+                                        setSelectedChatbotKey(item?.file)
                                     }}
+                                    title='Delete Chatbot'
                                     className="absolute top-2 right-2 text-gray-500 focus:outline-none hover:bg-gray-200 rounded p-1"
                                 >
                                     <TrashIcon />
                                 </button>
+                                <button
+                                    onClick={() => {
+                                        setCloneStatus(true)
+                                        setSelectedChatbotKey(item?.file)
+                                    }}
+                                    title='Clone Chatbot'
+                                    className="absolute top-2 right-10 text-gray-500 focus:outline-none hover:bg-gray-200 rounded p-1"
+                                >
+                                    <CopyIcon />
+                                </button>
                             </div>
                         )
                         )}
-                        {modalStatus && <CustomModal id={deleteChatbotKey} title={`Do you want to delete chatbot - ${deleteChatbotKey}?`} status={modalStatus} onClose={deleteLiveChatbot} />}
+                        {modalStatus && <CustomModal id={selectedChatbotKey} title={`Do you want to delete chatbot - ${selectedChatbotKey}?`} status={modalStatus} onClose={deleteLiveChatbot} />}
+                        {cloneStatus && 
+                            <CustomModal 
+                                id={selectedChatbotKey} 
+                                title={`Do you want to clone this chatbot - ${selectedChatbotKey}?`} 
+                                status={cloneStatus} 
+                                onClose={handleCloneChatbot} 
+                            />
+                        }
+                        {createChatbot &&
+                        <CustomModal 
+                            id={selectedChatbotKey} 
+                            onClose={handleCloneChatbot} 
+                            status={createChatbot}
+                            title={"Enter the name for the new chatbot"}
+                            children={
+                                <CloneChatbot id={selectedChatbotKey} onClose={handleCloneChatbot}/>
+                            }
+                            showOptionsButton={false}
+                        />
+                        }
                     </div>
                 </div>
             )}
