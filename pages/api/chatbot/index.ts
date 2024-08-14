@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getJsTest } from '@/utils/test';
 import { getChatbotsList } from '@/utils/chatbots';
 import { Socket } from 'net';
 

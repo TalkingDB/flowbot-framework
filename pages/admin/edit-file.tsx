@@ -5,7 +5,7 @@ import { updateConfig } from '@/apiRequests';
 
 interface EditorProps {
   fileType: 'json' | 'javascript' | 'css';
-  serverType?: 'server' | 'webapp'
+  serverType?: 'server' | 'webapp' | 'webapp.css'
   fileContent: string;
   chatbotId?: string
 }
@@ -22,15 +22,22 @@ export const getServerSideProps: GetServerSideProps<EditorProps> = async (contex
       fileType = "javascript"
     }
     fileContent = await getJsTest(chatbotId, filetype);
+    if (typeof fileContent === "string" && typeof chatbotId === "string" && typeof filetype === "string") {
+      const props: EditorProps = {
+        fileType: fileType as 'json' | 'javascript' | 'css',
+        serverType: filetype as 'server' | 'webapp' | 'webapp.css', 
+        fileContent,
+        chatbotId
+      };
+      return {
+        props
+      };
+    }
   }
-  return {
-    props: {
-      fileContent,
-      fileType,
-      serverType: filetype,
-      chatbotId
-    },
-  };
+
+  return { notFound: true };
+
+  
 
 };
 

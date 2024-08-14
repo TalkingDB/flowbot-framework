@@ -70,7 +70,7 @@ const AdminPage: React.FC = () => {
             <ToastContainer />
             {key !== verificationKey ? (
                 <div className='m-8 flex justify-center items-center h-screen'>
-                    <h1>You don't have access of this page <br /> Please contact admin for access. </h1>
+                    <h1>{"You don't have access of this page"} <br /> Please contact admin for access. </h1>
                 </div>
             ) : (
                 <div className='m-6'>
@@ -151,11 +151,8 @@ const AdminPage: React.FC = () => {
                                 onClose={handleCloneChatbot}
                                 status={createChatbot}
                                 title={"Enter the name for the new chatbot"}
-                                children={
-                                    <CloneChatbot id={selectedChatbotKey} onClose={handleCloneChatbot} />
-                                }
                                 showOptionsButton={false}
-                            />
+                            >{<CloneChatbot id={selectedChatbotKey} onClose={handleCloneChatbot} />}</CustomModal>
                         }
                     </div>
                 </div>
