@@ -164,81 +164,50 @@ export const ChatMessages: React.FC<ChatMessageProps> = ({ chatId, messages, loa
                                     )}
                                     <div key={`chatMessage-${index}`} className={className}>
                                         <div
-                                            className={styles?.container}
-                                            style={{ flexDirection: JSModule?.conversationLayout ? (message?.type == 'apiMessage' ? 'row' : 'row-reverse') : 'row' }}
+                                            className={`${styles.container} ${
+                                                message.type === 'userMessage'
+                                                  ? styles.userRow
+                                                  : styles.botRow
+                                              }`}
                                         >
-                                            {!JSModule?.hideBotIcon &&
-                                                <div>
-                                                    {icon}
-                                                </div>
-                                            }
-
                                             {
-                                                JSModule?.conversationLayout &&
-                                                message?.type == 'apiMessage' &&
-                                                (index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage')) &&
-                                                <div className={styles?.botIcon}>
+                                                message.type === 'apiMessage' &&
+                                                !JSModule?.hideBotIcon && (
+                                                    <div>
                                                     {icon}
-                                                </div>
+                                                    </div>
+                                                )
                                             }
-
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    width: '100%',
-                                                    // marginRight:  message?.type == 'apiMessage' ? '0px' : '10px',
-                                                }}
-                                            
-                                            >
-                                                {!JSModule?.hideBotIcon &&
-                                                    <>
-                                                        {message?.type == 'apiMessage' ? (
-                                                            <span
-                                                                className={styles?.botName}
-                                                                style={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'row',
-                                                                    gap: '2px',
-                                                                    width: '100%',
-                                                                }}
+                                            <div>
+                                                {/* botname */}
+                                                {!JSModule?.hideBotIcon && message.type === 'apiMessage' && (
+                                                    <span className={styles?.botName}>
+                                                        {JSModule?.botName}
+                                                        {message?.step?.tooltip && (
+                                                            <p
+                                                                title={message?.step?.tooltip}
+                                                                className={styles?.tooltipIcon}
                                                             >
-                                                                {JSModule?.botName}
-                                                                {message?.step?.tooltip && (
-                                                                    <p
-                                                                        title={message?.step?.tooltip}
-                                                                        className={styles?.tooltipIcon}
-                                                                    >
-                                                                        <ToolTip />
-                                                                    </p>
-                                                                )}
-                                                            </span>
-                                                        ) : (
-                                                            <span
-                                                                className={styles?.botName}
-                                                                style={{
-                                                                    textAlign: JSModule?.conversationLayout ? 'right' : 'left'
-                                                                }}
-                                                            >You</span>
+                                                                <ToolTip />
+                                                            </p>
                                                         )}
-                                                    </>
-                                                }
+                                                    </span>
+                                                )}
+
+                                                {/* username */}
+                                                {!JSModule?.hideUserIcon && message.type === 'userMessage' && (
+                                                    <span
+                                                        className={styles?.botName}
+                                                        style={{
+                                                            textAlign: JSModule?.conversationLayout ? 'right' : 'left'
+                                                        }}
+                                                    >
+                                                        You
+                                                    </span>
+                                                )}
 
                                                 <div
                                                     className={`${styles?.markdownanswer}`}
-                                                    style={{
-                                                        minWidth: 'auto',
-                                                        maxWidth: 'auto',
-                                                        marginLeft: (!(index === messages.length - 1 || (index < messages.length - 1 && messages[index + 1]?.type !== 'apiMessage'))) && JSModule?.conversationLayout ? '2rem' : '',
-                                                        width: '100%',
-                                                        alignSelf: message?.type == 'userMessage' && JSModule?.conversationLayout ?
-                                                            'flex-end' :
-                                                            message?.type == 'apiMessage' && JSModule?.conversationLayout ?
-                                                                'self-start' :
-                                                                'flex-start',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                    }}
                                                 >
                                                     <span
                                                         className={`${styles?.markdownanswerspan} ${message?.type == 'apiMessage' ? styles?.chat_container_left : styles?.chat_container_right}`}
@@ -313,6 +282,14 @@ export const ChatMessages: React.FC<ChatMessageProps> = ({ chatId, messages, loa
                                                     )}
                                                 </div>
                                             </div>
+                                            {/* USER ICON (right side) */}
+                                            {message.type === 'userMessage' &&
+                                                !JSModule?.hideUserIcon && (
+                                                  <div>
+                                                    {icon}
+                                                  </div>
+                                                )
+                                            }
                                         </div>
                                     </div>
                                 </Fragment>
