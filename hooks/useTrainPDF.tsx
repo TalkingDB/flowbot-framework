@@ -4,6 +4,7 @@ import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { UploadPhase, FileUploadStatus } from '@/types/fileUploadStatus';
+import { setGraphId, setJobId } from '@/utils/sessionJobs';
 
 // TODO: Replace mock data with API response when backend endpoint is available.
 const mockPollProgress = (
@@ -102,6 +103,11 @@ export const useTainPDF = () => {
         setUploads((prev) => [...prev, entry]);
         setPdfList((prev) => [...prev, { name: file.name, is_trained: false }]);
         setTrainingInProgress(true);
+
+        // TODO: Call upload API, then store IDs in session:
+        // const { graphId, jobId } = await uploadPDF(file, chatId);
+        // setGraphId(graphId);  → used by chat queries
+        // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
     };
 
     const cancelUpload = (fileName: string) => {

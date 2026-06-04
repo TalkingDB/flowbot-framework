@@ -9,3 +9,9 @@ export type FileUploadStatus = {
     phase: UploadPhase;
     error?: string;
 };
+
+export type ActiveJob = {
+    graphId: string;
+    jobId: string;
+    fileName: string;
+};
