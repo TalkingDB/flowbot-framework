@@ -7,6 +7,8 @@ export type FileUploadStatus = {
     type: string;
     progress: number;
     phase: UploadPhase;
+    jobId?: string;
+    graphId?: string;
     error?: string;
 };
 
