@@ -7,7 +7,7 @@ export const uploadDocument = async (file: File) => {
         const response = await axiosTTTInstance.post(`/v1/documents`, formData);
         return response?.data;
     } catch (error) {
-        console.log(`something went wrong during uploading pdf`, {
+        console.log(`something went wrong during uploading document`, {
             message: error?.message,
             status: error?.response?.status,
             responseData: error?.response?.data
