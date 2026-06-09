@@ -30,14 +30,10 @@ services:
     env_file:
       - .env
     volumes:
-      # Mount source for hot reload
-      - ./pages:/app/pages
-      - ./components:/app/components
-      - ./modules:/app/modules
-      - ./hooks:/app/hooks
-      - ./utils:/app/utils
-      - ./styles:/app/styles
-      - ./public:/app/public
+      # Mount the repo for hot reload
+      - .:/app
+      - /app/node_modules
+      - /app/.next
       # Mount chatbot repos — add new bots here
       - ../flowbot-chatbot-ttt:/app/configuration/flowbot-chatbot-ttt
     labels:

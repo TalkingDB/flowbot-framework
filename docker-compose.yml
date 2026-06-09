@@ -43,9 +43,6 @@ services:
     env_file:
       - .env
     volumes:
-      # Mount chatbot repos directly (Docker can't follow symlinks that
-      # point outside the mounted dir — true on Linux and macOS).
-      # default/bot-forger configs are baked into the image already.
       # Add new bots here as siblings of flowbot-framework.
       - ../flowbot-chatbot-ttt:/app/configuration/flowbot-chatbot-ttt
     labels:
