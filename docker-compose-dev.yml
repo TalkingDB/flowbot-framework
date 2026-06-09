@@ -1,0 +1,69 @@
+# Development compose — hot reload, volume mounts, dev target
+# Usage: docker compose -f docker-compose-dev.yml up --build
+
+services:
+  traefik:
+    image: traefik:v2.11
+    container_name: traefik
+    command:
+      - --log.level=INFO
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.web.address=:80
+    ports:
+      - "80:80"
+      - "8080:8080"   # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - docker_net
+
+  llm-chatbot:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: dev
+    container_name: llm-chatbot
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    env_file:
+      - .env
+    volumes:
+      # Mount source for hot reload
+      - ./pages:/app/pages
+      - ./components:/app/components
+      - ./modules:/app/modules
+      - ./hooks:/app/hooks
+      - ./utils:/app/utils
+      - ./styles:/app/styles
+      - ./public:/app/public
+      # Mount chatbot repos — add new bots here
+      - ../flowbot-chatbot-ttt:/app/configuration/flowbot-chatbot-ttt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.llm-chatbot.rule=Host(`${CHAT_HOST}`)"
+      - "traefik.http.routers.llm-chatbot.entrypoints=web"
+      - "traefik.http.services.llm-chatbot.loadbalancer.server.port=80"
+    networks:
+      - docker_net
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - docker_net
+
+volumes:
+  mongodb-data:
+
+networks:
+  docker_net:
+    driver: bridge

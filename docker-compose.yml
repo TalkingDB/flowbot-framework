@@ -1,19 +1,31 @@
 services:
   traefik:
-    image: traefik:v1.7-alpine
+    image: traefik:v2.11
     container_name: traefik
+    restart: unless-stopped
     logging:
       options:
         max-size: "50m"
         max-file: "3"
-    command: >
-      --logLevel='INFO' --web --InsecureSkipVerify=true --defaultentrypoints=https,http --entryPoints='Name:http Address::80' --entryPoints='Name:https Address::443 TLS Redirect.EntryPoint:http' --retry --docker --docker.endpoint='unix:///var/run/docker.sock' --docker.exposedbydefault=true --docker.watch=true
+    command:
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=true
+      # HTTP entrypoint -> redirect to HTTPS
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      # HTTPS entrypoint with Let's Encrypt
+      - --entryPoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=sadkirat.s@smarter.codes
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
     ports:
       - "80:80"
+      - "443:443"
     volumes:
+      - ./letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - "traefik.port=8080"
     networks:
       - docker_net
 
@@ -21,22 +33,27 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      target: prod
     container_name: llm-chatbot
+    restart: unless-stopped
     logging:
       options:
         max-size: "50m"
         max-file: "3"
-    command: [ "npm", "run", "dev" ]
     env_file:
       - .env
     volumes:
-      - ./configuration:/app/configuration
+      # Mount chatbot repos directly (Docker can't follow symlinks that
+      # point outside the mounted dir — true on Linux and macOS).
+      # default/bot-forger configs are baked into the image already.
+      # Add new bots here as siblings of flowbot-framework.
+      - ../flowbot-chatbot-ttt:/app/configuration/flowbot-chatbot-ttt
     labels:
-      - "traefik.port=80"
       - "traefik.enable=true"
-      - "traefik.backend=llm-chatbot"
-      - "traefik.frontend.rule=Host:${CHAT_HOST}"
-      - "traefik.protocol=http"
+      - "traefik.http.routers.llm-chatbot.rule=Host(`${CHAT_HOST}`)"
+      - "traefik.http.routers.llm-chatbot.entrypoints=websecure"
+      - "traefik.http.routers.llm-chatbot.tls.certresolver=le"
+      - "traefik.http.services.llm-chatbot.loadbalancer.server.port=80"
     networks:
       - docker_net
 
