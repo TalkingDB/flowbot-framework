@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { getPDFList, uploadPDF } from '@/apiRequests';
+import { uploadDocument } from '@/apiRequests/ttt';
 import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
@@ -91,23 +92,48 @@ export const useTainPDF = () => {
         Array.from(files).forEach((file) => addFile(file));
     };
 
-    const addFile = (file: File) => {
+    const addFile = async (file: File) => {
         const entry: FileUploadStatus = {
             name: file.name,
             size: file.size,
             type: file.name.split('.').pop()?.toUpperCase() || '',
             progress: 0,
             phase: 'uploading',
+            jobId: '',
+            graphId: ''
         };
         progressRef.current[file.name] = 0;
         setUploads((prev) => [...prev, entry]);
         setPdfList((prev) => [...prev, { name: file.name, is_trained: false }]);
         setTrainingInProgress(true);
+    
+        try {
+            const {job_id, job_type, state} = await uploadDocument(file);
+            setUploads(prev =>
+                prev.map(f =>
+                    f.name === file.name
+                        ? {
+                              ...f,
+                              jobId: job_id,
+                          }
+                        : f
+                )
+            );
+            // setGraphId(graphId);  → used by chat queries
+            // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
 
-        // TODO: Call upload API, then store IDs in session:
-        // const { graphId, jobId } = await uploadPDF(file, chatId);
-        // setGraphId(graphId);  → used by chat queries
-        // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
+        } catch {
+            setUploads(prev =>
+                prev.map(f =>
+                    f.name === file.name
+                        ? {
+                              ...f,
+                              phase: 'error',
+                          }
+                        : f
+                )
+            );
+        }
     };
 
     const cancelUpload = (fileName: string) => {
