@@ -1,5 +1,4 @@
 # Development compose — hot reload, dev target
-# Traefik is managed externally (run TTT backend's Traefik locally).
 # Usage: docker compose -f docker-compose-dev.yml up --build
 
 services:
@@ -44,5 +43,5 @@ volumes:
 
 networks:
   docker_net:
-    external: true
     name: docker_default
+    external: true

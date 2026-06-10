@@ -1,6 +1,4 @@
 # Production compose — for VM deployment
-# Traefik is managed externally (shared with TTT backend).
-# This compose only runs the app + MongoDB on the shared network.
 
 services:
   llm-chatbot:
