@@ -29,3 +29,17 @@ export const getJobProgress = async (jobId: string) => {
         return false;
     }
 }
+
+export const cancelDocumentProcessing = async (jobId: string) => {
+    try {
+        const response = await axiosTTTInstance.post(`/v1/jobs/${jobId}/cancel`);
+        return response?.data;
+    } catch (error) {
+        console.log(`Error fetching job progress for ${jobId}`, {
+            message: error?.message,
+            status: error?.response?.status,
+            responseData: error?.response?.data
+        });
+        return false;
+    }
+}

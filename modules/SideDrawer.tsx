@@ -15,7 +15,7 @@ const formatBytes = (bytes: number) => {
 };
 
 const UploadDropZone: React.FC<UploadDropZoneProps> = ({
-    styles, dragOver, setDragOver, handleFileDrop, handlePDFFileChange, fileInputRef
+    styles, dragOver, setDragOver, handleFileDrop, handleFileChange, fileInputRef
 }) => (
     <div className={styles?.['UploadContainer']}>
         <label
@@ -32,7 +32,7 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
                 type="file"
                 accept=".pdf,.docx,.txt"
                 multiple
-                onChange={handlePDFFileChange}
+                onChange={handleFileChange}
                 ref={fileInputRef}
                 className="hidden"
             />
@@ -52,9 +52,11 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
     const isDone = file.phase === 'done';
     const isError = file.phase === 'error' || file.phase === 'cancelled';
     const isProcessing = file.phase === 'processing';
+    const isCancelling = file.phase === 'cancelling'
     const statusLabel = isDone ? 'Upload complete'
         : isError ? (file.error || 'Failed to upload')
         : isProcessing ? 'Processing...'
+        : isCancelling? 'Cancelling...'
         : 'Uploading...';
 
     return (
@@ -77,8 +79,8 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
                     ) : (
                         <>
                             <span className={styles?.['filePercent']}>{file.progress}%</span>
-                            {canCancel(file.name) && (
-                                <button className={styles?.['fileCancelX']} onClick={() => cancelUpload(file.name)}>✕</button>
+                            {(canCancel(file.jobId) && file.phase !== "cancelling") && (
+                                <button className={styles?.['fileCancelX']} onClick={() => cancelUpload(file.jobId)}>✕</button>
                             )}
                         </>
                     )}
@@ -91,6 +93,7 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
                         isError ? styles?.['fileProgressError']
                         : isDone ? styles?.['fileProgressDone']
                         : isProcessing ? styles?.['fileProgressProcessing']
+                        : isCancelling ? styles?.['fileProgressCancelling']
                         : ''
                     }`}
                     style={{ width: isError ? '100%' : `${file.progress}%` }}
@@ -99,13 +102,18 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
 
             {isError ? (
                 <div className={styles?.['fileErrorActions']}>
-                    <button className={styles?.['fileRetryBtn']} onClick={() => retryUpload(file.name)}>↻ Retry</button>
-                    <button className={styles?.['fileRemoveBtn']} onClick={() => removeUpload(file.name)}>🗑 Remove</button>
+                    {/* <button className={styles?.['fileRetryBtn']} onClick={() => retryUpload(file.name)}>↻ Retry</button> */}
+                    {
+                        file.jobId && (
+                            <button className={styles?.['fileRemoveBtn']} onClick={() => removeUpload(file.jobId)}>🗑 Remove</button>
+                        )
+                    }
                 </div>
             ) : (
                 <div className={`${styles?.['fileStatusLabel']} ${
                     isDone ? styles?.['fileStatusDone']
                     : isProcessing ? styles?.['fileStatusProcessing']
+                    : isCancelling ? styles?.['fileStatusCancelling']
                     : styles?.['fileStatusUploading']
                 }`}>
                     {!isDone && <Spinner size={12} />}
@@ -113,7 +121,7 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
                 </div>
             )}
 
-            {!isDone && !isError && !canCancel(file.name) && file.progress >= 90 && (
+            {!isDone && !isError && !canCancel(file.jobId) && file.progress >= 90 && (
                 <div className={styles?.['cancelHint']}>Cancel will be disabled soon ⓘ</div>
             )}
         </div>
@@ -131,7 +139,7 @@ const UploadsSection: React.FC<UploadsSectionProps> = ({
             <div className={styles?.['uploadsHeader']}>Uploads ({activeUploads.length})</div>
             {activeUploads.map((file) => (
                 <UploadFileCard
-                    key={file.name}
+                    key={file.jobId}
                     styles={styles}
                     file={file}
                     canCancel={canCancel}
@@ -144,20 +152,20 @@ const UploadsSection: React.FC<UploadsSectionProps> = ({
     );
 };
 
-const TrainedDocuments: React.FC<TrainedDocumentsProps> = ({ styles, pdfList }) => {
+const TrainedDocuments: React.FC<TrainedDocumentsProps> = ({ styles, documentList }) => {
     return (
     <>
         <div className={styles?.['Divider']} />
         <div className={styles?.['UploaderHeader']}>Trained Documents</div>
         <div className={styles?.['DataContainer']}>
-            {pdfList?.filter(d => d.is_trained).map((document, index) => (
+            {documentList?.filter(d => d.phase == "done").map((document, index) => (
                 <div key={index} className={styles?.['fileCard']}>
                     <div className={styles?.['fileCardTop']}>
                         <div className={styles?.['fileIcon']}>
                             <FileTextIcon size={22} stroke="#10b981" />
                         </div>
                         <div className={styles?.['fileMeta']}>
-                            <div className={styles?.['fileName']}>{document?.name || document?.training_id}</div>
+                            <div className={styles?.['fileName']}>{document?.name || document?.jobId}</div>
                         </div>
                         <span className={styles?.['fileDoneLabel']}>✓ Done</span>
                     </div>
@@ -174,8 +182,8 @@ const TrainedDocuments: React.FC<TrainedDocumentsProps> = ({ styles, pdfList }) 
 export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen }) => {
     const { JSModule, styles } = useContext(ThemeContext);
     const {
-        pdfList, setPdfList, uploads, selectedFileType, setTrainingInProgress,
-        handlePDFFileChange, handleFileDrop, cancelUpload, retryUpload, removeUpload, canCancel
+        documentList, setDocumentList, uploads, selectedFileType, setTrainingInProgress,
+        handleFileChange, handleFileDrop, cancelUpload, retryUpload, removeUpload, canCancel
     } = useTainPDF();
     const router = useRouter();
     const { 'chat-id': chatId } = router.query;
@@ -225,7 +233,7 @@ export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen }) => {
                 dragOver={dragOver}
                 setDragOver={setDragOver}
                 handleFileDrop={handleFileDrop}
-                handlePDFFileChange={handlePDFFileChange}
+                handleFileChange={handleFileChange}
                 fileInputRef={fileInputRef}
             />
 
@@ -238,7 +246,7 @@ export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen }) => {
                 removeUpload={removeUpload}
             />
 
-            <TrainedDocuments styles={styles} pdfList={pdfList} />
+            <TrainedDocuments styles={styles} documentList={documentList} />
         </div>
     );
 };
