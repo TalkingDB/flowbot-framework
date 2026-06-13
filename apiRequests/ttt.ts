@@ -35,7 +35,7 @@ export const cancelDocumentProcessing = async (jobId: string) => {
         const response = await axiosTTTInstance.post(`/v1/jobs/${jobId}/cancel`);
         return response?.data;
     } catch (error) {
-        console.log(`Error fetching job progress for ${jobId}`, {
+        console.log(`Error in cancelling the document processing with jobid: ${jobId}`, {
             message: error?.message,
             status: error?.response?.status,
             responseData: error?.response?.data

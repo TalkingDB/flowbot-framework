@@ -5,6 +5,7 @@ import { useTainPDF } from "@/hooks/useTrainPDF";
 import UploadIcon from '@/assets/svgs/UploadIcon';
 import FileTextIcon from '@/assets/svgs/FileTextIcon';
 import Spinner from '@/components/ui/Spinner';
+import { ToastContainer } from 'react-toastify';
 import { SideDrawerProps, UploadDropZoneProps, UploadFileCardProps, UploadsSectionProps, TrainedDocumentsProps } from '@/types/sideDrawer';
 
 const formatBytes = (bytes: number) => {
@@ -247,6 +248,7 @@ export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen }) => {
             />
 
             <TrainedDocuments styles={styles} documentList={documentList} />
+            <ToastContainer />
         </div>
     );
 };

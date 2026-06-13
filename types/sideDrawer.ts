@@ -10,7 +10,7 @@ export interface UploadDropZoneProps {
     dragOver: boolean;
     setDragOver: (val: boolean) => void;
     handleFileDrop: (files: FileList) => void;
-    handlePDFFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     fileInputRef: React.RefObject<HTMLInputElement>;
 }
 
@@ -34,5 +34,5 @@ export interface UploadsSectionProps {
 
 export interface TrainedDocumentsProps {
     styles: any;
-    pdfList: any[];
+    documentList: any[];
 }

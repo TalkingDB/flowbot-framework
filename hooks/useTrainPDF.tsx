@@ -5,10 +5,10 @@ import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { UploadPhase, FileUploadStatus } from '@/types/fileUploadStatus';
 import { setGraphId, setJobId } from '@/utils/sessionJobs';
+import { toast } from 'react-toastify';
 
 const pollProgress = async (
     uploads: FileUploadStatus[],
-    progressRef: React.MutableRefObject<Record<string, number>>,
     cancelledRef: React.MutableRefObject<Set<string>>
 ): Promise<FileUploadStatus[]> => {
     return Promise.all(
@@ -20,7 +20,6 @@ const pollProgress = async (
             try {
                 const response = await getJobProgress(f?.jobId);
                 const progressPercentage = response?.percent || f.progress || 0;
-                progressRef.current[f.jobId] = progressPercentage;
 
                 const currentState = response?.state
                 if (currentState == "CANCELLED") {
@@ -71,7 +70,6 @@ export const useTainPDF = () => {
     const [trainingInProgress, setTrainingInProgress] = useState(false);
     const [uploads, setUploads] = useState<FileUploadStatus[]>([]);
     const cancelledRef = useRef<Set<string>>(new Set());
-    const progressRef = useRef<Record<string, number>>({});
     const uploadsRef = useRef<FileUploadStatus[]>([]);
     const { 'chat-id': chatId } = router.query;
 
@@ -82,7 +80,7 @@ export const useTainPDF = () => {
 
     usePolling<void>({
         fn: async () => {
-            const updated = await pollProgress(uploadsRef.current, progressRef, cancelledRef);
+            const updated = await pollProgress(uploadsRef.current, cancelledRef);
             setUploads(updated);
             // Mark newly completed files as trained
             const updatedDocumentList = updated.map((item) => item.phase === "done"? { ...item, progress: 100}: item)
@@ -124,7 +122,6 @@ export const useTainPDF = () => {
         
         try {
             const {job_id, job_type, state} = await uploadDocument(file);
-            progressRef.current[job_id] = 0;
             setDocumentList((prev: FileUploadStatus[]) => [...prev, { name: file.name, jobId: job_id}]);
             setUploads((prev: FileUploadStatus[]) =>
                 prev.map(f =>
@@ -162,10 +159,15 @@ export const useTainPDF = () => {
         if (!jobId) return
         
         // here we are not changing the UI status directly, instead it is handled in pollprogress function;
-        await cancelDocumentProcessing(jobId)
-        setUploads((prev: FileUploadStatus[]) =>
-            prev.map((f) => f.jobId === jobId ? { ...f, phase: 'cancelling', progress: 0} : f)
-        );
+        const response = await cancelDocumentProcessing(jobId)
+        if (!response) {
+            toast("Document processing cancellation failed", { type: "error" })
+        } else {
+            // if cancellation is successful
+            setUploads((prev: FileUploadStatus[]) =>
+                prev.map((f) => f.jobId === jobId ? { ...f, phase: 'cancelling', progress: 0} : f)
+            );
+        }
     };
 
     // TODO: extend this function, once the retry upload option is there;
@@ -173,14 +175,13 @@ export const useTainPDF = () => {
 
     const removeUpload = (jobId: string) => {
         cancelledRef.current.delete(jobId);
-        delete progressRef.current[jobId];
         setUploads((prev: FileUploadStatus[]) => prev.filter((f) => f.jobId !== jobId));
         setDocumentList((prev: FileUploadStatus[]) => prev.filter((item) => item.jobId !== jobId));
     };
 
     const canCancel = (jobId: string) => {
         const f = uploads.find((f: FileUploadStatus) => f.jobId === jobId);
-        return f ? f.progress < 90 && (f.phase === 'uploading' || f.phase === 'processing') : false;
+        return f ? f.progress < 90 && f.phase === 'processing' : false;
     };
 
     return {
