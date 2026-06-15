@@ -1,91 +1,106 @@
 import { useContext, useEffect, useState, useRef } from 'react';
-import { getPDFList, uploadPDF } from '@/apiRequests';
-import { uploadDocument } from '@/apiRequests/ttt';
+import { uploadDocument, getJobProgress, cancelDocumentProcessing } from '@/apiRequests/ttt';
 import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { UploadPhase, FileUploadStatus } from '@/types/fileUploadStatus';
 import { setGraphId, setJobId } from '@/utils/sessionJobs';
+import { toast } from 'react-toastify';
 
-// TODO: Replace mock data with API response when backend endpoint is available.
-const mockPollProgress = (
+const pollProgress = async (
     uploads: FileUploadStatus[],
-    progressRef: React.MutableRefObject<Record<string, number>>,
     cancelledRef: React.MutableRefObject<Set<string>>
-): FileUploadStatus[] => {
-    return uploads.map((f) => {
-        if (f.phase === 'done' || f.phase === 'cancelled' || f.phase === 'error') return f;
-        if (cancelledRef.current.has(f.name)) return f;
+): Promise<FileUploadStatus[]> => {
+    return Promise.all(
+        uploads.map(async (f) => {
+            if (f.phase === 'done' || f.phase === 'cancelled' || f.phase === 'error' || !f.jobId || cancelledRef.current.has(f.jobId)) {
+                return f;
+            }
 
-        let p = progressRef.current[f.name] || 0;
-        p += Math.random() * 8 + 2;
+            try {
+                const response = await getJobProgress(f?.jobId);
+                const progressPercentage = response?.percent || f.progress || 0;
 
-        if (p >= 100) {
-            p = 100;
-            progressRef.current[f.name] = 100;
-            return { ...f, progress: 100, phase: 'done' as UploadPhase };
-        }
+                const currentState = response?.state
+                if (currentState == "CANCELLED") {
+                    cancelledRef.current.add(f.jobId);
+                    return {
+                        ...f,
+                        phase: "cancelled",
+                        error: 'Upload cancelled',
+                        progress: 0
+                    };
+                } else if (currentState == "FAILED" || currentState == "COMPLETED") {
+                    return {
+                        ...f,
+                        phase: currentState == "FAILED"? "error": "done",
+                        progress: progressPercentage
+                    };
+                }
 
-        progressRef.current[f.name] = p;
-        const phase: UploadPhase = p >= 50 ? 'processing' : 'uploading';
-        return { ...f, progress: Math.round(p), phase };
-    });
+                // if the current state is not of failed or completed, 
+                // not changing the phase, updating the progress percentage only;
+                return {
+                    ...f,
+                    phase: currentState === "CANCELLING"? "cancelling": "processing",
+                    progress: progressPercentage
+                };
+            } catch (error) {
+                console.error(`something went wrong in polling progress`, {
+                    message: error?.message,
+                    status: error?.response?.status,
+                    responseData: error?.response?.data
+                });
+
+                return {
+                    ...f,
+                    phase: 'error',
+                    error: 'Failed to fetch status',
+                };
+            }
+        })
+    );
 };
 
 export const useTainPDF = () => {
     const router = useRouter();
     const { JSModule } = useContext(ThemeContext);
-    const [pdfList, setPdfList] = useState<
-        { name?: string; training_id?: string; is_trained: boolean }[]
-    >([]);
+    const [documentList, setDocumentList] = useState<FileUploadStatus[]>([]);
     const [selectedFileType, setSelectedFileType] = useState<string>('PDF');
     const [trainingInProgress, setTrainingInProgress] = useState(false);
     const [uploads, setUploads] = useState<FileUploadStatus[]>([]);
     const cancelledRef = useRef<Set<string>>(new Set());
-    const progressRef = useRef<Record<string, number>>({});
     const uploadsRef = useRef<FileUploadStatus[]>([]);
     const { 'chat-id': chatId } = router.query;
 
     uploadsRef.current = uploads;
-
-    useEffect(() => {
-        const fetchDocuments = async () => {
-            const response = await getPDFList(chatId);
-            if (response) setPdfList(response);
-        };
-        fetchDocuments();
-    }, [chatId]);
-
     const hasActiveFiles = uploads.some(
-        f => f.phase === 'uploading' || f.phase === 'processing'
+        (f: FileUploadStatus) => f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling'
     );
 
     usePolling<void>({
-        fn: () => {
-            const updated = mockPollProgress(uploadsRef.current, progressRef, cancelledRef);
+        fn: async () => {
+            const updated = await pollProgress(uploadsRef.current, cancelledRef);
             setUploads(updated);
             // Mark newly completed files as trained
-            const newlyDone = updated.filter(f => f.phase === 'done' && !uploadsRef.current.find(u => u.name === f.name && u.phase === 'done'));
-            if (newlyDone.length || updated.some(f => f.phase === 'done')) {
-                const doneNames = updated.filter(f => f.phase === 'done').map(f => f.name);
-                setPdfList((pl) => pl.map(item =>
-                    doneNames.includes(item.name || '') ? { ...item, is_trained: true } : item
-                ));
-            }
+            const updatedDocumentList = updated.map((item) => item.phase === "done"? { ...item, progress: 100}: item)
+            setDocumentList(updatedDocumentList)
         },
         interval: JSModule?.pollingInterval || 400, // configurable polling interval from backend config
         enabled: hasActiveFiles,
-        shouldStop: () => !uploadsRef.current.some(f => f.phase === 'uploading' || f.phase === 'processing'),
+        shouldStop: () => !uploadsRef.current.some((f: FileUploadStatus) => f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling'),
         onComplete: () => {
             setTrainingInProgress(false);
         },
     });
 
-    const handlePDFFileChange = (e: any) => {
+    const handleFileChange = (e: any) => {
         const files = e.target.files;
         if (files) {
             Array.from(files as FileList).forEach((file) => addFile(file));
         }
+        // resetting the file input value after processing
+        e.target.value = '';
     };
 
     const handleFileDrop = (files: FileList) => {
@@ -102,19 +117,19 @@ export const useTainPDF = () => {
             jobId: '',
             graphId: ''
         };
-        progressRef.current[file.name] = 0;
-        setUploads((prev) => [...prev, entry]);
-        setPdfList((prev) => [...prev, { name: file.name, is_trained: false }]);
+        setUploads((prev: FileUploadStatus[]) => [...prev, entry]);
         setTrainingInProgress(true);
-    
+        
         try {
             const {job_id, job_type, state} = await uploadDocument(file);
-            setUploads(prev =>
+            setDocumentList((prev: FileUploadStatus[]) => [...prev, { name: file.name, jobId: job_id}]);
+            setUploads((prev: FileUploadStatus[]) =>
                 prev.map(f =>
-                    f.name === file.name
+                    f.name === file.name && !f.jobId
                         ? {
                               ...f,
                               jobId: job_id,
+                              phase: f.phase === "uploading"? "processing": f.phase
                           }
                         : f
                 )
@@ -123,11 +138,14 @@ export const useTainPDF = () => {
             // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
 
         } catch {
-            setUploads(prev =>
+            // a unique jobId to differentiate the file
+            const tempId = crypto.randomUUID();
+            setUploads((prev: FileUploadStatus[]) =>
                 prev.map(f =>
-                    f.name === file.name
+                    f.name === file.name && !f.jobId
                         ? {
                               ...f,
+                              jobId: tempId,
                               phase: 'error',
                           }
                         : f
@@ -136,42 +154,44 @@ export const useTainPDF = () => {
         }
     };
 
-    const cancelUpload = (fileName: string) => {
-        cancelledRef.current.add(fileName);
-        setUploads((prev) =>
-            prev.map((f) => f.name === fileName ? { ...f, phase: 'cancelled', error: 'Upload cancelled', progress: 0 } : f)
-        );
+    const cancelUpload = async (jobId: string) => {
+        // const file = uploadsRef.current.find((f: FileUploadStatus) => f.name === fileName);
+        if (!jobId) return
+        
+        // here we are not changing the UI status directly, instead it is handled in pollprogress function;
+        const response = await cancelDocumentProcessing(jobId)
+        if (!response) {
+            toast("Document processing cancellation failed", { type: "error" })
+        } else {
+            // if cancellation is successful
+            setUploads((prev: FileUploadStatus[]) =>
+                prev.map((f) => f.jobId === jobId ? { ...f, phase: 'cancelling', progress: 0} : f)
+            );
+        }
     };
 
-    const retryUpload = (fileName: string) => {
-        cancelledRef.current.delete(fileName);
-        progressRef.current[fileName] = 0;
-        setUploads((prev) =>
-            prev.map((f) => f.name === fileName ? { ...f, phase: 'uploading', progress: 0, error: undefined } : f)
-        );
-        setTrainingInProgress(true);
+    // TODO: extend this function, once the retry upload option is there;
+    const retryUpload = (fileName: string) => {};
+
+    const removeUpload = (jobId: string) => {
+        cancelledRef.current.delete(jobId);
+        setUploads((prev: FileUploadStatus[]) => prev.filter((f) => f.jobId !== jobId));
+        setDocumentList((prev: FileUploadStatus[]) => prev.filter((item) => item.jobId !== jobId));
     };
 
-    const removeUpload = (fileName: string) => {
-        cancelledRef.current.delete(fileName);
-        delete progressRef.current[fileName];
-        setUploads((prev) => prev.filter((f) => f.name !== fileName));
-        setPdfList((prev) => prev.filter((item) => item.name !== fileName));
-    };
-
-    const canCancel = (fileName: string) => {
-        const f = uploads.find(u => u.name === fileName);
-        return f ? f.progress < 90 && (f.phase === 'uploading' || f.phase === 'processing') : false;
+    const canCancel = (jobId: string) => {
+        const f = uploads.find((f: FileUploadStatus) => f.jobId === jobId);
+        return f ? f.progress < 90 && f.phase === 'processing' : false;
     };
 
     return {
-        pdfList,
-        setPdfList,
+        documentList,
+        setDocumentList,
         selectedFileType,
         uploads,
         trainingInProgress,
         setTrainingInProgress,
-        handlePDFFileChange,
+        handleFileChange,
         handleFileDrop,
         cancelUpload,
         retryUpload,
