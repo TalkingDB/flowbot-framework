@@ -4,7 +4,7 @@ import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { UploadPhase, FileUploadStatus } from '@/types/fileUploadStatus';
-import { setGraphId, setJobId } from '@/utils/sessionJobs';
+import { addGraphId, addJobId } from '@/utils/sessionJobs';
 import { toast } from 'react-toastify';
 
 const pollProgress = async (
@@ -31,6 +31,13 @@ const pollProgress = async (
                         progress: 0
                     };
                 } else if (currentState == "FAILED" || currentState == "COMPLETED") {
+                    
+                    if (currentState == "COMPLETED") {
+                        // we are storing it in session storage;
+                        const graphId = response?.result_graph_id || f.graphId
+                        addGraphId(graphId)
+                    }
+
                     return {
                         ...f,
                         phase: currentState == "FAILED"? "error": "done",
@@ -134,7 +141,6 @@ export const useTainPDF = () => {
                         : f
                 )
             );
-            // setGraphId(graphId);  → used by chat queries
             // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
 
         } catch {
