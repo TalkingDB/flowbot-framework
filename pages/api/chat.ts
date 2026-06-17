@@ -20,7 +20,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history, enablegptfallback, session, reqQuery, chainStatus=false, conversation_id } = req.body;
+  const { question, history, enablegptfallback, session, graphIds, reqQuery, chainStatus=false, conversation_id } = req.body;
   const { pinecone_name_space } = req.query;
   const chatBotId = String(pinecone_name_space || 'default');
   // console.log('question', question, session);
@@ -63,6 +63,7 @@ export default async function handler(
                 chain,
                 axiosInstance: axios,
                 user,
+                graphIds,
                 BigQuery,
                 DocumentProcessorServiceClient,
                 GoogleAuth,
@@ -97,6 +98,7 @@ export default async function handler(
                 chain,
                 axiosInstance: axios,
                 user,
+                graphIds,
                 BigQuery,
                 DocumentProcessorServiceClient,
                 GoogleAuth,

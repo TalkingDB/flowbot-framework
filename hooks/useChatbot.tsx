@@ -12,6 +12,7 @@ import type { Socket } from 'socket.io-client';
 import ThemeContext from '@/contexts/ThemeContext';
 import { generateRandomString } from '@/utils/generateRandomeString';
 import { getDocumentNameAndPageNumber } from '@/utils/extractDocumentNameAndPage';
+import { getGraphIds } from '@/utils/sessionJobs';
 
 declare const window: any;
 
@@ -324,6 +325,7 @@ export const useChatbot = () => {
             }
             setQuery('');
             try {
+                const graphIds = getGraphIds()
                 let access_token = localStorage.getItem('access_token');
                 const conversation_id = localStorage.getItem('conversation_id')
                 const response = await fetch(
@@ -337,11 +339,11 @@ export const useChatbot = () => {
                         body: JSON.stringify({
                             conversation_id,
                             question,
+                            graphIds,
                             history,
                             session: currentSession,
                             reqQuery: router.query,
                             edit: update,
-                            graphId: sessionStorage.getItem('graphId') || undefined
                         })
                     },
                 );
