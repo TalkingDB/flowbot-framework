@@ -4,7 +4,7 @@ import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { UploadPhase, FileUploadStatus } from '@/types/fileUploadStatus';
-import { addGraphId, addJobId } from '@/utils/sessionJobs';
+import { addGraphId } from '@/utils/sessionJobs';
 import { toast } from 'react-toastify';
 
 const pollProgress = async (
@@ -141,7 +141,6 @@ export const useTainPDF = () => {
                         : f
                 )
             );
-            // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
 
         } catch {
             // a unique jobId to differentiate the file
