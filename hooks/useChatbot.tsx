@@ -17,7 +17,7 @@ declare const window: any;
 
 export const useChatbot = () => {
     const router = useRouter();
-    const { 'chat-id': chatIdParam, code: openidCode } = router.query;
+    const { 'chat-id': chatIdParam, code: openidCode, error: oauthError } = router.query;
     const chatId = chatIdParam || process.env.NEXT_PUBLIC_DEFAULT_CHAT_ID;
 
     // State declarations
@@ -51,13 +51,35 @@ export const useChatbot = () => {
     const [socketState, setSocketState] = useState(false);
     const [socketInitstate, setSocketInitstate] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isCheckingSession, setIsCheckingSession] = useState(true);
+    const [authError, setAuthError] = useState<string | null>(null);
 
     const { JSModule, styles } = useContext(ThemeContext) || {};
 
-    // Check login status on mount
+    // Poll session status: fires on mount, on tab focus, and every 5 min while tab is visible.
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        setIsLoggedIn(!!token);
+        let initialised = false;
+        const check = () => {
+            if (document.visibilityState !== 'visible') return;
+            fetch('/api/auth/session')
+                .then(r => r.json())
+                .then(({ isLoggedIn }) => {
+                    setIsLoggedIn(!!isLoggedIn);
+                    if (!initialised) { setIsCheckingSession(false); initialised = true; }
+                })
+                .catch(() => {
+                    setIsLoggedIn(false);
+                    if (!initialised) { setIsCheckingSession(false); initialised = true; }
+                });
+        };
+
+        check();
+        const id = setInterval(check, 5 * 60 * 1000);
+        document.addEventListener('visibilitychange', check);
+        return () => {
+            clearInterval(id);
+            document.removeEventListener('visibilitychange', check);
+        };
     }, []);
 
     // Check if OpenID is configured
@@ -75,8 +97,8 @@ export const useChatbot = () => {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('access_token');
+    const handleLogout = async () => {
+        await fetch('/api/auth/session', { method: 'DELETE' });
         setIsLoggedIn(false);
         if (JSModule?.handleHeaderPane) {
             JSModule.handleHeaderPane('logout');
@@ -214,49 +236,55 @@ export const useChatbot = () => {
         if (JSModule) {
             window.handleLeftPanel = JSModule?.handleLeftPanel;
             window.handleHeaderPane = JSModule?.handleHeaderPane;
+            window.handleLogout = handleLogout;
         }
     }, [JSModule]);
 
     useEffect(() => {
-        let access_token = localStorage.getItem('access_token');
-        if (access_token && JSModule?.handleHeaderPane) {
+        if (isLoggedIn && JSModule?.handleHeaderPane) {
             JSModule?.handleHeaderPane('login');
         }
-    }, [JSModule?.handleHeaderPane]);
+    }, [JSModule?.handleHeaderPane, isLoggedIn]);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchToken = async () => {
+            if (oauthError) {
+                setAuthError('Authentication was cancelled or interrupted. No account was created.');
+                return;
+            }
+
             if (openidCode && JSModule?.openid) {
                 try {
-                    const response = await fetch(JSModule.openid.token_endpoint, {
+                    // Must exactly match the redirect URI used in handleLogin
+                    const redirectUri = `${window.location.origin}/?chat-id=${chatId}`;
+                    const response = await fetch('/api/auth/session', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: new URLSearchParams({
-                            grant_type: 'authorization_code',
-                            client_id: JSModule.openid.client_id,
-                            code: openidCode as string,
-                            redirect_uri: `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}?chat-id=${chatId}`,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            code: openidCode,
+                            tokenEndpoint: JSModule.openid.token_endpoint,
+                            clientId: JSModule.openid.client_id,
+                            redirectUri,
                         }),
+                        signal: controller.signal,
                     });
 
                     if (response.ok) {
-                        const data = await response.json();
-                        const { access_token } = data;
-
-                        localStorage.setItem('access_token', access_token);
                         window.location.href = `/?chat-id=${chatId}`;
                     } else {
-                        console.error('Token request failed:', response.statusText);
+                        setAuthError('We couldn\'t sign you in. Please try again.');
                     }
-                } catch (error) {
-                    console.error('Error fetching token:', error);
+                } catch (err) {
+                    if ((err as Error).name === 'AbortError') return;
+                    setAuthError('Something went wrong while trying to sign in. Please try again.');
                 }
             }
         };
 
         fetchToken();
+        return () => controller.abort();
     }, [openidCode, JSModule?.openid]);
 
     async function nextStep() {
@@ -345,6 +373,14 @@ export const useChatbot = () => {
                         })
                     },
                 );
+                if (response.status === 401) {
+                    setIsLoggedIn(false);
+                    setLoading(false);
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error(`Chat request failed: ${response.status}`);
+                }
                 const data = await response.json();
                 console.log("data", data)
 
@@ -537,7 +573,7 @@ export const useChatbot = () => {
                 removeAuthTokenFromURL()
             } catch (error) {
                 setLoading(false);
-                console.log('error', error);
+                console.error('Chat request failed:', error);
             }
         }
     };
@@ -575,9 +611,6 @@ export const useChatbot = () => {
                 body: formData,
             })
                 .then((response) => response.json())
-                .then((data) => {
-                    console.log('File uploaded successfully:', data);
-                })
                 .catch((error) => {
                     console.error('Error uploading file:', error);
                 });
@@ -668,8 +701,11 @@ export const useChatbot = () => {
         references, 
         setReferences,
         isLoggedIn,
+        isCheckingSession,
         hasOpenID,
         handleLogin,
-        handleLogout
+        handleLogout,
+        authError,
+        setAuthError
     };
 };

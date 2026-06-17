@@ -5,6 +5,7 @@ import { SidePanel } from '@/modules/SideDrawer';
 import { ChatMessages } from '@/modules/ChatMessages';
 import { ChatInput } from '@/modules/ChatInput';
 import { Loader } from '@/components/ui';
+import { SignInScreen } from './SignIn';
 
 const Chatbot: React.FC = () => {
   const {
@@ -22,7 +23,13 @@ const Chatbot: React.FC = () => {
     setOpen,
     styles,
     references,
-    chatId
+    chatId,
+    isLoggedIn,
+    isCheckingSession,
+    hasOpenID,
+    handleLogin,
+    authError,
+    setAuthError,
   } = useChatbot();
 
   // Left panel state for toggle
@@ -44,7 +51,18 @@ const Chatbot: React.FC = () => {
     };
   }, []);
 
-  if (botLoading || !(JSModule?.enabled)) {
+  // Block unauthenticated access — wait for first session check before showing sign-in
+  if (hasOpenID && !isLoggedIn && !isCheckingSession) {
+    return (
+      <SignInScreen
+        JSModule={JSModule}
+        onLogin={() => { setAuthError(null); handleLogin(); }}
+        error={authError}
+      />
+    );
+  }
+
+  if (botLoading || !JSModule?.enabled) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
         <div style={{ width: '150px', height: '150px' }}>

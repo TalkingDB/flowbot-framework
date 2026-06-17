@@ -16,6 +16,22 @@ import path from 'path';
 const { htmlToText } = require('html-to-text');
 
 export const config = { api: { bodyParser: { sizeLimit: '100mb' } } };
+
+const SESSION_COOKIE = 'chatbot_session';
+
+async function botRequiresAuth(chatBotId: string): Promise<boolean> {
+  const loadOpenId = async (id: string) => {
+    try {
+      const mod: any = await import(`@/configuration/${id}/webapp`);
+      return mod?.openid;
+    } catch {
+      return undefined;
+    }
+  };
+  const openid = (await loadOpenId(chatBotId)) ?? (await loadOpenId('default'));
+  return !!(openid?.authorization_endpoint && openid?.client_id);
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -23,7 +39,6 @@ export default async function handler(
   const { question, history, enablegptfallback, session, reqQuery, chainStatus=false, conversation_id } = req.body;
   const { pinecone_name_space } = req.query;
   const chatBotId = String(pinecone_name_space || 'default');
-  // console.log('question', question, session);
 
   await dbConnect();
 
@@ -32,6 +47,13 @@ export default async function handler(
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
+
+  // Enforce authentication for bots that have OpenID configured.
+  if (await botRequiresAuth(chatBotId) && !req.cookies[SESSION_COOKIE]) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
   // OpenAI recommends replacing newlines with spaces for best results
   const sanitizedQuestion = question;
   // const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
@@ -52,7 +74,11 @@ export default async function handler(
       user = await UserModel.findById(conversation_id) as IUser;
     }
 
-    const headers = req.headers;
+    const sessionToken = req.cookies[SESSION_COOKIE];
+    const headers = {
+      ...req.headers,
+      ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {}),
+    };
 
     return new Promise((resolve, reject) => {
       import(`@/configuration/${chatBotId}/server`)
