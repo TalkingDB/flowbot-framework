@@ -4,7 +4,7 @@ import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { UploadPhase, FileUploadStatus } from '@/types/fileUploadStatus';
-import { setGraphId, setJobId } from '@/utils/sessionJobs';
+import { addGraphId } from '@/utils/sessionJobs';
 import { toast } from 'react-toastify';
 
 const pollProgress = async (
@@ -31,6 +31,13 @@ const pollProgress = async (
                         progress: 0
                     };
                 } else if (currentState == "FAILED" || currentState == "COMPLETED") {
+                    
+                    if (currentState == "COMPLETED") {
+                        // we are storing it in session storage;
+                        const graphId = response?.result_graph_id || f.graphId
+                        addGraphId(graphId)
+                    }
+
                     return {
                         ...f,
                         phase: currentState == "FAILED"? "error": "done",
@@ -45,7 +52,7 @@ const pollProgress = async (
                     phase: currentState === "CANCELLING"? "cancelling": "processing",
                     progress: progressPercentage
                 };
-            } catch (error) {
+            } catch (error: any) {
                 console.error(`something went wrong in polling progress`, {
                     message: error?.message,
                     status: error?.response?.status,
@@ -122,7 +129,7 @@ export const useTainPDF = () => {
         
         try {
             const {job_id, job_type, state} = await uploadDocument(file);
-            setDocumentList((prev: FileUploadStatus[]) => [...prev, { name: file.name, jobId: job_id}]);
+            setDocumentList((prev: FileUploadStatus[]) => [...prev,{ ...entry, jobId: job_id }]);
             setUploads((prev: FileUploadStatus[]) =>
                 prev.map(f =>
                     f.name === file.name && !f.jobId
@@ -134,8 +141,6 @@ export const useTainPDF = () => {
                         : f
                 )
             );
-            // setGraphId(graphId);  → used by chat queries
-            // setJobId(jobId);      → used by polling: GET /jobs/{jobId}
 
         } catch {
             // a unique jobId to differentiate the file
