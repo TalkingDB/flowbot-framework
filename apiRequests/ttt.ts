@@ -43,3 +43,17 @@ export const cancelDocumentProcessing = async (jobId: string) => {
         return false;
     }
 }
+
+export const getDocumentTreeJSon = async (graphId: string) => {
+    try {
+        const response = await axiosTTTInstance.get(`/v1/tree/json?graph_id=${graphId}`);
+        return response?.data;
+    } catch (error: any) {
+        console.log(`Error in fetching document tree json with graphId: ${graphId}`, {
+            message: error?.message,
+            status: error?.response?.status,
+            responseData: error?.response?.data
+        });
+        return false;
+    }
+}

@@ -3,6 +3,7 @@ import React from 'react';
 export interface SideDrawerProps {
     open: boolean;
     setOpen: (val: boolean) => void;
+    switchTab: (val: string) => void;
 }
 
 export interface UploadDropZoneProps {
@@ -35,4 +36,5 @@ export interface UploadsSectionProps {
 export interface TrainedDocumentsProps {
     styles: any;
     documentList: any[];
+    switchTab: (val: string) => void;
 }
