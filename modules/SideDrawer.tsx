@@ -6,6 +6,7 @@ import UploadIcon from '@/assets/svgs/UploadIcon';
 import FileTextIcon from '@/assets/svgs/FileTextIcon';
 import Spinner from '@/components/ui/Spinner';
 import { ToastContainer } from 'react-toastify';
+import { MoreVertical } from 'lucide-react';
 import { SideDrawerProps, UploadDropZoneProps, UploadFileCardProps, UploadsSectionProps, TrainedDocumentsProps } from '@/types/sideDrawer';
 
 const formatBytes = (bytes: number) => {
@@ -57,7 +58,7 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
     const statusLabel = isDone ? 'Upload complete'
         : isError ? (file.error || 'Failed to upload')
         : isProcessing ? 'Processing...'
-        : isCancelling? 'Cancelling...'
+        : isCancelling ? 'Cancelling...'
         : 'Uploading...';
 
     return (
@@ -153,34 +154,85 @@ const UploadsSection: React.FC<UploadsSectionProps> = ({
     );
 };
 
-const TrainedDocuments: React.FC<TrainedDocumentsProps> = ({ styles, documentList }) => {
+const TrainedDocuments: React.FC<TrainedDocumentsProps> = ({ styles, documentList, switchTab }) => {
+    const [openMenu, setOpenMenu] = useState<number | null>(null);
+
     return (
-    <>
-        <div className={styles?.['Divider']} />
-        <div className={styles?.['UploaderHeader']}>Trained Documents</div>
-        <div className={styles?.['DataContainer']}>
-            {documentList?.filter(d => d.phase == "done").map((document, index) => (
-                <div key={index} className={styles?.['fileCard']}>
-                    <div className={styles?.['fileCardTop']}>
-                        <div className={styles?.['fileIcon']}>
-                            <FileTextIcon size={22} stroke="#10b981" />
+        <>
+            <div className={styles?.['Divider']} />
+            <div className={styles?.['UploaderHeader']}>Trained Documents</div>
+            <div className={styles?.['DataContainer']}>
+                {documentList?.filter(d => d.phase == "done").map((document, index) => (
+                    <div key={index} className={styles?.['fileCard']}>
+                        <div className={styles?.['fileCardTop']}>
+                            <div className={styles?.['fileIcon']}>
+                                <FileTextIcon size={22} stroke="#10b981" />
+                            </div>
+                            <div className={styles?.['fileMeta']}>
+                                <div className={styles?.['fileName']}>{document?.name || document?.jobId}</div>
+                            </div>
+                            <span className={styles?.['fileDoneLabel']}>✓ Done</span>
+                            
+                            {/* More Button */}
+                            <div style={{ position: 'relative', marginLeft: '8px' }}>
+                                <button
+                                    onClick={() => setOpenMenu(openMenu === index ? null : index)}
+                                    style={{
+                                        border: 'none',
+                                        background: 'transparent',
+                                        cursor: 'pointer',
+                                        fontSize: '18px',
+                                    }}
+                                >
+                                    <MoreVertical size={18} />
+                                </button>
+
+                                {openMenu === index && (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            right: 0,
+                                            top: '100%',
+                                            background: '#fff',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '6px',
+                                            boxShadow:
+                                                '0 2px 8px rgba(0,0,0,0.1)',
+                                            zIndex: 100,
+                                            minWidth: '140px',
+                                        }}
+                                    >
+                                        <button
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px 12px',
+                                                textAlign: 'left',
+                                                border: 'none',
+                                                background: 'transparent',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => {
+                                                switchTab('documentTree', document?.graphId);
+                                                setOpenMenu(null);
+                                            }}
+                                        >
+                                            View Tree
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div className={styles?.['fileMeta']}>
-                            <div className={styles?.['fileName']}>{document?.name || document?.jobId}</div>
+                        <div className={styles?.['fileProgressBg']}>
+                            <div className={`${styles?.['fileProgressFill']} ${styles?.['fileProgressDone']}`} style={{ width: '100%' }} />
                         </div>
-                        <span className={styles?.['fileDoneLabel']}>✓ Done</span>
                     </div>
-                    <div className={styles?.['fileProgressBg']}>
-                        <div className={`${styles?.['fileProgressFill']} ${styles?.['fileProgressDone']}`} style={{ width: '100%' }} />
-                    </div>
-                </div>
-            ))}
-        </div>
-    </>
+                ))}
+            </div>
+        </>
     );
 };
 
-export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen }) => {
+export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen, switchTab }) => {
     const { JSModule, styles } = useContext(ThemeContext);
     const {
         documentList, setDocumentList, uploads, selectedFileType, setTrainingInProgress,
@@ -247,7 +299,7 @@ export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen }) => {
                 removeUpload={removeUpload}
             />
 
-            <TrainedDocuments styles={styles} documentList={documentList} />
+            <TrainedDocuments switchTab={switchTab} styles={styles} documentList={documentList} />
             <ToastContainer />
         </div>
     );
