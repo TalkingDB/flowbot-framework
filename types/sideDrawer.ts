@@ -1,9 +1,16 @@
 import React from 'react';
+import { NamespaceState } from '@/types/namespace';
 
 export interface SideDrawerProps {
     open: boolean;
     setOpen: (val: boolean) => void;
     switchTab: (tabName: string, graphId?: string) => Promise<void>;
+    namespace?: NamespaceState;
+}
+
+export interface DemoDocsSectionProps {
+    styles: any;
+    namespace: NamespaceState;
 }
 
 export interface UploadDropZoneProps {

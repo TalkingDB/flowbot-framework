@@ -33,6 +33,7 @@ const Chatbot: React.FC = () => {
     handleLogin,
     authError,
     setAuthError,
+    namespace,
   } = useChatbot();
 
   // Left panel state for toggle
@@ -244,7 +245,7 @@ const Chatbot: React.FC = () => {
 
               {/* Right Documents Panel */}
               {JSModule?.drawerEnabled && (
-                <SidePanel switchTab={switchTab} open={open} setOpen={setOpen} />
+                <SidePanel switchTab={switchTab} open={open} setOpen={setOpen} namespace={namespace} />
               )}
             </div>
           </div>
