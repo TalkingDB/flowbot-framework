@@ -14,6 +14,7 @@ import rehypeRaw from 'rehype-raw';
 import { DynamicComponent } from "@/components/DynamicComponent";
 import { useRouter } from 'next/router';
 import { FileText, ChevronUp } from "lucide-react";
+import { Document } from "langchain/document";
 import SourcePanel from "./SourcePanel";
 
 interface ChatMessageProps {
@@ -30,7 +31,7 @@ interface ChatMessageProps {
 export const ChatMessages: React.FC<ChatMessageProps> = ({ chatId, messages, loading, handleSubmit, typingState, handleFileUpload, references, onUploadClick }) => {
 
     const [expandedMessageIndex, setExpandedMessageIndex] = useState<number | null>(null);
-    const [selectedSourceReferences, setSelectedSourceReferences] = useState<Document | any>(null);
+    const [selectedSourceReferences, setSelectedSourceReferences] = useState<Document[]>([]);
     const { JSModule, styles } = useContext(ThemeContext);
     const router = useRouter();
     const messageListRef = useRef<HTMLDivElement>(null);
@@ -56,7 +57,7 @@ export const ChatMessages: React.FC<ChatMessageProps> = ({ chatId, messages, loa
             setSelectedSourceReferences([]);
         } else {
             setExpandedMessageIndex(index);
-            setSelectedSourceReferences(message.sourceDocs);
+            setSelectedSourceReferences(message.sourceDocs ?? []);
         }
     }
 
@@ -318,6 +319,7 @@ export const ChatMessages: React.FC<ChatMessageProps> = ({ chatId, messages, loa
                 {
                     expandedMessageIndex !== null && (
                         <SourcePanel
+                            key={expandedMessageIndex}
                             sources={selectedSourceReferences}
                         />
                     )
