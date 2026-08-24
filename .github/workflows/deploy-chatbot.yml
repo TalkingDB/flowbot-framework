@@ -1,0 +1,23 @@
+name: Deploy Chatbot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Chatbot to VM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /ttt/infra-tdb-platform
+            ./manage-docker.sh chat-app up chat https://ttt-rc4.talkingdb.io
