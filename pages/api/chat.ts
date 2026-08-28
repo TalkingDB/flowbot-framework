@@ -4,6 +4,7 @@ import dbConnect from '@/config/mongodb';
 import { upsertSubscription } from '@/models/subscriptionModel';
 import { IUser, upsertUserByEmail } from '@/models/userModel';
 import { ITokenUsage, upsertUserHistory, pushChatEntry } from '@/models/userHistoryModel';
+import { upsertTokenUsage } from '@/models/tokenUsageModel';
 import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
@@ -164,6 +165,7 @@ export default async function handler(
 
             // Save Q&A only when there is an actual question and answer
             if (sanitizedQuestion && response?.text) {
+                await upsertTokenUsage(user?._id, response.tokens)
                 await saveChatHistory(
                     session,
                     chatBotId,
@@ -217,6 +219,7 @@ export default async function handler(
 
         // Save Q&A — fallback path
         if (sanitizedQuestion && response?.text) {
+            await upsertTokenUsage(user?._id, response.tokens)
             await saveChatHistory(
                 session,
                 chatBotId,
