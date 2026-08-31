@@ -243,18 +243,12 @@ export const useChatbot = () => {
         setRoomId(localStorage?.getItem('conversation_id') || '')
     
         socket.on('connect', () => {
-          console.log('Connected to websocket server for the messages from hcinbox');
-
           if (roomId) {
               socket.emit('joinRoom', roomId);
           }
         });
     
         socket.on('updateMessageState', (message) => {
-
-            console.log('yes we got emitted updateMessageState and now its in client');
-            console.log('message is', message);
-            
             setMessageState((state: any) => ({
                 ...state,
                 messages: [
@@ -279,21 +273,14 @@ export const useChatbot = () => {
     // Function to initialize socket
     const initializeSocket = async () => {
         // Logic to set up socket connection
-        console.log('socket base url____', JSModule?.socket_base_url)
         await fetch('/api/chat-socket');
         const newSocket = io(`${JSModule?.socket_base_url}`, { path: '/socket.io' });
 
-
-        console.log('current session----', currentSession);
-
-
         newSocket.on('connect', () => {
-            console.log('connected');
             newSocket.emit('join-room', currentSession);
         });
 
         newSocket.on('received-slack-message', (data: any) => {
-            console.log('slack-message received', data)
             setMessageState((state: any) => ({
                 ...state,
                 messages: [
@@ -311,13 +298,11 @@ export const useChatbot = () => {
         })
 
         newSocket.on('received-slack-user-typing', (data: any) => {
-            console.log('typing data received =>', data);
             setTypingState(true);
         })
 
         newSocket.on('close-socket-connection', (data: any) => {
             if (socketState) {
-                console.log('socket closed successfully', data)
                 setSocketState(false)
                 handleSubmit('dummy')
             }
@@ -435,7 +420,6 @@ export const useChatbot = () => {
             }
             if (!query && question && JSModule?.showRadioSelection) {
                 if (question) {
-                    console.log('questionm', question)
                     setMessageState((state: any) => ({
                         ...state,
                         messages: [
@@ -454,7 +438,6 @@ export const useChatbot = () => {
 
             if (query && JSModule?.showUserResponseFirst) {
                 if (question) {
-                    console.log('questionm', question)
                     setMessageState((state: any) => ({
                         ...state,
                         messages: [
@@ -506,17 +489,14 @@ export const useChatbot = () => {
                     throw new Error(`Chat request failed: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log("data", data)
 
                 // it is the case user sent message to human agent;
                 if ( data?.messageHandovered) {
-                    console.log(`yess message is handovered`);
                     setLoading(false);
                     return
                 }
 
                 if (data?.conversationId) {
-                    console.log(`yes we got conversationId ${data?.conversationId}`);
                     localStorage.setItem("conversation_id", data?.conversationId)
                     setRoomId(data?.conversationId)
                 }
