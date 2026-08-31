@@ -420,14 +420,12 @@ export const useChatbot = () => {
     // Function to handle form submission
     const handleSubmit = async (value?: string, update: boolean = false, socketMode: boolean = false) => {
         setLoading(true);
-        console.log('socket status', socketState)
+         
         if (socketMode) {
             setLoading(false)
         }
         if (socketState && !value) {
             setQuery('');
-            console.log('inside setSocket true', value)
-            console.log('inside setSocket query', query)
             await handleSocket(query);
             setLoading(false);
         } else {
