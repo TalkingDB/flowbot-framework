@@ -8,7 +8,8 @@ import {
     upsertUserHistory,
     pushChatEntry,
 } from '@/models/userHistoryModel';
-import { upsertTokenUsage } from '@/models/tokenUsageModel';
+import { upsertTokenUsage, getUserTokenUsage } from '@/models/tokenUsageModel';
+import { AVG_TOKEN_USAGE_PER_REQUEST, TOKEN_USAGE_LIMIT } from '@/config/constants';
 import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
@@ -46,7 +47,7 @@ async function botRequiresAuth(chatBotId: string): Promise<boolean> {
  */
 async function resolveUser(req: NextApiRequest): Promise<IUser | null> {
     try {
-        const email = await getVerifiedEmail(req);
+        const email = getVerifiedEmail(req);
         // Name is display-only, not used for identity — no need to verify it
         const rawName = req.cookies['chatbot_user'];
         const name = rawName ? decodeURIComponent(rawName) : '';
@@ -115,6 +116,18 @@ export default async function handler(
         return;
     }
 
+    // Single user record per person — no session-keyed user records any more.
+    // Anonymous users (no email cookie) get null; the chat still works, just
+    // not linked to a persistent user profile.
+    const user = await resolveUser(req);
+    
+    const userTokenUsage = await getUserTokenUsage(user?._id)
+    const totalTokensUsed = userTokenUsage?.totalTokensUsed || 0;
+    if ((totalTokensUsed + AVG_TOKEN_USAGE_PER_REQUEST) > TOKEN_USAGE_LIMIT ) {
+        res.status(403).json({ error: 'Your free demo token limit has been reached.' });
+        return;
+    }
+
     // OpenAI recommends replacing newlines with spaces for best results
     const sanitizedQuestion = question;
     // const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
@@ -126,11 +139,6 @@ export default async function handler(
             const response = await chain.run(question);
             return res.status(200).json(response);
         }
-
-        // Single user record per person — no session-keyed user records any more.
-        // Anonymous users (no email cookie) get null; the chat still works, just
-        // not linked to a persistent user profile.
-        const user = await resolveUser(req);
 
         const headers = {
             ...req.headers,

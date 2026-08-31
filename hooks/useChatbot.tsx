@@ -238,14 +238,14 @@ export const useChatbot = () => {
     // here we will be updating the messages we are getting from api server through socket io
     useEffect(() => {
         const socket = io({
-          path: '/api/socket',
+            path: '/api/socket',
         });
         setRoomId(localStorage?.getItem('conversation_id') || '')
     
         socket.on('connect', () => {
-          if (roomId) {
-              socket.emit('joinRoom', roomId);
-          }
+            if (roomId) {
+                socket.emit('joinRoom', roomId);
+            }
         });
     
         socket.on('updateMessageState', (message) => {
@@ -265,7 +265,7 @@ export const useChatbot = () => {
         });
     
         return () => {
-          socket.disconnect();
+            socket.disconnect();
         };
     }, [roomId]);
 
@@ -405,7 +405,7 @@ export const useChatbot = () => {
     // Function to handle form submission
     const handleSubmit = async (value?: string, update: boolean = false, socketMode: boolean = false) => {
         setLoading(true);
-         
+
         if (socketMode) {
             setLoading(false)
         }
@@ -471,7 +471,7 @@ export const useChatbot = () => {
                             conversation_id,
                             question,
                             // if no document have selected, senting all the available;
-                            graphIds: selectedGraphIds.length? selectedGraphIds: allGraphIds,
+                            graphIds: selectedGraphIds.length ? selectedGraphIds : allGraphIds,
                             history,
                             session: currentSessionId,
                             reqQuery: router.query,
@@ -485,13 +485,32 @@ export const useChatbot = () => {
                     setLoading(false);
                     return;
                 }
+                if (response.status === 403) {
+                    const data = await response.json();
+                    setLoading(false);
+                    setMessageState((state: any) => ({
+                        ...state,
+                        messages: [
+                            ...state.messages,
+                            {
+                                type: 'apiMessage',
+                                message: data.error,
+                                src: 'talkingDb',
+                                step: {},
+                                id: Math.random(),
+                            },
+                        ],
+                    }));
+
+                    return;
+                }
                 if (!response.ok) {
                     throw new Error(`Chat request failed: ${response.status}`);
                 }
                 const data = await response.json();
 
                 // it is the case user sent message to human agent;
-                if ( data?.messageHandovered) {
+                if (data?.messageHandovered) {
                     setLoading(false);
                     return
                 }
@@ -500,12 +519,12 @@ export const useChatbot = () => {
                     localStorage.setItem("conversation_id", data?.conversationId)
                     setRoomId(data?.conversationId)
                 }
-                
+
                 const message: string = data?.errorMessage;
-                if ( message && message.includes('For more information,') ){
+                if (message && message.includes('For more information,')) {
                     const { documentName, pageNumbers } = getDocumentNameAndPageNumber(message)
                     pageNumbers?.map((pageNumber) => {
-                      setReferences((prev) => [ ...prev, { documentName, pageNumber: Number(pageNumber)}])
+                        setReferences((prev) => [...prev, { documentName, pageNumber: Number(pageNumber) }])
                     })
                 }
                 if (data?.redirect) {
@@ -809,8 +828,8 @@ export const useChatbot = () => {
         loading,
         botLoading,
         query,
-        JSModule, 
-        styles, 
+        JSModule,
+        styles,
         setQuery,
         open,
         setOpen,
@@ -821,7 +840,7 @@ export const useChatbot = () => {
         handleFileUpload,
         updatePromptTemplate,
         resetPromptTemplateHandler,
-        references, 
+        references,
         setReferences,
         isLoggedIn,
         isCheckingSession,

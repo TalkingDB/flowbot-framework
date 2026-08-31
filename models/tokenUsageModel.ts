@@ -80,4 +80,10 @@ export const upsertTokenUsage = async (
   );
 };
 
+export const getUserTokenUsage = async (
+  userId: mongoose.Types.ObjectId,
+) => {
+  return await UserTokenUsageModel.findOne({ userId });
+};
+
 export default UserTokenUsageModel;
