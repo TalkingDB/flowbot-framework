@@ -3,7 +3,11 @@ import { makeChain } from '@/utils/makechain';
 import dbConnect from '@/config/mongodb';
 import { upsertSubscription } from '@/models/subscriptionModel';
 import { IUser, upsertUserByEmail } from '@/models/userModel';
-import { ITokenUsage, upsertUserHistory, pushChatEntry } from '@/models/userHistoryModel';
+import {
+    ITokenUsage,
+    upsertUserHistory,
+    pushChatEntry,
+} from '@/models/userHistoryModel';
 import { upsertTokenUsage } from '@/models/tokenUsageModel';
 import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
@@ -24,16 +28,16 @@ import { getVerifiedEmail } from '@/utils/auth';
 import appConfig from '@/config/constants';
 
 async function botRequiresAuth(chatBotId: string): Promise<boolean> {
-  const loadOpenId = async (id: string) => {
-    try {
-      const mod: any = await import(`@/configuration/${id}/webapp`);
-      return mod?.openid;
-    } catch {
-      return undefined;
-    }
-  };
-  const openid = (await loadOpenId(chatBotId)) ?? (await loadOpenId('default'));
-  return !!(openid?.authorization_endpoint && openid?.client_id);
+    const loadOpenId = async (id: string) => {
+        try {
+            const mod: any = await import(`@/configuration/${id}/webapp`);
+            return mod?.openid;
+        } catch {
+            return undefined;
+        }
+    };
+    const openid = (await loadOpenId(chatBotId)) ?? (await loadOpenId('default'));
+    return !!(openid?.authorization_endpoint && openid?.client_id);
 }
 
 /**
@@ -44,8 +48,8 @@ async function resolveUser(req: NextApiRequest): Promise<IUser | null> {
     try {
         const email = await getVerifiedEmail(req);
         // Name is display-only, not used for identity — no need to verify it
-        const rawName = req.cookies["chatbot_user"];
-        const name = rawName ? decodeURIComponent(rawName) : "";
+        const rawName = req.cookies['chatbot_user'];
+        const name = rawName ? decodeURIComponent(rawName) : '';
         return upsertUserByEmail(email, name);
     } catch {
         // No valid session token — anonymous user, chat still works
@@ -64,11 +68,11 @@ async function saveChatHistory(
     question: string,
     answer: string,
     graphIds: string[],
-    tokens: ITokenUsage
+    tokens: ITokenUsage,
 ): Promise<void> {
     try {
-        const email  = user?.email  || null;
-        const userId = user?._id    || null;
+        const email = user?.email || null;
+        const userId = user?._id || null;
 
         await upsertUserHistory(sessionId, chatbotId, email, userId);
         await pushChatEntry(sessionId, {
@@ -83,161 +87,161 @@ async function saveChatHistory(
 }
 
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
+    req: NextApiRequest,
+    res: NextApiResponse,
 ) {
-  const {
-    question,
-    history,
-    enablegptfallback,
-    session,
-    graphIds, 
-    reqQuery,
-    chainStatus = false,
-  } = req.body;
-  const chatBotId = String(req.query.chatBotId || 'default');
+    const {
+        question,
+        history,
+        enablegptfallback,
+        session,
+        graphIds,
+        reqQuery,
+        chainStatus = false,
+    } = req.body;
+    const chatBotId = String(req.query.chatBotId || 'default');
 
-  await dbConnect();
+    await dbConnect();
 
-  //only accept post requests
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
-
-  // Enforce authentication for bots that have OpenID configured.
-  if ((await botRequiresAuth(chatBotId)) && !req.cookies[SESSION_COOKIE]) {
-    res.status(401).json({ error: 'Authentication required' });
-    return;
-  }
-
-  // OpenAI recommends replacing newlines with spaces for best results
-  const sanitizedQuestion = question;
-  // const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
-
-  try {
-    //create chain
-    const chain = new makeChain(chatBotId);
-    if (chainStatus) {
-      const response = await chain.run(question);
-      return res.status(200).json(response);
+    //only accept post requests
+    if (req.method !== 'POST') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
     }
+
+    // Enforce authentication for bots that have OpenID configured.
+    if ((await botRequiresAuth(chatBotId)) && !req.cookies[SESSION_COOKIE]) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+    }
+
+    // OpenAI recommends replacing newlines with spaces for best results
+    const sanitizedQuestion = question;
+    // const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
+
+    try {
+        //create chain
+        const chain = new makeChain(chatBotId);
+        if (chainStatus) {
+            const response = await chain.run(question);
+            return res.status(200).json(response);
+        }
 
         // Single user record per person — no session-keyed user records any more.
         // Anonymous users (no email cookie) get null; the chat still works, just
         // not linked to a persistent user profile.
         const user = await resolveUser(req);
 
-    const headers = {
-      ...req.headers,
-      authorization: `Bearer ${appConfig.TDB_TTT_SERVICE_AUTHORIZATION}`,
-    };
+        const headers = {
+            ...req.headers,
+            authorization: `Bearer ${appConfig.TDB_TTT_SERVICE_AUTHORIZATION}`,
+        };
 
         // TODO: when "New Chat" button is implemented, pass the new sessionId from
-        //       the frontend so user_histories creates a fresh record for that session.
-    return new Promise((resolve) => {
-      import(`@/configuration/${chatBotId}/server`)
-        .then(async (module) => {
-          try {
-            const response = await module.start(
-              {
-                chain,
-                axiosInstance: axios,
-                user,
-                graphIds,
-                BigQuery,
-                DocumentProcessorServiceClient,
-                GoogleAuth,
-                fs,
-                path,
-                FormData,
-                reqQuery,
-                reqBody: req.body,
-                chatBotId,
-                headers,
-                parser,
-                generator,
-                json5,
-                htmlToText,
-              },
-              sanitizedQuestion,
-            );
+        // the frontend so user_histories creates a fresh record for that session.
+        return new Promise((resolve) => {
+            import(`@/configuration/${chatBotId}/server`)
+                .then(async (module) => {
+                    try {
+                        const response = await module.start(
+                            {
+                                chain,
+                                axiosInstance: axios,
+                                user,
+                                graphIds,
+                                BigQuery,
+                                DocumentProcessorServiceClient,
+                                GoogleAuth,
+                                fs,
+                                path,
+                                FormData,
+                                reqQuery,
+                                reqBody: req.body,
+                                chatBotId,
+                                headers,
+                                parser,
+                                generator,
+                                json5,
+                                htmlToText,
+                            },
+                            sanitizedQuestion,
+                        );
 
-            // Save Q&A only when there is an actual question and answer
-            if (sanitizedQuestion && response?.text) {
-                await upsertTokenUsage(user?._id, response.tokens)
-                await saveChatHistory(
-                    session,
-                    chatBotId,
-                    user,
-                    sanitizedQuestion,
-                    response.text,
-                    graphIds || [],
-                    response.tokens
-                );
-            }
+                        // Save Q&A only when there is an actual question and answer
+                        if (sanitizedQuestion && response?.text) {
+                            await upsertTokenUsage(user?._id, response.tokens);
+                            await saveChatHistory(
+                                session,
+                                chatBotId,
+                                user,
+                                sanitizedQuestion,
+                                response.text,
+                                graphIds || [],
+                                response.tokens,
+                            );
+                        }
 
-            res.status(200).json(response);
-            resolve(response);
-          } catch (error: any) {
-            const upstream = error?.status ?? error?.response?.status;
-            const status =
-              Number.isInteger(upstream) && upstream >= 400 && upstream <= 599
-                ? upstream
-                : 500;
-            res
-              .status(status)
-              .json({ error: error?.message || 'Something went wrong' });
-            resolve(error);
-          }
-        })
-        .catch((error) => {
-    // Fallback to default server config when chatbot-specific one is missing
-          import(`@/configuration/default/server`).then(async (module) => {
-            const response = await module.start(
-              {
-                chain,
-                axiosInstance: axios,
-                user,
-                graphIds,
-                BigQuery,
-                DocumentProcessorServiceClient,
-                GoogleAuth,
-                fs,
-                path,
-                FormData,
-                reqQuery,
-                chatBotId,
-                headers,
-                parser,
-                generator,
-                json5,
-                htmlToText,
-              },
-              sanitizedQuestion,
-            );
+                        res.status(200).json(response);
+                        resolve(response);
+                    } catch (error: any) {
+                        const upstream = error?.status ?? error?.response?.status;
+                        const status =
+                            Number.isInteger(upstream) && upstream >= 400 && upstream <= 599
+                                ? upstream
+                                : 500;
+                        res
+                            .status(status)
+                            .json({ error: error?.message || 'Something went wrong' });
+                        resolve(error);
+                    }
+                })
+                .catch((error) => {
+                    // Fallback to default server config when chatbot-specific one is missing
+                    import(`@/configuration/default/server`).then(async (module) => {
+                        const response = await module.start(
+                            {
+                                chain,
+                                axiosInstance: axios,
+                                user,
+                                graphIds,
+                                BigQuery,
+                                DocumentProcessorServiceClient,
+                                GoogleAuth,
+                                fs,
+                                path,
+                                FormData,
+                                reqQuery,
+                                chatBotId,
+                                headers,
+                                parser,
+                                generator,
+                                json5,
+                                htmlToText,
+                            },
+                            sanitizedQuestion,
+                        );
 
-        // Save Q&A — fallback path
-        if (sanitizedQuestion && response?.text) {
-            await upsertTokenUsage(user?._id, response.tokens)
-            await saveChatHistory(
-                session,
-                chatBotId,
-                user,
-                sanitizedQuestion,
-                response.text,
-                graphIds || [],
-                response.tokens
-            );
-        }
+                        // Save Q&A — fallback path
+                        if (sanitizedQuestion && response?.text) {
+                            await upsertTokenUsage(user?._id, response.tokens);
+                            await saveChatHistory(
+                                session,
+                                chatBotId,
+                                user,
+                                sanitizedQuestion,
+                                response.text,
+                                graphIds || [],
+                                response.tokens,
+                            );
+                        }
 
-            res.status(200).json(response);
-            resolve(response);
-          });
+                        res.status(200).json(response);
+                        resolve(response);
+                    });
+                });
         });
-    });
-  } catch (error: any) {
-    console.log('error', error);
-    res.status(500).json({ error: error.message || 'Something went wrong' });
-  }
+    } catch (error: any) {
+        console.log('error', error);
+        res.status(500).json({ error: error.message || 'Something went wrong' });
+    }
 }
