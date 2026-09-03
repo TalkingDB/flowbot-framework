@@ -9,7 +9,7 @@ const UsersList: React.FC<UsersListProps> = ({
     return (
         <>
             <div className="flex h-9 items-center border-b border-slate-200 px-4 text-xs font-medium text-slate-600">
-                {users.length} users
+                {users.length} user/s
             </div>
             <div className="max-h-[calc(100vh-360px)] overflow-y-auto">
                 {users.map((user) => (

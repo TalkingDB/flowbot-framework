@@ -78,14 +78,7 @@ const UserPage = () => {
                                 <Loader />
                             ) : (
                                 <>
-                                    {/* <FeedbackStats
-                                        total={totalNumberOfFeedbacks}
-                                        averageRating={0}
-                                        unread={totalNumberOfFeedbacks}
-                                        resolved={0}
-                                    /> */}
-                                    
-                                    <div className="mt-4 grid grid-cols-[minmax(0,1.55fr)_minmax(390px,0.85fr)] gap-5">
+                                    <div className="mt-4 grid grid-cols-1 gap-5">
                                         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                                             <UsersList
                                                 users={users}
