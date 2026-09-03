@@ -676,23 +676,25 @@ export const useChatbot = () => {
                         JSModule?.leftPanelStateUpdate(+data.currentStep.header.step);
                     }
                     setIsSignupPage(false);
-                    setMessageState((state: any) => ({
-                        ...state,
-                        messages: [
-                            ...state.messages,
-                            {
-                                type: 'apiMessage',
-                                message: data.text,
-                                src: data.src,
-                                step: data.currentStep || {},
-                                sourceDocs: data.sourceDocuments,
-                                tokens: data.tokens,
-                                id: Math.random(),
-                            },
-                        ],
-                        history: [...state.history, [question, data.text]],
-                    }));
-                    setActiveIndex(data.currentStep.id);
+                    if (data.text) {
+                        setMessageState((state: any) => ({
+                            ...state,
+                            messages: [
+                                ...state.messages,
+                                {
+                                    type: 'apiMessage',
+                                    message: data.text,
+                                    src: data.src,
+                                    step: data.currentStep || {},
+                                    sourceDocs: data.sourceDocuments,
+                                    tokens: data.tokens,
+                                    id: Math.random(),
+                                },
+                            ],
+                            history: [...state.history, [question, data.text]],
+                        }));
+                    }
+                    setActiveIndex(data.currentStep?.id);
                 }
 
                 if (data.currentStep?.inputHidden) {
