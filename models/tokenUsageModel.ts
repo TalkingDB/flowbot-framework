@@ -57,13 +57,17 @@ export const upsertTokenUsage = async (
   userId: mongoose.Types.ObjectId,
   tokens: ITokenUsage,
 ) => {
+  const inputTokens = tokens.input_tokens ?? 0;
+  const outputTokens = tokens.output_tokens ?? 0;
+  const totalTokens = tokens.total_tokens ?? 0;
+
   return await UserTokenUsageModel.findOneAndUpdate(
     { userId },
     {
       $inc: {
-        inputTokensUsed: tokens.input_tokens,
-        outputTokensUsed: tokens.output_tokens,
-        totalTokensUsed: tokens.total_tokens,
+        inputTokensUsed: inputTokens,
+        outputTokensUsed: outputTokens,
+        totalTokensUsed: totalTokens,
       },
       $currentDate: {
         updatedAt: true,

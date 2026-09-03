@@ -175,9 +175,12 @@ export default async function handler(
                             sanitizedQuestion,
                         );
 
+                        if (sanitizedQuestion && response?.tokens && user?._id) {
+                            await upsertTokenUsage(user._id, response.tokens);
+                        }
+
                         // Save Q&A only when there is an actual question and answer
                         if (sanitizedQuestion && response?.text) {
-                            await upsertTokenUsage(user?._id, response.tokens);
                             await saveChatHistory(
                                 session,
                                 chatBotId,
@@ -229,9 +232,12 @@ export default async function handler(
                             sanitizedQuestion,
                         );
 
+                        if (sanitizedQuestion && response?.tokens && user?._id) {
+                            await upsertTokenUsage(user._id, response.tokens);
+                        }
+
                         // Save Q&A — fallback path
                         if (sanitizedQuestion && response?.text) {
-                            await upsertTokenUsage(user?._id, response.tokens);
                             await saveChatHistory(
                                 session,
                                 chatBotId,

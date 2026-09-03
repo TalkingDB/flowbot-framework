@@ -486,7 +486,23 @@ export const useChatbot = () => {
                     return;
                 }
                 if (response.status === 403) {
-                    const data = await response.json();
+                    let errorMessage = 'Access forbidden. Please try again later.';
+                    try {
+                        const contentType = response.headers.get('content-type') || '';
+                
+                        if (contentType.includes('application/json')) {
+                            const data = await response.json();
+                            errorMessage = data?.error || errorMessage;
+                        } else {
+                            const text = await response.text();
+                            if (text) {
+                                errorMessage = text;
+                            }
+                        }
+                    } catch {
+                        // keep the default fallback message.
+                    }
+                
                     setLoading(false);
                     setMessageState((state: any) => ({
                         ...state,
@@ -494,7 +510,7 @@ export const useChatbot = () => {
                             ...state.messages,
                             {
                                 type: 'apiMessage',
-                                message: data.error,
+                                message: errorMessage,
                                 src: 'talkingDb',
                                 step: {},
                                 id: Math.random(),
