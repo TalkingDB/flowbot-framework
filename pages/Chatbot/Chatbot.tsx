@@ -36,8 +36,10 @@ const Chatbot: React.FC = () => {
     chatId,
     isLoggedIn,
     isCheckingSession,
+    user,
     hasOpenID,
     handleLogin,
+    handleLogout,
     authError,
     setAuthError,
     namespace,
@@ -221,6 +223,8 @@ const Chatbot: React.FC = () => {
           onSelectSession={handleSelectSession}
           onNewChat={handleNewChat}
           totalTokensOverride={selectedSessionId ? pastConversationTokens : undefined}
+          user={user}
+          onLogout={handleLogout}
         />
         <div style={{
           flex: 1,

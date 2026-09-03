@@ -5,7 +5,6 @@ import ChevronDownIcon from '@/assets/svgs/ChevronDownIcon';
 import LogoutIcon from '@/assets/svgs/LogoutIcon';
 import ShareIcon from '@/assets/svgs/ShareIcon';
 import { ToggleButton } from '@/components/ui/Buttons/ToggleButton';
-import { useChatbot } from '@/hooks/useChatbot';
 import { toast } from 'react-toastify';
 import { getPublicChatLink, submitFeedback } from '@/apiRequests';
 import { getCurrentSessionId } from '@/utils/sessionJobs';
@@ -17,7 +16,7 @@ import FeedbackForm from '@/components/FeedbackForm';
 import { FeedbackPayload } from '@/types/feedback';
 import ChatTabs from './ChatTabs';
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDrawerToggle, leftPanelExpanded = true, onToggleLeftPanel, messages, manageProjectsOpen = false, onToggleManageProjects, sessions, setSessions, activeSessionId, onSelectSession, onNewChat, totalTokensOverride }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDrawerToggle, leftPanelExpanded = true, onToggleLeftPanel, messages, manageProjectsOpen = false, onToggleManageProjects, sessions, setSessions, activeSessionId, onSelectSession, onNewChat, totalTokensOverride, user = {}, onLogout }) => {
     const { JSModule, styles } = useContext(ThemeContext);
     const headerRef = useRef<HTMLDivElement>(null);
     const userMenuRef = useRef<HTMLDivElement>(null);
@@ -26,11 +25,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDr
     const [canShareChat, setCanShareChat] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-    const [user, setUser] = useState<{
-        name?: string;
-        email?: string;
-    }>({});
-    const { handleLogout } = useChatbot();
 
     // if messages contain at-least one message from user and bot;
     useEffect(() => {
@@ -119,21 +113,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDr
                 "mousedown",
                 handleClickOutside
             );
-        };
-    }, []);
-
-    useEffect(() => {
-        let cancelled = false;
-        fetch("/api/auth/session")
-            .then((r) => r.json())
-            .then((data: { name?: string; email?: string }) => {
-                if (cancelled) return;
-                setUser(data);
-            })
-            .catch(() => { });
-
-        return () => {
-            cancelled = true;
         };
     }, []);
 
@@ -241,7 +220,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDr
                         <div className="absolute right-0 top-14 z-[200] min-w-44 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 ">
                             <button
                                 className="flex w-full items-center gap-2 bg-transparent px-4 py-2.5 text-left text-sm text-red-500 transition-colors duration-150 hover:bg-gray-50"
-                                onClick={handleLogout}
+                                onClick={onLogout}
                             >
                                 <LogoutIcon />
                                 Sign out

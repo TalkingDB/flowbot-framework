@@ -144,6 +144,7 @@ export const useChatbot = () => {
     };
 
     const { JSModule, styles } = useContext(ThemeContext) || {};
+    const [user, setUser] = useState<{ name?: string; email?: string }>({});
 
     // Poll session status: fires on mount, on tab focus, and every 5 min while tab is visible.
     useEffect(() => {
@@ -153,8 +154,9 @@ export const useChatbot = () => {
             if (document.visibilityState !== 'visible') return;
             fetch(AUTH_SESSION_URL)
                 .then(r => r.json())
-                .then(({ isLoggedIn }) => {
+                .then(({ isLoggedIn, name, email }) => {
                     setIsLoggedIn(!!isLoggedIn);
+                    setUser({ name, email });
                     if (!initialised) {
                         setIsCheckingSession(false);
                         initialised = true;
@@ -849,6 +851,7 @@ export const useChatbot = () => {
         setReferences,
         isLoggedIn,
         isCheckingSession,
+        user,
         hasOpenID,
         handleLogin,
         handleLogout,
