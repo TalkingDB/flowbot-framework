@@ -666,12 +666,12 @@ export const useChatbot = () => {
                         }));
                     }
                 } else {
-                    if (data.currentStep.fullWidth) {
+                    if (data.currentStep?.fullWidth) {
                         setRegistrationMessage(data.currentStep);
                         setIsSignupPage(true);
                         return;
                     }
-                    if (!data.hideAnswer && (data.currentStep.answer || question) && !JSModule?.showUserResponseFirst) {
+                    if (!data.hideAnswer && (data.currentStep?.answer || question) && !JSModule?.showUserResponseFirst) {
                         setMessageState((state: any) => ({
                             ...state,
                             messages: [
@@ -685,7 +685,7 @@ export const useChatbot = () => {
                             ],
                         }));
                     }
-                    if (data.currentStep.update) {
+                    if (data.currentStep?.update) {
                         JSModule?.leftPanelStateUpdate(+data.currentStep.header.step);
                     }
                     setIsSignupPage(false);
