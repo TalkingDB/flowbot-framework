@@ -11,3 +11,17 @@ export interface SidebarProps {
 export interface AdminLayoutProps {
     children: ReactNode;
 }
+
+export interface UserDetails {
+    name: string;
+    email: string;
+    inputTokensUsed: number;
+    outputTokensUsed: number;
+    totalTokensUsed: number;
+}
+
+export interface UsersListProps {
+    users: UserDetails[];
+    selectedUserEmail: string;
+    onSelect: (user: UserDetails) => void;
+}
