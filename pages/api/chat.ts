@@ -8,8 +8,8 @@ import {
     upsertUserHistory,
     pushChatEntry,
 } from '@/models/userHistoryModel';
-import { upsertTokenUsage, getUserTokenUsage } from '@/models/tokenUsageModel';
-import { AVG_TOKEN_USAGE_PER_REQUEST, TOKEN_USAGE_LIMIT } from '@/config/constants';
+import { ensureUserTokenUsage, acquireQuotaLock, updateTokenUsageAndReleaseLock } from '@/models/tokenUsageModel';
+import { AVG_TOKEN_USAGE_PER_REQUEST, TOKEN_QUOTA_LOCK_DURATION_MS, TOKEN_USAGE_LIMIT } from '@/config/constants';
 import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
@@ -121,11 +121,22 @@ export default async function handler(
     // not linked to a persistent user profile.
     const user = await resolveUser(req);
     
-    const userTokenUsage = await getUserTokenUsage(user?._id)
-    const totalTokensUsed = userTokenUsage?.totalTokensUsed || 0;
-    if ((totalTokensUsed + AVG_TOKEN_USAGE_PER_REQUEST) > TOKEN_USAGE_LIMIT ) {
-        res.status(403).json({ error: 'Your free demo token limit has been reached.' });
-        return;
+    if (user?._id) {
+        await ensureUserTokenUsage(user._id);
+    
+        const quotaAcquired = await acquireQuotaLock(
+            user._id,
+            TOKEN_USAGE_LIMIT,
+            AVG_TOKEN_USAGE_PER_REQUEST,
+            TOKEN_QUOTA_LOCK_DURATION_MS,
+        );
+    
+        if (!quotaAcquired) {
+            res.status(403).json({
+                error: 'Your free demo token limit has been reached or another request is already being processed.',
+            });
+            return;
+        }
     }
 
     // OpenAI recommends replacing newlines with spaces for best results
@@ -176,7 +187,7 @@ export default async function handler(
                         );
 
                         if (sanitizedQuestion && response?.tokens && user?._id) {
-                            await upsertTokenUsage(user._id, response.tokens);
+                            await updateTokenUsageAndReleaseLock(user._id, response.tokens);
                         }
 
                         // Save Q&A only when there is an actual question and answer
@@ -208,49 +219,59 @@ export default async function handler(
                 })
                 .catch((error) => {
                     // Fallback to default server config when chatbot-specific one is missing
-                    import(`@/configuration/default/server`).then(async (module) => {
-                        const response = await module.start(
-                            {
-                                chain,
-                                axiosInstance: axios,
-                                user,
-                                graphIds,
-                                BigQuery,
-                                DocumentProcessorServiceClient,
-                                GoogleAuth,
-                                fs,
-                                path,
-                                FormData,
-                                reqQuery,
-                                chatBotId,
-                                headers,
-                                parser,
-                                generator,
-                                json5,
-                                htmlToText,
-                            },
-                            sanitizedQuestion,
-                        );
-
-                        if (sanitizedQuestion && response?.tokens && user?._id) {
-                            await upsertTokenUsage(user._id, response.tokens);
-                        }
-
-                        // Save Q&A — fallback path
-                        if (sanitizedQuestion && response?.text) {
-                            await saveChatHistory(
-                                session,
-                                chatBotId,
-                                user,
+                    import(`@/configuration/default/server`)
+                    .then(async (module) => {
+                        try {
+                            const response = await module.start(
+                                {
+                                    chain,
+                                    axiosInstance: axios,
+                                    user,
+                                    graphIds,
+                                    BigQuery,
+                                    DocumentProcessorServiceClient,
+                                    GoogleAuth,
+                                    fs,
+                                    path,
+                                    FormData,
+                                    reqQuery,
+                                    chatBotId,
+                                    headers,
+                                    parser,
+                                    generator,
+                                    json5,
+                                    htmlToText,
+                                },
                                 sanitizedQuestion,
-                                response.text,
-                                graphIds || [],
-                                response.tokens,
                             );
+    
+                            if (sanitizedQuestion && response?.tokens && user?._id) {
+                                await updateTokenUsageAndReleaseLock(user._id, response.tokens);
+                            }
+    
+                            // Save Q&A — fallback path
+                            if (sanitizedQuestion && response?.text) {
+                                await saveChatHistory(
+                                    session,
+                                    chatBotId,
+                                    user,
+                                    sanitizedQuestion,
+                                    response.text,
+                                    graphIds || [],
+                                    response.tokens,
+                                );
+                            }
+    
+                            res.status(200).json(response);
+                            resolve(response);
+                        } catch (fallbackError: any) {
+                            res.status(500).json({ error: fallbackError?.message || 'Something went wrong' });
+                            resolve(fallbackError);
                         }
-
-                        res.status(200).json(response);
-                        resolve(response);
+                    })
+                    .catch((importError) => {
+                        res.status(500).json({ error: 'Chat service unavailable' });
+                        resolve(importError);
                     });
                 });
         });

@@ -6,6 +6,7 @@ export interface IUserTokenUsage extends Document {
   inputTokensUsed: number;
   outputTokensUsed: number;
   totalTokensUsed: number;
+  quotaLockUntil: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,10 @@ const UserTokenUsageSchema: Schema = new Schema(
       default: 0,
       min: 0,
     },
+    quotaLockUntil: {
+      type: Date,
+      default: null,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -53,7 +58,8 @@ export const UserTokenUsageModel =
 
 //   --------------------------------------
 
-export const upsertTokenUsage = async (
+// Update actual token usage + release lock
+export const updateTokenUsageAndReleaseLock = async (
   userId: mongoose.Types.ObjectId,
   tokens: ITokenUsage,
 ) => {
@@ -69,25 +75,99 @@ export const upsertTokenUsage = async (
         outputTokensUsed: outputTokens,
         totalTokensUsed: totalTokens,
       },
+      $set: {
+        quotaLockUntil: null,
+      },
       $currentDate: {
         updatedAt: true,
-      },
-      $setOnInsert: {
-        userId,
-        createdAt: new Date(),
       },
     },
     {
       new: true,
-      upsert: true,
     },
   );
 };
 
-export const getUserTokenUsage = async (
+// Ensure usage document exists
+export const ensureUserTokenUsage = async (userId: mongoose.Types.ObjectId) => {
+  return await UserTokenUsageModel.findOneAndUpdate(
+    { userId },
+    {
+      $setOnInsert: {
+        userId,
+        inputTokensUsed: 0,
+        outputTokensUsed: 0,
+        totalTokensUsed: 0,
+        quotaLockUntil: null,
+        createdAt: new Date(),
+      },
+    },
+    {
+      upsert: true,
+      new: true,
+    },
+  );
+};
+
+// Atomically acquire quota lock + check quota
+export const acquireQuotaLock = async (
   userId: mongoose.Types.ObjectId,
+  tokenLimit: number,
+  estimatedTokens: number,
+  lockDurationMs: number,
 ) => {
-  return await UserTokenUsageModel.findOne({ userId });
+  const now = new Date();
+  const lockUntil = new Date(now.getTime() + lockDurationMs);
+
+  const result = await UserTokenUsageModel.findOneAndUpdate(
+    {
+      userId,
+
+      // Lock is available if there is no active lock
+      $or: [{ quotaLockUntil: null }, { quotaLockUntil: { $lte: now } }],
+
+      // Quota check happens as part of the same atomic operation
+      $expr: {
+        $lte: [
+          {
+            $add: ['$totalTokensUsed', estimatedTokens],
+          },
+          tokenLimit,
+        ],
+      },
+    },
+    {
+      $set: {
+        quotaLockUntil: lockUntil,
+      },
+      $currentDate: {
+        updatedAt: true,
+      },
+    },
+    {
+      new: true,
+    },
+  );
+
+  return result !== null;
+};
+
+// Release lock without updating tokens
+export const releaseQuotaLock = async (userId: mongoose.Types.ObjectId) => {
+  return UserTokenUsageModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        quotaLockUntil: null,
+      },
+      $currentDate: {
+        updatedAt: true,
+      },
+    },
+    {
+      new: true,
+    },
+  );
 };
 
 export default UserTokenUsageModel;
