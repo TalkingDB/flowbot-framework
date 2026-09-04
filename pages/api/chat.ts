@@ -8,7 +8,7 @@ import {
     upsertUserHistory,
     pushChatEntry,
 } from '@/models/userHistoryModel';
-import { ensureUserTokenUsage, acquireQuotaLock, updateTokenUsageAndReleaseLock } from '@/models/tokenUsageModel';
+import { ensureUserTokenUsage, acquireQuotaLock, updateTokenUsageAndReleaseLock, releaseQuotaLock } from '@/models/tokenUsageModel';
 import { AVG_TOKEN_USAGE_PER_REQUEST, TOKEN_QUOTA_LOCK_DURATION_MS, TOKEN_USAGE_LIMIT } from '@/config/constants';
 import axios from 'axios';
 import { BigQuery } from '@google-cloud/bigquery';
@@ -120,18 +120,19 @@ export default async function handler(
     // Anonymous users (no email cookie) get null; the chat still works, just
     // not linked to a persistent user profile.
     const user = await resolveUser(req);
+    let quotaLockAcquired = false;
     
     if (user?._id) {
         await ensureUserTokenUsage(user._id);
     
-        const quotaAcquired = await acquireQuotaLock(
+        quotaLockAcquired = await acquireQuotaLock(
             user._id,
             TOKEN_USAGE_LIMIT,
             AVG_TOKEN_USAGE_PER_REQUEST,
             TOKEN_QUOTA_LOCK_DURATION_MS,
         );
     
-        if (!quotaAcquired) {
+        if (!quotaLockAcquired) {
             res.status(403).json({
                 error: 'Your free demo token limit has been reached or another request is already being processed.',
             });
@@ -211,6 +212,7 @@ export default async function handler(
 
                         if (sanitizedQuestion && response?.tokens && user?._id) {
                             await updateTokenUsageAndReleaseLock(user._id, response.tokens);
+                            quotaLockAcquired = false;
                         }
 
                         // Save Q&A only when there is an actual question and answer, and the
@@ -284,6 +286,7 @@ export default async function handler(
     
                             if (sanitizedQuestion && response?.tokens && user?._id) {
                                 await updateTokenUsageAndReleaseLock(user._id, response.tokens);
+                                quotaLockAcquired = false;
                             }
     
                             // Save Q&A — fallback path
@@ -315,5 +318,9 @@ export default async function handler(
     } catch (error: any) {
         console.log('error', error);
         res.status(500).json({ error: error.message || 'Something went wrong' });
+    } finally {
+        if (quotaLockAcquired && user?._id) {
+            await releaseQuotaLock(user._id);
+        }
     }
 }
