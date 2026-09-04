@@ -196,6 +196,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDr
                     <PanelIcon size={20} stroke={drawerOpen ? "#2563eb" : "#6b7280"} />
                 </button>
 
+                {/* logged-out visitors (e.g. a shared public chat) get no avatar and no sign-out */}
+                {user?.email && (
                 <div className="relative" ref={userMenuRef}>
                     <div
                         className="flex cursor-pointer select-none items-center gap-2 rounded-full border border-gray-200 px-2 py-1 transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 overflow-visible"
@@ -228,6 +230,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ drawerOpen = false, onDr
                         </div>
                     )}
                 </div>
+                )}
                 <div
                     ref={menuRef}
                     className='relative block'
