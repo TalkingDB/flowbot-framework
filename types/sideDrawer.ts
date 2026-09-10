@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { NamespaceState } from '@/types/namespace';
-import { SessionDocument } from '@/types/fileUploadStatus';
+import { SessionDocument,FileUploadStatus } from '@/types/fileUploadStatus';
 
 export interface SideDrawerProps {
     open: boolean;
@@ -11,6 +11,7 @@ export interface SideDrawerProps {
     hideDemoDocs?: boolean;
     selectedGraphIds: string[]
     setSelectedGraphIds: Dispatch<SetStateAction<string[]>>;
+    currentSession?: string; 
 }
 
 export interface DemoDocsSectionProps {
@@ -32,7 +33,7 @@ export interface UploadDropZoneProps {
 
 export interface UploadFileCardProps {
     styles: any;
-    file: any;
+    file: FileUploadStatus;
     canCancel: (jobId: string) => boolean;
     cancelUpload: (jobId: string) => void;
     retryUpload: (jobId: string) => void;
@@ -41,7 +42,7 @@ export interface UploadFileCardProps {
 
 export interface UploadsSectionProps {
     styles: any;
-    uploads: any[];
+    uploads: FileUploadStatus[];
     canCancel: (jobId: string) => boolean;
     cancelUpload: (jobId: string) => void;
     retryUpload: (jobId: string) => void;

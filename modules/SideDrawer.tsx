@@ -100,8 +100,8 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
                     ) : (
                         <>
                             <span className={styles?.['filePercent']}>{file.progress}%</span>
-                            {(canCancel(file.jobId) && file.phase !== "cancelling") && (
-                                <button className={styles?.['fileCancelX']} onClick={() => cancelUpload(file.jobId)}>✕</button>
+                            {(file.jobId && canCancel(file.jobId) && file.phase !== "cancelling") && (
+                                <button className={styles?.['fileCancelX']} onClick={() => file.jobId && cancelUpload(file.jobId)}>✕</button>
                             )}
                         </>
                     )}
@@ -131,14 +131,14 @@ const UploadFileCard: React.FC<UploadFileCardProps> = ({
                         <button
                             className={styles?.['fileRetryBtn']}
                             disabled={!!file.retrying}
-                            onClick={() => retryUpload(file.jobId)}
+                            onClick={() => file.jobId && retryUpload(file.jobId)}
                         >
                             {file.retrying ? 'Retrying…' : '↻ Retry'}
                         </button>
                     )}
                     {
                         file.jobId && (
-                            <button className={styles?.['fileRemoveBtn']} onClick={() => removeUpload(file.jobId)}>🗑 Remove</button>
+                            <button className={styles?.['fileRemoveBtn']} onClick={() => file.jobId && removeUpload(file.jobId)}>🗑 Remove</button>
                         )
                     }
                 </div>
@@ -169,7 +169,7 @@ const UploadsSection: React.FC<UploadsSectionProps> = ({
             <div className={styles?.['uploadsHeader']}>Uploads ({activeUploads.length})</div>
             {activeUploads.map((file) => (
                 <UploadFileCard
-                    key={file.jobId}
+                    key={file.jobId ?? file.name}
                     styles={styles}
                     file={file}
                     canCancel={canCancel}
@@ -424,12 +424,13 @@ const DemoDocsSection: React.FC<DemoDocsSectionProps> = ({ styles, namespace, ha
     );
 };
 
-export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen, namespace, switchTab, handleSuggestedQueries, hideDemoDocs, selectedGraphIds, setSelectedGraphIds }) => {
+export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen, namespace, switchTab, handleSuggestedQueries, hideDemoDocs, selectedGraphIds, setSelectedGraphIds , currentSession,
+}) => {
     const { JSModule, styles } = useContext(ThemeContext);
     const {
         uploads, uploadConstraints, handleFileChange, handleFileDrop, cancelUpload, retryUpload, removeUpload, canCancel,
         documentList, loadingSessionDocuments, removeSessionDocument
-    } = useTainPDF();
+    } = useTainPDF(currentSession);
     const router = useRouter();
 
     const accept = uploadConstraints
@@ -440,7 +441,6 @@ export const SidePanel: React.FC<SideDrawerProps> = ({ open, setOpen, namespace,
             .map((t) => `${t.extension.toUpperCase()} (max ${t.max_file_size_mb} MB)`)
             .join(', ')
         : DEFAULT_UPLOAD_HINT;
-    const { 'chat-id': chatId } = router.query;
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [drawerWidth, setDrawerWidth] = useState(320);
     const [dragOver, setDragOver] = useState(false);

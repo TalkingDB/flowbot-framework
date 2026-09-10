@@ -13,6 +13,8 @@ export type FileUploadStatus = {
     startedAt?: number;
     retrying?: boolean;
     synthetic?: boolean;
+    sessionId?: string;
+    _version?: number;
 };
 
 export type SessionDocument = {

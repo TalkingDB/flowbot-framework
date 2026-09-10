@@ -111,23 +111,22 @@ export const upsertUserHistory = async (
     email: string | null,
     userId: mongoose.Types.ObjectId | null
 ): Promise<IUserHistory> => {
+    const existing = await UserHistoryModel.findOne({ sessionId });
+    if (existing && existing.email !== email) {
+        throw { status: 403, message: 'Session does not belong to the authenticated user' };
+    }
+
     const result = await UserHistoryModel.findOneAndUpdate(
         { sessionId },
         {
-            $setOnInsert: {
-                sessionId,
-                chatbotId,
-                email,
-                userId,
-                createdAt: new Date(),
-            },
+            $set: { email, userId },
             $currentDate: { updatedAt: true },
+            $setOnInsert: { sessionId, chatbotId, createdAt: new Date() },
         },
         { new: true, upsert: true, setDefaultsOnInsert: true }
     );
     return result as IUserHistory;
 };
-
 /**
  * Appends one Q&A pair to the session's chat array.
  * Only called after module.start() returns successfully in chat.ts.
@@ -217,6 +216,23 @@ export const updateSessionStatus = async (
             new: true
         }
     );
+};
+
+export const pullDocumentEntry = async (
+    sessionId: string,
+    email: string,
+    jobId: string
+): Promise<{ matched: boolean }> => {
+    const before = await UserHistoryModel.findOne({ sessionId, email }, { documents: 1 });
+    if (!before) return { matched: false };
+    const hadEntry = before.documents?.some((d: any) => d.jobId === jobId);
+    if (!hadEntry) return { matched: false };
+
+    await UserHistoryModel.updateOne(
+        { sessionId, email },
+        { $pull: { documents: { jobId } }, $currentDate: { updatedAt: true } }
+    );
+    return { matched: true };
 };
 
 export default UserHistoryModel;

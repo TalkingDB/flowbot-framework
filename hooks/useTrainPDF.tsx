@@ -5,8 +5,10 @@ import ThemeContext from '@/contexts/ThemeContext';
 import { useRouter } from 'next/router';
 import { usePolling } from '@/hooks/usePolling';
 import { FileUploadStatus, SessionDocument } from '@/types/fileUploadStatus';
-import { getActiveProjectId, getCurrentSessionId, getJobSessionId, notifyGraphIdsChanged, SESSION_CHANGED_EVENT } from '@/utils/sessionJobs';
+import { getActiveProjectId, getCurrentSessionId, getJobSessionId, notifyGraphIdsChanged, SESSION_CHANGED_EVENT, RESUME_SESSION_EVENT } from '@/utils/sessionJobs';
+import type { HistoryDocumentEntry } from '@/types/history';
 import { toast } from 'react-toastify';
+import { removeHistoryDocument } from '@/apiRequests';
 
 /**
  * Notify the server that a document has been processed and linked to this session.
@@ -18,7 +20,7 @@ async function recordDocumentInHistory(
     graphId: string,
     chatbotId: string
 ): Promise<void> {
-    const sessionId = getCurrentSessionId();
+    const sessionId = file.sessionId;
     if (!sessionId || !graphId) return;
 
     try {
@@ -127,7 +129,7 @@ const toCompletedDocs = (data: any[]): SessionDocument[] =>
             fileSize: raw?.file_size, graphId: raw?.result_graph_id,
         }));
 
-export const useTainPDF = () => {
+export const useTainPDF = (activeSessionId?: string) => {
     const router = useRouter();
     const { JSModule } = useContext(ThemeContext);
     const [trainingInProgress, setTrainingInProgress] = useState(false);
@@ -144,6 +146,11 @@ export const useTainPDF = () => {
     const chatbotId = (chatId as string) || process.env.NEXT_PUBLIC_DEFAULT_CHAT_ID || '';
 
     uploadsRef.current = uploads;
+
+    const bumpVersion = (f: FileUploadStatus): FileUploadStatus => ({
+        ...f,
+        _version: (f._version || 0) + 1,
+    });
 
     useEffect(() => {
         jobSessionIdRef.current = getJobSessionId();
@@ -191,6 +198,7 @@ export const useTainPDF = () => {
                 jobId: raw?.job_id,
                 graphId: raw?.result_graph_id || '',
                 startedAt: Date.now(),
+                sessionId: getCurrentSessionId(),
             }));
 
         if (seeded.length) {
@@ -202,12 +210,17 @@ export const useTainPDF = () => {
         }
     };
     const hasActiveFiles = uploads.some(
-        (f: FileUploadStatus) => f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling'
+        (f: FileUploadStatus) =>
+            (!f.sessionId || f.sessionId === activeSessionId) &&
+            (f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling')
     );
 
     // move finished uploads into Trained using their polling data (/v1/documents lags)
-    const mergeCompletedIntoTrained = (list: FileUploadStatus[]) => {
-        const completed = list.filter((f) => f.phase === 'done' && f.jobId);
+    const mergeCompletedIntoTrained = (list: FileUploadStatus[], activeSessionId?: string) => {
+        const liveJobIds = new Set(uploadsRef.current.map((f) => f.jobId).filter(Boolean));
+        const completed = list.filter(
+            (f) => f.phase === 'done' && f.jobId && liveJobIds.has(f.jobId) && (!activeSessionId || f.sessionId === activeSessionId)
+        );
         if (!completed.length) return;
         setDocumentList((prev) => {
             const existing = new Set(prev.map((d) => d.jobId));
@@ -227,13 +240,55 @@ export const useTainPDF = () => {
 
     usePolling<void>({
         fn: async () => {
-            const updated = await pollProgress(uploadsRef.current, cancelledRef,chatbotId);
-            setUploads(updated);
-            mergeCompletedIntoTrained(updated);
+            // snapshot versions at the start of this tick
+            const versionsAtStart = new Map(uploadsRef.current.map((f) => [f.jobId, f._version || 0]));
+            const updated = await pollProgress(uploadsRef.current, cancelledRef, chatbotId);
+            setUploads((prev) => {
+                const updatedMap = new Map(updated.map((u) => [u.jobId, u]));
+                return prev.map((f) => {
+                    if (!f.jobId || !updatedMap.has(f.jobId)) return f;
+                    // skip entries whose version changed since this tick started —
+                    // a cancel/retry landed locally while getJobProgress was in flight
+                    if ((f._version || 0) !== versionsAtStart.get(f.jobId)) return f;
+                    return updatedMap.get(f.jobId)!;
+                });
+            });
+            mergeCompletedIntoTrained(updated, activeSessionId);
         },
         interval: JSModule?.pollingInterval || 400, // configurable polling interval from backend config
         enabled: hasActiveFiles,
-        shouldStop: () => !uploadsRef.current.some((f: FileUploadStatus) => f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling'),
+        shouldStop: () =>
+            !uploadsRef.current.some(
+                (f: FileUploadStatus) =>
+                    (!f.sessionId || f.sessionId === activeSessionId) &&
+                    (f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling')
+            ),
+        onComplete: () => setTrainingInProgress(false),
+    });
+
+    usePolling<void>({
+        fn: async () => {
+            // snapshot versions at the start of this tick
+            const versionsAtStart = new Map(uploadsRef.current.map((f) => [f.jobId, f._version || 0]));
+            const updated = await pollProgress(uploadsRef.current, cancelledRef, chatbotId);
+            setUploads((prev) => {
+                const updatedMap = new Map(updated.map((u) => [u.jobId, u]));
+                return prev.map((f) => {
+                    if (!f.jobId || !updatedMap.has(f.jobId)) return f;
+                    if ((f._version || 0) !== versionsAtStart.get(f.jobId)) return f;
+                    return updatedMap.get(f.jobId)!;
+                });
+            });
+            mergeCompletedIntoTrained(updated, activeSessionId);
+        },
+        interval: JSModule?.pollingInterval || 400,
+        enabled: hasActiveFiles,
+        shouldStop: () =>
+            !uploadsRef.current.some(
+                (f: FileUploadStatus) =>
+                    (!f.sessionId || f.sessionId === activeSessionId) &&
+                    (f.phase === 'uploading' || f.phase === 'processing' || f.phase === 'cancelling')
+            ),
         onComplete: () => setTrainingInProgress(false),
     });
 
@@ -289,6 +344,7 @@ export const useTainPDF = () => {
             jobId: '',
             graphId: '',
             startedAt: Date.now(),
+            sessionId: getCurrentSessionId(),
         };
         if (validationError) {
             setUploads((prev: FileUploadStatus[]) => [
@@ -326,7 +382,7 @@ export const useTainPDF = () => {
         if (!jobId) return
 
         setUploads((prev: FileUploadStatus[]) =>
-            prev.map((f) => f.jobId === jobId ? { ...f, phase: 'cancelling', progress: 0 } : f)
+            prev.map((f) => f.jobId === jobId ? bumpVersion({ ...f, phase: 'cancelling', progress: 0 }) : f)
         );
 
         const response = await cancelDocumentProcessing(jobId);
@@ -334,7 +390,7 @@ export const useTainPDF = () => {
         if (!response) {
             toast("Document processing cancellation failed", { type: "error" });
             setUploads((prev: FileUploadStatus[]) =>
-                prev.map((f) => (f.jobId === jobId && f.phase === 'cancelling') ? { ...f, phase: 'processing' } : f)
+                prev.map((f) => (f.jobId === jobId && f.phase === 'cancelling') ? bumpVersion({ ...f, phase: 'processing' }) : f)
             );
             return;
         }
@@ -342,7 +398,7 @@ export const useTainPDF = () => {
         if (response?.state === 'CANCELLED') {
             cancelledRef.current.add(jobId);
             setUploads((prev: FileUploadStatus[]) =>
-                prev.map((f) => f.jobId === jobId ? { ...f, phase: 'cancelled', error: 'Upload cancelled', progress: 0 } : f)
+                prev.map((f) => f.jobId === jobId ? bumpVersion({ ...f, phase: 'cancelled', error: 'Upload cancelled', progress: 0 }) : f)
             );
         }
     };
@@ -353,37 +409,31 @@ export const useTainPDF = () => {
         const current = uploadsRef.current.find((f) => f.jobId === jobId);
         if (!current || current.retrying) return;
 
-        setUploads((prev: FileUploadStatus[]) =>
-            prev.map((f) => (f.jobId === jobId ? { ...f, retrying: true } : f))
-        );
+        setUploads((prev: FileUploadStatus[]) =>prev.map((f) => (f.jobId === jobId ? bumpVersion({ ...f, retrying: true }) : f)));
 
-        const result = await retryDocumentJob(jobId);
-
-        if (!result.ok) {
-            toast(result.message || 'Retry failed', { type: 'error' });
+        try {
+            const result = await retryDocumentJob(jobId);
+            if (!result.ok) {
+                toast(result.message || 'Retry failed', { type: 'error' });
+                return;
+            }
+            cancelledRef.current.delete(jobId);
+            setTrainingInProgress(true);
             setUploads((prev: FileUploadStatus[]) =>
-                prev.map((f) => (f.jobId === jobId ? { ...f, retrying: false } : f))
+                prev.map((f) =>
+                    f.jobId === jobId
+                        ? bumpVersion({...f, phase: 'processing', progress: 0, error: undefined, stage: undefined, retrying: false, startedAt: Date.now() })
+                        : f
+                )
             );
-            return;
+        } catch (err) {
+            console.error('retryUpload failed:', err);
+            toast('Retry failed', { type: 'error' });
+        } finally {
+            setUploads((prev: FileUploadStatus[]) =>
+                prev.map((f) => (f.jobId === jobId && f.retrying ? bumpVersion({ ...f, retrying: false }) : f))
+            );
         }
-
-        cancelledRef.current.delete(jobId);
-        setTrainingInProgress(true);
-        setUploads((prev: FileUploadStatus[]) =>
-            prev.map((f) =>
-                f.jobId === jobId
-                    ? {
-                        ...f,
-                        phase: 'processing',
-                        progress: 0,
-                        error: undefined,
-                        stage: undefined,
-                        retrying: false,
-                        startedAt: Date.now(),
-                    }
-                    : f
-            )
-        );
     };
 
     const removeUpload = (jobId: string) => {
@@ -412,6 +462,13 @@ export const useTainPDF = () => {
         setUploads((prev) => prev.filter((f) => f.jobId !== jobId));
         cancelledRef.current.delete(jobId);
         notifyGraphIdsChanged();
+
+        if (activeSessionId) {
+            removeHistoryDocument(activeSessionId, jobId).catch((err) =>
+                console.error('Failed to remove document from history (non-fatal):', err)
+            );
+        }
+
         toast('Document removed', { type: 'success' });
     };
 
@@ -419,10 +476,13 @@ export const useTainPDF = () => {
         const f = uploads.find((f: FileUploadStatus) => f.jobId === jobId);
         return f ? f.phase === 'processing' : false;
     };
+    const visibleUploads = uploads.filter(
+        (f) => !f.sessionId || f.sessionId === activeSessionId
+    );
 
     return {
         documentList,
-        uploads,
+        uploads: visibleUploads,
         uploadConstraints,
         trainingInProgress,
         handleFileChange,
