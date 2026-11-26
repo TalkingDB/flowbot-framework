@@ -1,0 +1,24 @@
+sequenceDiagram
+    accTitle: One chat question through Flowbot
+    accDescr: The browser posts the question to the chat API. Flowbot checks the user and token quota, imports the chatbot's server module, and calls start with a handler object and the question. If the module streams, tokens are sent to the browser as Server Sent Events and a final message closes the stream. Token usage is recorded and history is saved.
+    autonumber
+    participant B as Browser
+    participant API as /api/chat (Flowbot)
+    participant M as configuration/{id}/server
+    participant X as Bot backend (e.g. TTT, LLM)
+    participant DB as MongoDB
+    B->>API: POST question, chat id, graph ids
+    API->>DB: check user and token quota
+    API->>M: import, then start(handler, question, onToken)
+    M->>X: search, call model
+    alt module.streaming is true
+        loop each token
+            M-->>API: onToken(chunk)
+            API-->>B: data: {"type": "token", "chunk": ...}
+        end
+        API-->>B: data: {"type": "final", "payload": ...}
+    else not streaming
+        M-->>API: response
+        API-->>B: JSON response
+    end
+    API->>DB: record token usage, save history
