@@ -6,6 +6,11 @@ A chat application framework for AI agents and business processes. Flowbot provi
 ![Next.js 13](https://img.shields.io/badge/next.js-13-000000)
 ![Node 18](https://img.shields.io/badge/node-18-339933)
 
+<p align="center">
+  <img src="docs/images/demo.gif" alt="A short animated tour of flowbot-framework: what it is, how to start, and which page to read next">
+</p>
+<p align="center"><sub>A short tour: what it is, how to start, and what to read next.</sub></p>
+
 | Start here | Go deeper |
 | :--- | :--- |
 | [How a chatbot plugs in](#how-a-chatbot-plugs-in) | [Architecture: request flow and the configuration contract](docs/architecture.md) |
@@ -90,6 +95,12 @@ From [`.env.example`](.env.example):
 ## Contributor
 
 Mayank Gupta, mayank.g@smarter.codes
+
+## Support TalkingDB
+
+If flowbot-framework saved you time, please [give it a star](https://github.com/TalkingDB/flowbot-framework) ⭐. Stars help other developers find the project.
+
+Found a bug, or a document it gets wrong? [Open an issue](https://github.com/TalkingDB/flowbot-framework/issues/new). We are always here to help and open to a conversation. Explore the TalkingDB applications at [talkingdb.io](https://talkingdb.io/#applications).
 
 ## License
 
