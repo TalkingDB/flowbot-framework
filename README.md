@@ -7,9 +7,9 @@ A chat application framework for AI agents and business processes. Flowbot provi
 ![Node 18](https://img.shields.io/badge/node-18-339933)
 
 <p align="center">
-  <img src="docs/images/demo.gif" alt="A short animated tour of flowbot-framework: what it is, how to start, and which page to read next">
+  <img src="docs/images/demo.gif" alt="Animated diagram: a chatbot is a configuration folder with a webapp and a server module; the values the default configuration ships with; how one question flows through Flowbot">
 </p>
-<p align="center"><sub>A short tour: what it is, how to start, and what to read next.</sub></p>
+<p align="center"><sub>Drawn from <code>configuration/default</code> and <a href="docs/architecture.md">Architecture</a>.</sub></p>
 
 | Start here | Go deeper |
 | :--- | :--- |
