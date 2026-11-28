@@ -1,0 +1,11 @@
+flowchart TB
+    accTitle: How Flowbot loads a chatbot configuration
+    accDescr: A user opens the app with a chat id. The web page loads that chatbot's webapp settings for title, theme and welcome text. Each question is posted to the chat API, which loads the chatbot's server module and calls its start function. The module calls its own backend, such as the TTT service and an LLM, and streams tokens back to the browser.
+    U["User<br>/?chat-id=flowbot-chatbot-ttt"] --> WEB["Flowbot web app<br>Next.js pages"]:::here
+    WEB -- "loads" --> LOOK["configuration/{id}/webapp<br>title, theme, welcome text"]
+    WEB -- "POST /api/chat" --> API["Flowbot chat API"]:::here
+    API -- "start(question)" --> BOT["configuration/{id}/server<br>chatbot server module"]
+    BOT --> EXT["its backend<br>(e.g. TTT search + LLM)"]
+    BOT -- "tokens" --> API
+    API --> DB[("MongoDB<br>users, history")]
+    classDef here stroke-width:3px
