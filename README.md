@@ -1,100 +1,48 @@
-# Flowbot
+<!-- short-readme -->
+<h1 align="center">Flowbot</h1>
 
-A chat application framework for AI agents and business processes. Flowbot provides the web app, sign in, chat history, admin pages, sharing and streaming; each chatbot plugs in as a small **configuration** folder that decides how questions are answered and how the chat looks.
+<p align="center"><b>A chat app framework for AI agents and business processes.</b></p>
 
-![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Next.js 13](https://img.shields.io/badge/next.js-13-000000)
-![Node 18](https://img.shields.io/badge/node-18-339933)
+<p align="center"><a href="#try-it">Try it</a> · <a href="docs/architecture.md">How it works</a> · <a href="docs/usage-and-examples.md">Usage and examples</a> · <a href="docs/troubleshooting.md">Troubleshooting</a> · <a href="docs/reference.md">Full reference</a></p>
+
+<p align="center"><a href="https://github.com/TalkingDB/flowbot-framework/stargazers"><img src="https://img.shields.io/github/stars/TalkingDB/flowbot-framework?style=social" alt="GitHub stars"></a> <a href="https://www.gnu.org/licenses/agpl-3.0.html"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="AGPL-3.0"></a></p>
 
 <p align="center">
   <img src="docs/images/demo.gif" alt="Animated diagram: a chatbot is a configuration folder with a webapp and a server module; the values the default configuration ships with; how one question flows through Flowbot">
 </p>
 <p align="center"><sub>Drawn from <code>configuration/default</code> and <a href="docs/architecture.md">Architecture</a>.</sub></p>
 
-| Start here | Go deeper |
-| :--- | :--- |
-| [How a chatbot plugs in](#how-a-chatbot-plugs-in) | [Architecture: request flow and the configuration contract](docs/architecture.md) |
-| [Quickstart](#quickstart) | [Usage and examples: add a chatbot, run, deploy](docs/usage-and-examples.md) |
-| [Configuration variables](#configuration-variables) | [Troubleshooting](docs/troubleshooting.md) |
-| [What this repo is not](#what-this-repo-is-not) | [Example chatbot: flowbot-chatbot-ttt](https://github.com/TalkingDB/flowbot-chatbot-ttt) |
+Flowbot gives you the web app, sign in, chat history, admin pages, sharing and streaming. Each chatbot plugs in as a small **configuration** folder that decides how it looks and how questions are answered.
 
-All pages: [docs/](docs/README.md).
+## What it does
 
-## How a chatbot plugs in
+- **Look**: `configuration/<chat-id>/webapp` sets the title, welcome text and colours.
+- **Logic**: `configuration/<chat-id>/server` answers each question ([the contract](docs/architecture.md)).
+- **Everything else** (sign in, history in [MongoDB](https://www.mongodb.com/docs/), streaming) is the framework's job ([usage](docs/usage-and-examples.md)).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/how-flowbot-loads-a-chatbot-configuration-dark.svg">
-  <img alt="A user opens the app with a chat id. The web page loads that chatbot's webapp settings for title, theme and welcome text. Each question is posted to the chat API, which loads the chatbot's server module and calls its start function. The module calls its own backend, such as the TTT service and an LLM, and streams tokens back to the browser." src="docs/images/how-flowbot-loads-a-chatbot-configuration.svg">
-</picture>
-
-<sub>Diagram source: [how-flowbot-loads-a-chatbot-configuration.mmd](docs/diagrams/how-flowbot-loads-a-chatbot-configuration.mmd). Edit it and re-render with the steps in [docs/diagrams](docs/diagrams/README.md).</sub>
-
-In words: Flowbot is the shell; the chatbot folder named by `chat-id` supplies the look (`webapp`) and the answering logic (`server`), and Flowbot streams its answer to the browser and keeps the history.
-
-Configurations live in [`configuration/`](configuration/). Two ship with this repository: [`default`](configuration/default/) and [`bot-forger`](configuration/bot-forger/). Others, such as [flowbot-chatbot-ttt](https://github.com/TalkingDB/flowbot-chatbot-ttt), live in their own repositories and are copied in at deploy time.
-
-## Quickstart
-
-You need Node.js 18 and Yarn, or [Docker](https://docs.docker.com/get-started/docker-overview/). MongoDB is required for sign in and history ([Docker Compose](https://docs.docker.com/compose/) starts one for you).
+## Try it
 
 ```bash
-cp .env.example .env          # fill in the values; see the table below
+cp .env.example .env
 yarn install
-yarn dev                      # http://localhost:3000
+yarn dev                 # http://localhost:3000/?chat-id=default
 ```
 
-With Docker:
+Or with Docker: `./develop.sh`.
 
-```bash
-./develop.sh                  # docker compose -f docker-compose-dev.yml up --build -d
-```
+## Where it fits
 
-Open `http://localhost:3000/?chat-id=default`, or set `NEXT_PUBLIC_DEFAULT_CHAT_ID` to choose the chatbot shown without a `chat-id`.
+[flowbot-chatbot-ttt](https://github.com/TalkingDB/flowbot-chatbot-ttt) is the TalkingDB document chat built on it.
 
-## Configuration variables
+## Learn more
 
-From [`.env.example`](.env.example):
-
-| Variable | Used for |
+| Page | Read it to |
 | :--- | :--- |
-| `MONGODB_URI`, `MONGO_USER`, `MONGO_PSSWD` | Users and chat history |
-| `NEXT_PUBLIC_CHAT_HOST`, `NEXT_PUBLIC_NEXTAUTH_URL` | Public URLs of this app |
-| `NEXT_PUBLIC_DEFAULT_CHAT_ID` | Chatbot used when the URL has no `chat-id` |
-| `NEXT_PUBLIC_TDB_TTT_SERVICE`, `NEXT_PUBLIC_TDB_TTT_SERVICE_AUTHORIZATION` | The TalkingDB TTT service and its key, passed to chatbots that search documents |
-| `NEXT_PUBLIC_BACKEND_CONNECTOR_HOST`, `NEXT_PUBLIC_BACKEND_CONNECTOR_KEY`, `NEXT_PUBLIC_BACKEND_TEXT_SIMILARITY` | Other backends a chatbot may call |
-| `GPT_BEARER_TOKEN` | [LLM](https://en.wikipedia.org/wiki/Large_language_model) access for chatbots that need it |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `CLIENT_SECRET`, `OAUTH_TOKEN_ENDPOINT_ALLOWLIST` | Google sign in |
-| `SESSION_SECRET` | Session signing |
-| `ADMIN_EMAILS` | Who can open the admin pages |
-| `SENTRY_IGNORE_API_RESOLUTION_ERROR` | Sentry setting |
-
-> [!CAUTION]
-> Variables starting with `NEXT_PUBLIC_` are built into the JavaScript that browsers download. Anything secret in one of them, such as a service authorization key, is visible to every visitor. Prefer server side variables for secrets.
-
-## What this repo is not
-
-- **Not a chatbot by itself.** Answers come from the configuration's `server` module; without one, the `default` configuration is used.
-- **Not a search engine.** Document search is done by the service a chatbot calls, such as [module-ttt](https://github.com/TalkingDB/module-ttt).
-- **Not a TalkingDB library.** It is a JavaScript application; TalkingDB services are reached over HTTP.
-
-## Related repositories
-
-| Repository | Relationship |
-| :--- | :--- |
-| [flowbot-chatbot-ttt](https://github.com/TalkingDB/flowbot-chatbot-ttt) | The TTT document chat configuration that runs on Flowbot |
-| [module-ttt](https://github.com/TalkingDB/module-ttt) | Document search used by that configuration |
-| [infra-tdb-platform](https://github.com/TalkingDB/infra-tdb-platform) | Lists Flowbot in the Backstage catalogue |
-
-## Further reading
-
-- [Next.js pages router](https://nextjs.org/docs/pages)
-- [Server Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
-- [Next.js environment variables](https://nextjs.org/docs/pages/guides/environment-variables)
-- [MongoDB with Mongoose](https://mongoosejs.com/docs/)
-
-## Contributor
-
-Mayank Gupta, mayank.g@smarter.codes
+| [How it works](docs/architecture.md) | see the parts and how data moves |
+| [Usage and examples](docs/usage-and-examples.md) | copy working examples |
+| [Troubleshooting](docs/troubleshooting.md) | fix a problem |
+| [Full reference](docs/reference.md) | read everything that used to be on this page |
+| [All docs](docs/README.md) | see every page |
 
 ## Support TalkingDB
 
